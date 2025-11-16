@@ -217,9 +217,9 @@ struct AddWorkoutCardView: View {
     }
 }
 
-// Row component for legacy exercise display (still used by EditWorkoutExerciseView)
+// Row component for exercise display
 struct WorkoutExerciseRow: View {
-    let exerciseData: WorkoutExerciseData
+    let exerciseData: WorkoutExerciseItemData
     let order: Int
 
     var body: some View {

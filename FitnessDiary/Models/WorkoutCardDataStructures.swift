@@ -37,14 +37,3 @@ struct WorkoutSetData: Identifiable {
     var loadType: LoadType
     var percentageOfMax: Double?
 }
-
-/// Legacy structure for backward compatibility with old editing views
-/// TODO: Migrate all uses to WorkoutExerciseItemData
-struct WorkoutExerciseData: Identifiable {
-    let id = UUID()
-    var exercise: Exercise
-    var order: Int
-    var sets: [WorkoutSetData]
-    var notes: String?
-    var restTime: TimeInterval?
-}

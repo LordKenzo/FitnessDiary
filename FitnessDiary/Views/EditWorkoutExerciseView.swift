@@ -3,7 +3,7 @@ import SwiftData
 
 struct EditWorkoutExerciseView: View {
     @Environment(\.dismiss) private var dismiss
-    @Binding var exerciseData: WorkoutExerciseData
+    @Binding var exerciseData: WorkoutExerciseItemData
     let exercises: [Exercise]
 
     @State private var notes: String
@@ -11,7 +11,7 @@ struct EditWorkoutExerciseView: View {
     @State private var restSeconds: Int
     @State private var showingExercisePicker = false
 
-    init(exerciseData: Binding<WorkoutExerciseData>, exercises: [Exercise]) {
+    init(exerciseData: Binding<WorkoutExerciseItemData>, exercises: [Exercise]) {
         self._exerciseData = exerciseData
         self.exercises = exercises
         _notes = State(initialValue: exerciseData.wrappedValue.notes ?? "")
@@ -234,7 +234,7 @@ struct SetRow: View {
 }
 
 #Preview {
-    let exerciseData = WorkoutExerciseData(
+    let exerciseData = WorkoutExerciseItemData(
         exercise: Exercise(
             name: "Panca Piana",
             biomechanicalStructure: .multiJoint,
