@@ -18,6 +18,7 @@ struct ClientListView: View {
     @State private var clientToDelete: Client?
     @State private var showingDeleteConfirmation = false
     @State private var showingDeleteAllConfirmation = false
+    @State private var clientForWorkoutCards: Client?
 
     private var filteredClients: [Client] {
         if searchText.isEmpty {
@@ -53,8 +54,7 @@ struct ClientListView: View {
                         }
                         .swipeActions(edge: .leading) {
                             Button {
-                                // TODO: Navigare alle schede del cliente
-                                // Placeholder per futura implementazione
+                                clientForWorkoutCards = client
                             } label: {
                                 Label("Schede", systemImage: "list.bullet.clipboard")
                             }
@@ -100,6 +100,11 @@ struct ClientListView: View {
         }
         .sheet(item: $selectedClient) { client in
             EditClientView(client: client)
+        }
+        .sheet(item: $clientForWorkoutCards) { client in
+            NavigationStack {
+                ClientWorkoutCardsView(client: client)
+            }
         }
         .alert("Elimina Cliente", isPresented: $showingDeleteConfirmation, presenting: clientToDelete) { client in
             Button("Annulla", role: .cancel) {
