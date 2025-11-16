@@ -61,7 +61,8 @@ struct EditWorkoutCardView: View {
                             )
                         },
                         notes: exerciseItem.notes,
-                        restTime: exerciseItem.restTime
+                        restTime: exerciseItem.restTime,
+                        targetExpression: exerciseItem.targetExpression
                     )
                 }
             )

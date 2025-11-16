@@ -4,6 +4,7 @@ import SwiftData
 struct EditWorkoutExerciseItemView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query private var strengthParameters: [StrengthExpressionParameters]
     @Binding var exerciseItemData: WorkoutExerciseItemData
     let exercises: [Exercise]
     let isInMethod: Bool // se true, nasconde il tempo di recupero (gestito dal blocco)
@@ -22,6 +23,20 @@ struct EditWorkoutExerciseItemView: View {
             return nil
         }
         return profile.getOneRepMax(for: big5)
+    }
+
+    private var targetParameters: StrengthExpressionParameters? {
+        guard let targetType = exerciseItemData.targetExpression else { return nil }
+        return strengthParameters.first(where: { $0.type == targetType })
+    }
+
+    private var currentRestTime: TimeInterval {
+        TimeInterval(restMinutes * 60 + restSeconds)
+    }
+
+    private var isRestTimeOutOfRange: Bool {
+        guard let params = targetParameters else { return false }
+        return !params.isRestTimeInRange(currentRestTime)
     }
 
     private var validationError: String? {
@@ -45,6 +60,8 @@ struct EditWorkoutExerciseItemView: View {
     var body: some View {
         Form {
             exerciseSection
+
+            targetExpressionSection
 
             if !isInMethod {
                 restTimeSection
@@ -92,8 +109,27 @@ struct EditWorkoutExerciseItemView: View {
         }
     }
 
+    private var targetExpressionSection: some View {
+        Section {
+            Picker("Obiettivo", selection: $exerciseItemData.targetExpression) {
+                Text("Nessuno").tag(nil as StrengthExpressionType?)
+                ForEach(StrengthExpressionType.allCases) { type in
+                    HStack {
+                        Image(systemName: type.icon)
+                            .foregroundStyle(type.color)
+                        Text(type.rawValue)
+                    }
+                    .tag(type as StrengthExpressionType?)
+                }
+            }
+        } footer: {
+            Text("Seleziona un obiettivo per ricevere feedback intelligenti sui parametri (carico, reps, recupero).")
+                .font(.caption)
+        }
+    }
+
     private var restTimeSection: some View {
-        Section("Tempo di Recupero") {
+        Section {
             HStack {
                 Picker("Minuti", selection: $restMinutes) {
                     ForEach(0..<10, id: \.self) { min in
@@ -110,6 +146,18 @@ struct EditWorkoutExerciseItemView: View {
                 .pickerStyle(.wheel)
             }
             .frame(height: 120)
+        } header: {
+            Text("Tempo di Recupero")
+        } footer: {
+            if isRestTimeOutOfRange, let params = targetParameters {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.yellow)
+                    Text("Il tempo di recupero consigliato per \(params.type.rawValue) è \(params.restTimeMinFormatted)-\(params.restTimeMaxFormatted)")
+                        .font(.caption)
+                        .foregroundStyle(.yellow)
+                }
+            }
         }
     }
 
@@ -150,11 +198,11 @@ struct EditWorkoutExerciseItemView: View {
         let setTypeSupport = methodType?.supportedSetType ?? .both
         if isInMethod {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, setTypeSupport: setTypeSupport)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
             }
         } else {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, setTypeSupport: setTypeSupport)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
             }
             .onMove(perform: moveSets)
             .onDelete(perform: deleteSets)

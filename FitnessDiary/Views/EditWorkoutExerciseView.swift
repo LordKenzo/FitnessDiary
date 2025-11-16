@@ -160,6 +160,28 @@ struct SetRow: View {
     let oneRepMax: Double?
     var isClusterSet: Bool = false
     var setTypeSupport: SetTypeSupport = .both
+    var targetParameters: StrengthExpressionParameters? = nil
+
+    // Validazione del carico rispetto all'obiettivo
+    private var loadPercentage: Double? {
+        guard let oneRepMax = oneRepMax else { return nil }
+        if let weight = set.weight, set.loadType == .absolute, oneRepMax > 0 {
+            return (weight / oneRepMax) * 100.0
+        } else if let percentage = set.percentageOfMax, set.loadType == .percentage {
+            return percentage
+        }
+        return nil
+    }
+
+    private var isLoadOutOfRange: Bool {
+        guard let params = targetParameters, let loadPct = loadPercentage else { return false }
+        return !params.isLoadInRange(loadPct)
+    }
+
+    private var areRepsOutOfRange: Bool {
+        guard let params = targetParameters, let reps = set.reps else { return false }
+        return !params.areRepsInRange(reps)
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -201,6 +223,12 @@ struct SetRow: View {
                             Text("rip")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+
+                            if areRepsOutOfRange {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.yellow)
+                            }
                         }
 
                         Picker("", selection: $set.loadType) {
@@ -234,9 +262,17 @@ struct SetRow: View {
                             // Mostra percentuale calcolata se disponibile 1RM
                             if let oneRepMax = oneRepMax, let weight = set.weight, oneRepMax > 0 {
                                 let percentage = (weight / oneRepMax) * 100.0
-                                Text("→ \(Int(percentage))%")
-                                    .font(.caption)
-                                    .foregroundStyle(.blue)
+                                HStack(spacing: 4) {
+                                    Text("→ \(Int(percentage))%")
+                                        .font(.caption)
+                                        .foregroundStyle(isLoadOutOfRange ? .yellow : .blue)
+
+                                    if isLoadOutOfRange {
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                            .font(.caption)
+                                            .foregroundStyle(.yellow)
+                                    }
+                                }
                             }
                         } else {
                             HStack(spacing: 4) {
@@ -253,9 +289,17 @@ struct SetRow: View {
                             // Mostra kg calcolati se disponibile 1RM
                             if let oneRepMax = oneRepMax, let percentage = set.percentageOfMax {
                                 let weight = (percentage / 100.0) * oneRepMax
-                                Text("→ \(String(format: "%.1f", weight)) kg")
-                                    .font(.caption)
-                                    .foregroundStyle(.blue)
+                                HStack(spacing: 4) {
+                                    Text("→ \(String(format: "%.1f", weight)) kg")
+                                        .font(.caption)
+                                        .foregroundStyle(isLoadOutOfRange ? .yellow : .blue)
+
+                                    if isLoadOutOfRange {
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                            .font(.caption)
+                                            .foregroundStyle(.yellow)
+                                    }
+                                }
                             } else if set.percentageOfMax != nil {
                                 Text("⚠️ 1RM non impostato")
                                     .font(.caption)

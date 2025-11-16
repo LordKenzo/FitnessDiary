@@ -23,6 +23,7 @@ struct WorkoutExerciseItemData: Identifiable {
     var sets: [WorkoutSetData]
     var notes: String?
     var restTime: TimeInterval?
+    var targetExpression: StrengthExpressionType?
 }
 
 /// Temporary structure for editing an individual workout set
