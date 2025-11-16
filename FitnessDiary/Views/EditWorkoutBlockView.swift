@@ -138,7 +138,7 @@ struct EditWorkoutBlockView: View {
                     Text("Un blocco semplice può contenere solo un esercizio")
                         .font(.caption)
                 } else if blockData.blockType == .method, let method = blockData.methodType {
-                    if let max = method.maxExercises {
+                    if method.maxExercises != nil {
                         Text("Questo metodo richiede esattamente \(method.minExercises) esercizi")
                             .font(.caption)
                     } else {
