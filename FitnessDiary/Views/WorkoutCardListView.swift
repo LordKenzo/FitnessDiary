@@ -303,6 +303,15 @@ struct WorkoutCardRow: View {
                         .padding(.vertical, 3)
                         .background(Color.orange.opacity(0.2))
                         .clipShape(Capsule())
+                } else {
+                    Text("PRONTA")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.green.opacity(0.2))
+                        .clipShape(Capsule())
                 }
             }
 
