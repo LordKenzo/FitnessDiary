@@ -68,10 +68,11 @@ final class Exercise: Identifiable {
 
     // Helper per aggiungere una variante (bidirezionale)
     func addVariant(_ variant: Exercise) {
-        // Previeni duplicati e auto-referenza
+        // Previeni duplicati, auto-referenza e superamento del limite su entrambi i lati
         guard variant.id != self.id,
               !variants.contains(where: { $0.id == variant.id }),
-              variants.count < 10 else { return }
+              variants.count < 10,
+              variant.variants.count < 10 else { return }
 
         variants.append(variant)
 
