@@ -109,6 +109,7 @@ struct ProfileDetailView: View {
     
     private func calculateBMI() -> Double {
         let heightInMeters = profile.height / 100
+        guard heightInMeters > 0 else { return 0 }
         return profile.weight / (heightInMeters * heightInMeters)
     }
     
