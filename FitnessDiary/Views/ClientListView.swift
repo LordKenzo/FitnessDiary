@@ -322,118 +322,146 @@ struct EditClientView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Dati Obbligatori") {
-                    TextField("Nome", text: $client.firstName)
-                    TextField("Cognome", text: $client.lastName)
-                }
-
-                Section("Foto Profilo") {
-                    ClientPhotoPickerRow(
-                        title: "Foto",
-                        item: $photoItem,
-                        photoData: $client.profileImageData
-                    )
-                }
-
-                Section("Dati Facoltativi") {
-                    HStack {
-                        Text("Età")
-                        Spacer()
-                        TextField("Anni", value: $client.age, format: .number)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 100)
-                    }
-
-                    Picker("Sesso", selection: $client.gender) {
-                        Text("Non specificato").tag(nil as Gender?)
-                        ForEach([Gender.male, Gender.female, Gender.other], id: \.self) { gender in
-                            Label(gender.rawValue, systemImage: gender.icon)
-                                .tag(gender as Gender?)
-                        }
-                    }
-
-                    HStack {
-                        Text("Peso (kg)")
-                        Spacer()
-                        TextField("kg", value: $client.weight, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 100)
-                    }
-
-                    HStack {
-                        Text("Altezza (cm)")
-                        Spacer()
-                        TextField("cm", value: $client.height, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 100)
-                    }
-
-                    TextField("Palestra", text: Binding(
-                        get: { client.gym ?? "" },
-                        set: { client.gym = $0.isEmpty ? nil : $0 }
-                    ))
-                }
-
-                Section("Anamnesi") {
-                    TextEditor(text: Binding(
-                        get: { client.medicalHistory ?? "" },
-                        set: { client.medicalHistory = $0.isEmpty ? nil : $0 }
-                    ))
-                    .frame(minHeight: 100)
-                }
-
-                Section("Massimali 1RM") {
-                    NavigationLink {
-                        OneRepMaxView(records: $client.oneRepMaxRecords)
-                    } label: {
-                        HStack {
-                            Label("Gestisci Massimali", systemImage: "figure.strengthtraining.traditional")
-                            Spacer()
-                            Text("\(client.oneRepMaxRecords.count)/5")
-                                .foregroundStyle(.secondary)
-                                .font(.caption)
-                        }
-                    }
-                }
-
-                Section("Schede Assegnate") {
-                    NavigationLink {
-                        ClientWorkoutCardsView(client: client)
-                    } label: {
-                        HStack {
-                            Label("Vedi Schede", systemImage: "list.bullet.clipboard")
-                            Spacer()
-                            Text("\(client.assignedCards.count)")
-                                .foregroundStyle(.secondary)
-                                .font(.caption)
-                        }
-                    }
-                }
-
-                Section {
-                    Button("Elimina Cliente", role: .destructive) {
-                        deleteClient()
-                    }
-                }
+                requiredDataSection
+                photoSection
+                optionalDataSection
+                medicalHistorySection
+                oneRepMaxSection
+                workoutCardsSection
+                deleteSection
             }
             .navigationTitle("Modifica Cliente")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Fatto") {
-                        dismiss()
-                    }
-                    .disabled(!isFormValid)
-                }
+                doneButton
             }
             .fullScreenCover(isPresented: $showingFullscreen) {
                 if let data = client.profileImageData {
                     FullscreenPhotoView(imageData: data)
                 }
             }
+        }
+    }
+
+    // MARK: - View Components
+
+    private var requiredDataSection: some View {
+        Section("Dati Obbligatori") {
+            TextField("Nome", text: $client.firstName)
+            TextField("Cognome", text: $client.lastName)
+        }
+    }
+
+    private var photoSection: some View {
+        Section("Foto Profilo") {
+            ClientPhotoPickerRow(
+                title: "Foto",
+                item: $photoItem,
+                photoData: $client.profileImageData
+            )
+        }
+    }
+
+    private var optionalDataSection: some View {
+        Section("Dati Facoltativi") {
+            HStack {
+                Text("Età")
+                Spacer()
+                TextField("Anni", value: $client.age, format: .number)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 100)
+            }
+
+            Picker("Sesso", selection: $client.gender) {
+                Text("Non specificato").tag(nil as Gender?)
+                ForEach([Gender.male, Gender.female, Gender.other], id: \.self) { gender in
+                    Label(gender.rawValue, systemImage: gender.icon)
+                        .tag(gender as Gender?)
+                }
+            }
+
+            HStack {
+                Text("Peso (kg)")
+                Spacer()
+                TextField("kg", value: $client.weight, format: .number)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 100)
+            }
+
+            HStack {
+                Text("Altezza (cm)")
+                Spacer()
+                TextField("cm", value: $client.height, format: .number)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 100)
+            }
+
+            TextField("Palestra", text: Binding(
+                get: { client.gym ?? "" },
+                set: { client.gym = $0.isEmpty ? nil : $0 }
+            ))
+        }
+    }
+
+    private var medicalHistorySection: some View {
+        Section("Anamnesi") {
+            TextEditor(text: Binding(
+                get: { client.medicalHistory ?? "" },
+                set: { client.medicalHistory = $0.isEmpty ? nil : $0 }
+            ))
+            .frame(minHeight: 100)
+        }
+    }
+
+    private var oneRepMaxSection: some View {
+        Section("Massimali 1RM") {
+            NavigationLink {
+                OneRepMaxView(records: $client.oneRepMaxRecords)
+            } label: {
+                HStack {
+                    Label("Gestisci Massimali", systemImage: "figure.strengthtraining.traditional")
+                    Spacer()
+                    Text("\(client.oneRepMaxRecords.count)/5")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+            }
+        }
+    }
+
+    private var workoutCardsSection: some View {
+        Section("Schede Assegnate") {
+            NavigationLink {
+                ClientWorkoutCardsView(client: client)
+            } label: {
+                HStack {
+                    Label("Vedi Schede", systemImage: "list.bullet.clipboard")
+                    Spacer()
+                    Text("\(client.assignedCards.count)")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+            }
+        }
+    }
+
+    private var deleteSection: some View {
+        Section {
+            Button("Elimina Cliente", role: .destructive) {
+                deleteClient()
+            }
+        }
+    }
+
+    private var doneButton: some ToolbarContent {
+        ToolbarItem(placement: .confirmationAction) {
+            Button("Fatto") {
+                dismiss()
+            }
+            .disabled(!isFormValid)
         }
     }
 
