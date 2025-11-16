@@ -44,7 +44,7 @@ struct MethodSelectionView: View {
                 }
 
                 Section("Condizionamento") {
-                    ForEach([MethodType.amrap, .circuit], id: \.self) { method in
+                    ForEach([MethodType.amrap, .circuit, .tabata], id: \.self) { method in
                         MethodRow(method: method) {
                             onSelect(method)
                             dismiss()

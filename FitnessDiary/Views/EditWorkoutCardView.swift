@@ -266,7 +266,8 @@ struct EditWorkoutCardView: View {
                     order: exerciseItemData.order,
                     exercise: exerciseItemData.exercise,
                     notes: exerciseItemData.notes,
-                    restTime: exerciseItemData.restTime
+                    restTime: exerciseItemData.restTime,
+                    targetExpression: exerciseItemData.targetExpression
                 )
 
                 // Crea le serie
@@ -279,7 +280,17 @@ struct EditWorkoutCardView: View {
                         duration: setData.duration,
                         notes: setData.notes,
                         loadType: setData.loadType,
-                        percentageOfMax: setData.percentageOfMax
+                        percentageOfMax: setData.percentageOfMax,
+                        clusterSize: setData.clusterSize,
+                        clusterRestTime: setData.clusterRestTime,
+                        clusterProgression: setData.clusterProgression,
+                        clusterMinPercentage: setData.clusterMinPercentage,
+                        clusterMaxPercentage: setData.clusterMaxPercentage,
+                        restPauseCount: setData.restPauseCount,
+                        restPauseDuration: setData.restPauseDuration,
+                        tabataWorkDuration: setData.tabataWorkDuration,
+                        tabataRestDuration: setData.tabataRestDuration,
+                        tabataRounds: setData.tabataRounds
                     )
                     exerciseItem.sets.append(workoutSet)
                 }
