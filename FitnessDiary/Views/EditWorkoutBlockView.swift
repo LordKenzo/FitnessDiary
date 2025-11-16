@@ -216,7 +216,10 @@ struct EditWorkoutBlockView: View {
                 loadType: .absolute,
                 percentageOfMax: nil,
                 clusterSize: isCluster ? 2 : nil,
-                clusterRestTime: isCluster ? 30 : nil
+                clusterRestTime: isCluster ? 30 : nil,
+                clusterProgression: isCluster ? .constant : nil,
+                clusterMinPercentage: isCluster ? 80 : nil,
+                clusterMaxPercentage: isCluster ? 95 : nil
             ))
         }
 
@@ -281,7 +284,10 @@ struct EditWorkoutBlockView: View {
                         loadType: .absolute,
                         percentageOfMax: nil,
                         clusterSize: isCluster ? 2 : nil,
-                        clusterRestTime: isCluster ? 30 : nil
+                        clusterRestTime: isCluster ? 30 : nil,
+                        clusterProgression: isCluster ? .constant : nil,
+                        clusterMinPercentage: isCluster ? 80 : nil,
+                        clusterMaxPercentage: isCluster ? 95 : nil
                     )
                     blockData.exerciseItems[index].sets.append(newSet)
                 }
