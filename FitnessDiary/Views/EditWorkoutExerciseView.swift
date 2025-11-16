@@ -247,7 +247,7 @@ struct SetRow: View {
         ]
     )
 
-    NavigationStack {
+    return NavigationStack {
         EditWorkoutExerciseView(
             exerciseData: .constant(exerciseData),
             exercises: []
