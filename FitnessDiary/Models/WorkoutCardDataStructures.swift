@@ -44,6 +44,15 @@ struct WorkoutSetData: Identifiable {
     var clusterProgression: ClusterLoadProgression? // Tipo di progressione del carico tra i cluster
     var clusterMinPercentage: Double? // Percentuale minima 1RM (es. 80%)
     var clusterMaxPercentage: Double? // Percentuale massima 1RM (es. 95%)
+
+    // Rest-Pause parameters
+    var restPauseCount: Int? // Numero di pause nella serie (es. 2-3)
+    var restPauseDuration: TimeInterval? // Durata delle pause in secondi (es. 10-20)
+
+    // Tabata parameters
+    var tabataWorkDuration: TimeInterval? // Durata fase di lavoro (default 20s)
+    var tabataRestDuration: TimeInterval? // Durata fase di recupero (default 10s)
+    var tabataRounds: Int? // Numero di round (fisso a 8 per Tabata standard)
 }
 
 // MARK: - Cluster Set Extensions
@@ -134,6 +143,41 @@ extension WorkoutSetData {
             return nil
         }
         return percentages.map { ($0 / 100.0) * oneRM }
+    }
+
+    // MARK: - Rest-Pause Helpers
+
+    // Helper per formattare la descrizione del rest-pause
+    var restPauseDescription: String? {
+        guard let reps = reps,
+              let pauseCount = restPauseCount,
+              let pauseDuration = restPauseDuration else {
+            return nil
+        }
+        return "\(reps) reps con \(pauseCount) pause da \(Int(pauseDuration))s"
+    }
+
+    // MARK: - Tabata Helpers
+
+    // Helper per formattare la descrizione del Tabata
+    var tabataDescription: String? {
+        guard let rounds = tabataRounds,
+              let work = tabataWorkDuration,
+              let rest = tabataRestDuration else {
+            return nil
+        }
+        return "\(rounds) round × (\(Int(work))s lavoro : \(Int(rest))s recupero)"
+    }
+
+    // Durata totale di un protocollo Tabata
+    var tabataTotalDuration: TimeInterval? {
+        guard let rounds = tabataRounds,
+              let work = tabataWorkDuration,
+              let rest = tabataRestDuration else {
+            return nil
+        }
+        // Ogni round: work + rest, ma l'ultimo round non ha rest
+        return TimeInterval(rounds - 1) * (work + rest) + work
     }
 }
 

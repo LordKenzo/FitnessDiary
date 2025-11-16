@@ -206,17 +206,22 @@ struct EditWorkoutBlockView: View {
         // Se è un metodo, crea le serie in base a globalSets
         let setsCount = blockData.blockType == .method ? globalSets : 1
         let isCluster = blockData.methodType?.requiresClusterManagement ?? false
+        let isRestPause = blockData.methodType?.requiresRestPauseManagement ?? false
+        let isTabata = blockData.methodType?.requiresTabataManagement ?? false
 
         // Determina il tipo di serie corretto per il metodo
-        let setTypeSupport = blockData.methodType?.supportedSetType ?? .both
+        let setTypeSupport = blockData.methodType?.supportedSetType
         let defaultSetType: SetType
-        switch setTypeSupport {
-        case .repsOnly:
+        if let support = setTypeSupport {
+            switch support {
+            case .repsOnly:
+                defaultSetType = .reps
+            case .durationOnly:
+                defaultSetType = .duration
+            }
+        } else {
+            // Default per esercizi singoli
             defaultSetType = .reps
-        case .durationOnly:
-            defaultSetType = .duration
-        case .both:
-            defaultSetType = .reps // Default a reps per esercizi singoli e Circuit
         }
 
         var sets: [WorkoutSetData] = []
@@ -233,7 +238,12 @@ struct EditWorkoutBlockView: View {
                 clusterRestTime: isCluster ? 30 : nil,
                 clusterProgression: isCluster ? .constant : nil,
                 clusterMinPercentage: isCluster ? 80 : nil,
-                clusterMaxPercentage: isCluster ? 95 : nil
+                clusterMaxPercentage: isCluster ? 95 : nil,
+                restPauseCount: isRestPause ? 2 : nil,
+                restPauseDuration: isRestPause ? 15 : nil,
+                tabataWorkDuration: isTabata ? 20 : nil,
+                tabataRestDuration: isTabata ? 10 : nil,
+                tabataRounds: isTabata ? 8 : nil
             ))
         }
 

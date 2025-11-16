@@ -50,7 +50,16 @@ final class WorkoutSet: Identifiable {
     var clusterMinPercentage: Double? // Percentuale minima 1RM (es. 80%)
     var clusterMaxPercentage: Double? // Percentuale massima 1RM (es. 95%)
 
-    init(order: Int, setType: SetType = .reps, reps: Int? = nil, weight: Double? = nil, duration: TimeInterval? = nil, notes: String? = nil, loadType: LoadType = .absolute, percentageOfMax: Double? = nil, clusterSize: Int? = nil, clusterRestTime: TimeInterval? = nil, clusterProgression: ClusterLoadProgression? = nil, clusterMinPercentage: Double? = nil, clusterMaxPercentage: Double? = nil) {
+    // Rest-Pause parameters
+    var restPauseCount: Int? // Numero di pause nella serie (es. 2-3)
+    var restPauseDuration: TimeInterval? // Durata delle pause in secondi (es. 10-20)
+
+    // Tabata parameters
+    var tabataWorkDuration: TimeInterval? // Durata fase di lavoro (default 20s)
+    var tabataRestDuration: TimeInterval? // Durata fase di recupero (default 10s)
+    var tabataRounds: Int? // Numero di round (fisso a 8 per Tabata standard)
+
+    init(order: Int, setType: SetType = .reps, reps: Int? = nil, weight: Double? = nil, duration: TimeInterval? = nil, notes: String? = nil, loadType: LoadType = .absolute, percentageOfMax: Double? = nil, clusterSize: Int? = nil, clusterRestTime: TimeInterval? = nil, clusterProgression: ClusterLoadProgression? = nil, clusterMinPercentage: Double? = nil, clusterMaxPercentage: Double? = nil, restPauseCount: Int? = nil, restPauseDuration: TimeInterval? = nil, tabataWorkDuration: TimeInterval? = nil, tabataRestDuration: TimeInterval? = nil, tabataRounds: Int? = nil) {
         self.id = UUID()
         self.order = order
         self.setType = setType
@@ -65,6 +74,11 @@ final class WorkoutSet: Identifiable {
         self.clusterProgression = clusterProgression
         self.clusterMinPercentage = clusterMinPercentage
         self.clusterMaxPercentage = clusterMaxPercentage
+        self.restPauseCount = restPauseCount
+        self.restPauseDuration = restPauseDuration
+        self.tabataWorkDuration = tabataWorkDuration
+        self.tabataRestDuration = tabataRestDuration
+        self.tabataRounds = tabataRounds
     }
 
     // Computed property che ritorna il loadType effettivo, defaultando a .absolute per dati legacy
@@ -195,5 +209,40 @@ final class WorkoutSet: Identifiable {
             return nil
         }
         return percentages.map { ($0 / 100.0) * oneRM }
+    }
+
+    // MARK: - Rest-Pause Helpers
+
+    // Helper per formattare la descrizione del rest-pause
+    var restPauseDescription: String? {
+        guard let reps = reps,
+              let pauseCount = restPauseCount,
+              let pauseDuration = restPauseDuration else {
+            return nil
+        }
+        return "\(reps) reps con \(pauseCount) pause da \(Int(pauseDuration))s"
+    }
+
+    // MARK: - Tabata Helpers
+
+    // Helper per formattare la descrizione del Tabata
+    var tabataDescription: String? {
+        guard let rounds = tabataRounds,
+              let work = tabataWorkDuration,
+              let rest = tabataRestDuration else {
+            return nil
+        }
+        return "\(rounds) round × (\(Int(work))s lavoro : \(Int(rest))s recupero)"
+    }
+
+    // Durata totale di un protocollo Tabata
+    var tabataTotalDuration: TimeInterval? {
+        guard let rounds = tabataRounds,
+              let work = tabataWorkDuration,
+              let rest = tabataRestDuration else {
+            return nil
+        }
+        // Ogni round: work + rest, ma l'ultimo round non ha rest
+        return TimeInterval(rounds - 1) * (work + rest) + work
     }
 }

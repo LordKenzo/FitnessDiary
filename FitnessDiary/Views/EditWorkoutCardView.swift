@@ -57,7 +57,17 @@ struct EditWorkoutCardView: View {
                                 duration: set.duration,
                                 notes: set.notes,
                                 loadType: set.loadType ?? .absolute,
-                                percentageOfMax: set.percentageOfMax
+                                percentageOfMax: set.percentageOfMax,
+                                clusterSize: set.clusterSize,
+                                clusterRestTime: set.clusterRestTime,
+                                clusterProgression: set.clusterProgression,
+                                clusterMinPercentage: set.clusterMinPercentage,
+                                clusterMaxPercentage: set.clusterMaxPercentage,
+                                restPauseCount: set.restPauseCount,
+                                restPauseDuration: set.restPauseDuration,
+                                tabataWorkDuration: set.tabataWorkDuration,
+                                tabataRestDuration: set.tabataRestDuration,
+                                tabataRounds: set.tabataRounds
                             )
                         },
                         notes: exerciseItem.notes,

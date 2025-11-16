@@ -28,6 +28,7 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
     case emom = "EMOM"
     case amrap = "AMRAP"
     case circuit = "Circuito"
+    case tabata = "Tabata"
 
     var id: String { rawValue }
 
@@ -60,6 +61,8 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return "infinity"
         case .circuit:
             return "arrow.triangle.turn.up.right.circle"
+        case .tabata:
+            return "stopwatch.fill"
         }
     }
 
@@ -92,6 +95,8 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return .brown
         case .circuit:
             return .gray
+        case .tabata:
+            return .red
         }
     }
 
@@ -108,7 +113,7 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return 1
         case .contrastTraining, .complexTraining:
             return 2
-        case .emom, .amrap, .circuit:
+        case .emom, .amrap, .circuit, .tabata:
             return 1
         }
     }
@@ -154,6 +159,8 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return "As Many Reps As Possible - massime ripetizioni nel tempo"
         case .circuit:
             return "Circuito di esercizi da ripetere"
+        case .tabata:
+            return "Protocollo Tabata: 8 round di lavoro/recupero (default 20s:10s)"
         }
     }
 
@@ -198,16 +205,33 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
         case .superset, .triset, .giantSet, .dropset, .pyramidAscending, .pyramidDescending,
              .contrastTraining, .complexTraining, .cluster, .rest_pause:
             return .repsOnly
-        case .emom, .amrap:
+        case .emom, .amrap, .circuit, .tabata:
             return .durationOnly
-        case .circuit:
-            return .both // Circuit può essere a tempo o a ripetizioni
+        }
+    }
+
+    // Indica se il metodo richiede gestione Rest-Pause
+    var requiresRestPauseManagement: Bool {
+        switch self {
+        case .rest_pause:
+            return true
+        default:
+            return false
+        }
+    }
+
+    // Indica se il metodo richiede gestione Tabata
+    var requiresTabataManagement: Bool {
+        switch self {
+        case .tabata:
+            return true
+        default:
+            return false
         }
     }
 }
 
 enum SetTypeSupport {
     case repsOnly       // Solo ripetizioni (Superset, Cluster, ecc.)
-    case durationOnly   // Solo durata (EMOM, AMRAP)
-    case both          // Entrambi (Circuit Training)
+    case durationOnly   // Solo durata (EMOM, AMRAP, Circuit, Tabata)
 }
