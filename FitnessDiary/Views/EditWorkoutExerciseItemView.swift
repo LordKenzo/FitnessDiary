@@ -136,12 +136,11 @@ struct EditWorkoutExerciseItemView: View {
                 exerciseItemData.exercise = exercise
             }
         }
-        .toolbar {
-            doneButton
-        }
+        .toolbar(content: toolbarContent)
     }
 
-    private var doneButton: some ToolbarContent {
+    @ToolbarContentBuilder
+    private func toolbarContent() -> some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
             Button("Fatto") {
                 saveChanges()
