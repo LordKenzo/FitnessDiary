@@ -3,6 +3,7 @@ import SwiftData
 
 struct EditWorkoutExerciseItemView: View {
     @Environment(\.dismiss) private var dismiss
+    @Query private var profiles: [UserProfile]
     @Binding var exerciseItemData: WorkoutExerciseItemData
     let exercises: [Exercise]
     let isInMethod: Bool // se true, nasconde il tempo di recupero (gestito dal blocco)
@@ -11,6 +12,14 @@ struct EditWorkoutExerciseItemView: View {
     @State private var restMinutes: Int
     @State private var restSeconds: Int
     @State private var showingExercisePicker = false
+
+    private var oneRepMax: Double? {
+        guard let profile = profiles.first,
+              let big5 = exerciseItemData.exercise.big5Exercise else {
+            return nil
+        }
+        return profile.getOneRepMax(for: big5)
+    }
 
     init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false) {
         self._exerciseItemData = exerciseItemData
@@ -70,7 +79,7 @@ struct EditWorkoutExerciseItemView: View {
 
             Section {
                 ForEach($exerciseItemData.sets) { $set in
-                    SetRow(set: $set)
+                    SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax)
                 }
                 .onMove(perform: moveSets)
                 .onDelete(perform: deleteSets)

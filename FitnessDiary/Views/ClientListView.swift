@@ -385,6 +385,20 @@ struct EditClientView: View {
                     .frame(minHeight: 100)
                 }
 
+                Section("Massimali 1RM") {
+                    NavigationLink {
+                        OneRepMaxView(oneRepMaxRecords: $client.oneRepMaxRecords)
+                    } label: {
+                        HStack {
+                            Label("Gestisci Massimali", systemImage: "figure.strengthtraining.traditional")
+                            Spacer()
+                            Text("\(client.oneRepMaxRecords.count)/5")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    }
+                }
+
                 Section {
                     Button("Elimina Cliente", role: .destructive) {
                         deleteClient()

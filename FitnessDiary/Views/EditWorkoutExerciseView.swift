@@ -3,6 +3,7 @@ import SwiftData
 
 struct EditWorkoutExerciseView: View {
     @Environment(\.dismiss) private var dismiss
+    @Query private var profiles: [UserProfile]
     @Binding var exerciseData: WorkoutExerciseItemData
     let exercises: [Exercise]
 
@@ -10,6 +11,14 @@ struct EditWorkoutExerciseView: View {
     @State private var restMinutes: Int
     @State private var restSeconds: Int
     @State private var showingExercisePicker = false
+
+    private var oneRepMax: Double? {
+        guard let profile = profiles.first,
+              let big5 = exerciseData.exercise.big5Exercise else {
+            return nil
+        }
+        return profile.getOneRepMax(for: big5)
+    }
 
     init(exerciseData: Binding<WorkoutExerciseItemData>, exercises: [Exercise]) {
         self._exerciseData = exerciseData
@@ -66,7 +75,7 @@ struct EditWorkoutExerciseView: View {
 
             Section {
                 ForEach($exerciseData.sets) { $set in
-                    SetRow(set: $set)
+                    SetRow(set: $set, exercise: exerciseData.exercise, oneRepMax: oneRepMax)
                 }
                 .onMove(perform: moveSets)
                 .onDelete(perform: deleteSets)
@@ -135,6 +144,8 @@ struct EditWorkoutExerciseView: View {
 
 struct SetRow: View {
     @Binding var set: WorkoutSetData
+    let exercise: Exercise?
+    let oneRepMax: Double?
 
     var body: some View {
         VStack(spacing: 8) {
@@ -153,30 +164,82 @@ struct SetRow: View {
             }
 
             if set.setType == .reps {
-                HStack(spacing: 16) {
-                    Spacer()
-                        .frame(width: 60)
+                VStack(spacing: 4) {
+                    // Prima riga: Rip + Toggle Kg/%
+                    HStack(spacing: 16) {
+                        Spacer()
+                            .frame(width: 60)
 
-                    HStack(spacing: 4) {
-                        TextField("Rip", value: $set.reps, format: .number)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.center)
-                            .frame(width: 50)
-                            .textFieldStyle(.roundedBorder)
-                        Text("rip")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        HStack(spacing: 4) {
+                            TextField("Rip", value: $set.reps, format: .number)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 50)
+                                .textFieldStyle(.roundedBorder)
+                            Text("rip")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Picker("", selection: $set.loadType) {
+                            Text("Kg").tag(LoadType.absolute)
+                            Text("% 1RM").tag(LoadType.percentage)
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(width: 120)
                     }
 
-                    HStack(spacing: 4) {
-                        TextField("Kg", value: $set.weight, format: .number)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.center)
+                    // Seconda riga: Campo input + valore calcolato
+                    HStack(spacing: 16) {
+                        Spacer()
                             .frame(width: 60)
-                            .textFieldStyle(.roundedBorder)
-                        Text("kg")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+
+                        Spacer()
+                            .frame(width: 54) // Allinea con campo Rip
+
+                        if set.loadType == .absolute {
+                            HStack(spacing: 4) {
+                                TextField("Kg", value: $set.weight, format: .number)
+                                    .keyboardType(.decimalPad)
+                                    .multilineTextAlignment(.center)
+                                    .frame(width: 60)
+                                    .textFieldStyle(.roundedBorder)
+                                Text("kg")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            // Mostra percentuale calcolata se disponibile 1RM
+                            if let oneRepMax = oneRepMax, let weight = set.weight, oneRepMax > 0 {
+                                let percentage = (weight / oneRepMax) * 100.0
+                                Text("→ \(Int(percentage))%")
+                                    .font(.caption)
+                                    .foregroundStyle(.blue)
+                            }
+                        } else {
+                            HStack(spacing: 4) {
+                                TextField("%", value: $set.percentageOfMax, format: .number)
+                                    .keyboardType(.decimalPad)
+                                    .multilineTextAlignment(.center)
+                                    .frame(width: 60)
+                                    .textFieldStyle(.roundedBorder)
+                                Text("%")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            // Mostra kg calcolati se disponibile 1RM
+                            if let oneRepMax = oneRepMax, let percentage = set.percentageOfMax {
+                                let weight = (percentage / 100.0) * oneRepMax
+                                Text("→ \(String(format: "%.1f", weight)) kg")
+                                    .font(.caption)
+                                    .foregroundStyle(.blue)
+                            } else if set.percentageOfMax != nil {
+                                Text("⚠️ 1RM non impostato")
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
+                            }
+                        }
                     }
                 }
             } else {

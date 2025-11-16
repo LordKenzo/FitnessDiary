@@ -79,7 +79,21 @@ struct ProfileDetailView: View {
                 LabeledContent("Altezza", value: String(format: "%.0f cm", profile.height))
                 LabeledContent("BMI", value: String(format: "%.1f", calculateBMI()))
             }
-            
+
+            Section("Massimali 1RM") {
+                NavigationLink {
+                    OneRepMaxView(oneRepMaxRecords: $profile.oneRepMaxRecords)
+                } label: {
+                    HStack {
+                        Label("Gestisci Massimali", systemImage: "figure.strengthtraining.traditional")
+                        Spacer()
+                        Text("\(profile.oneRepMaxRecords.count)/5")
+                            .foregroundStyle(.secondary)
+                            .font(.caption)
+                    }
+                }
+            }
+
             Section {
                 LabeledContent("FC Massima", value: "\(profile.maxHeartRate) bpm")
                 LabeledContent("FC Calcolata", value: "\(220 - profile.age) bpm")

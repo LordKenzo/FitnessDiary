@@ -23,4 +23,50 @@ enum Big5Exercise: String, Codable, CaseIterable, Identifiable {
             return "figure.squat"
         }
     }
+
+    /// Tenta di mappare il nome dell'esercizio a un Big5Exercise
+    /// Cerca corrispondenze case-insensitive nel nome
+    static func from(exerciseName: String) -> Big5Exercise? {
+        let lowercasedName = exerciseName.lowercased()
+
+        // Panca Piana - varianti comuni
+        if lowercasedName.contains("panca") && (lowercasedName.contains("piana") || lowercasedName.contains("bilanciere")) {
+            return .benchPress
+        }
+        if lowercasedName.contains("bench press") {
+            return .benchPress
+        }
+
+        // Stacco - varianti comuni
+        if lowercasedName.contains("stacco") || lowercasedName.contains("deadlift") {
+            return .deadlift
+        }
+
+        // Military Press - varianti comuni
+        if lowercasedName.contains("military") ||
+           (lowercasedName.contains("lento") && lowercasedName.contains("avanti")) ||
+           lowercasedName.contains("shoulder press") {
+            return .militaryPress
+        }
+
+        // Hip Thrust
+        if lowercasedName.contains("hip thrust") || lowercasedName.contains("ponte glutei") {
+            return .hipThrust
+        }
+
+        // Squat - varianti comuni
+        if lowercasedName.contains("squat") {
+            return .squat
+        }
+
+        return nil
+    }
+}
+
+// Extension su Exercise per facilitare l'accesso al Big5
+extension Exercise {
+    /// Restituisce il Big5Exercise corrispondente se l'esercizio è uno dei 5 fondamentali
+    var big5Exercise: Big5Exercise? {
+        return Big5Exercise.from(exerciseName: self.name)
+    }
 }
