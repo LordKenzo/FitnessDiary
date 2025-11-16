@@ -62,6 +62,10 @@ class WorkoutBlockHelper {
             globalSets: blockData.globalSets,
             globalRestTime: blockData.globalRestTime,
             notes: blockData.notes,
+            tabataWorkDuration: blockData.tabataWorkDuration,
+            tabataRestDuration: blockData.tabataRestDuration,
+            tabataRounds: blockData.tabataRounds,
+            tabataRecoveryBetweenRounds: blockData.tabataRecoveryBetweenRounds,
             exerciseItems: []
         )
 
@@ -90,10 +94,7 @@ class WorkoutBlockHelper {
                     clusterMinPercentage: setData.clusterMinPercentage,
                     clusterMaxPercentage: setData.clusterMaxPercentage,
                     restPauseCount: setData.restPauseCount,
-                    restPauseDuration: setData.restPauseDuration,
-                    tabataWorkDuration: setData.tabataWorkDuration,
-                    tabataRestDuration: setData.tabataRestDuration,
-                    tabataRounds: setData.tabataRounds
+                    restPauseDuration: setData.restPauseDuration
                 )
                 exerciseItem.sets.append(workoutSet)
             }

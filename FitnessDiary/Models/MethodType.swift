@@ -113,8 +113,10 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return 1
         case .contrastTraining, .complexTraining:
             return 2
-        case .emom, .amrap, .circuit, .tabata:
+        case .emom, .amrap, .circuit:
             return 1
+        case .tabata:
+            return 8 // Tabata richiede esattamente 8 esercizi
         }
     }
 
@@ -125,6 +127,8 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return 2
         case .triset:
             return 3
+        case .tabata:
+            return 8 // Tabata richiede esattamente 8 esercizi
         default:
             return nil // Nessun limite massimo
         }
@@ -214,16 +218,6 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
     var requiresRestPauseManagement: Bool {
         switch self {
         case .rest_pause:
-            return true
-        default:
-            return false
-        }
-    }
-
-    // Indica se il metodo richiede gestione Tabata
-    var requiresTabataManagement: Bool {
-        switch self {
-        case .tabata:
             return true
         default:
             return false

@@ -38,6 +38,10 @@ struct EditWorkoutCardView: View {
                 globalSets: block.globalSets,
                 globalRestTime: block.globalRestTime,
                 notes: block.notes,
+                tabataWorkDuration: block.tabataWorkDuration,
+                tabataRestDuration: block.tabataRestDuration,
+                tabataRounds: block.tabataRounds,
+                tabataRecoveryBetweenRounds: block.tabataRecoveryBetweenRounds,
                 exerciseItems: block.exerciseItems.sorted(by: { $0.order < $1.order }).map { exerciseItem in
                     WorkoutExerciseItemData(
                         exercise: exerciseItem.exercise ?? Exercise(
@@ -64,10 +68,7 @@ struct EditWorkoutCardView: View {
                                 clusterMinPercentage: set.clusterMinPercentage,
                                 clusterMaxPercentage: set.clusterMaxPercentage,
                                 restPauseCount: set.restPauseCount,
-                                restPauseDuration: set.restPauseDuration,
-                                tabataWorkDuration: set.tabataWorkDuration,
-                                tabataRestDuration: set.tabataRestDuration,
-                                tabataRounds: set.tabataRounds
+                                restPauseDuration: set.restPauseDuration
                             )
                         },
                         notes: exerciseItem.notes,
@@ -257,7 +258,11 @@ struct EditWorkoutCardView: View {
                 methodType: blockData.methodType,
                 globalSets: blockData.globalSets,
                 globalRestTime: blockData.globalRestTime,
-                notes: blockData.notes
+                notes: blockData.notes,
+                tabataWorkDuration: blockData.tabataWorkDuration,
+                tabataRestDuration: blockData.tabataRestDuration,
+                tabataRounds: blockData.tabataRounds,
+                tabataRecoveryBetweenRounds: blockData.tabataRecoveryBetweenRounds
             )
 
             // Crea gli esercizi del blocco
@@ -287,10 +292,7 @@ struct EditWorkoutCardView: View {
                         clusterMinPercentage: setData.clusterMinPercentage,
                         clusterMaxPercentage: setData.clusterMaxPercentage,
                         restPauseCount: setData.restPauseCount,
-                        restPauseDuration: setData.restPauseDuration,
-                        tabataWorkDuration: setData.tabataWorkDuration,
-                        tabataRestDuration: setData.tabataRestDuration,
-                        tabataRounds: setData.tabataRounds
+                        restPauseDuration: setData.restPauseDuration
                     )
                     exerciseItem.sets.append(workoutSet)
                 }

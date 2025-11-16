@@ -12,6 +12,13 @@ struct WorkoutBlockData: Identifiable {
     var globalSets: Int
     var globalRestTime: TimeInterval?
     var notes: String?
+
+    // Parametri Tabata (solo per methodType == .tabata)
+    var tabataWorkDuration: TimeInterval?
+    var tabataRestDuration: TimeInterval?
+    var tabataRounds: Int?
+    var tabataRecoveryBetweenRounds: TimeInterval?
+
     var exerciseItems: [WorkoutExerciseItemData]
 }
 
@@ -48,11 +55,6 @@ struct WorkoutSetData: Identifiable {
     // Rest-Pause parameters
     var restPauseCount: Int? // Numero di pause nella serie (es. 2-3)
     var restPauseDuration: TimeInterval? // Durata delle pause in secondi (es. 10-20)
-
-    // Tabata parameters
-    var tabataWorkDuration: TimeInterval? // Durata fase di lavoro (default 20s)
-    var tabataRestDuration: TimeInterval? // Durata fase di recupero (default 10s)
-    var tabataRounds: Int? // Numero di round (fisso a 8 per Tabata standard)
 }
 
 // MARK: - Cluster Set Extensions
@@ -157,28 +159,6 @@ extension WorkoutSetData {
         return "\(reps) reps con \(pauseCount) pause da \(Int(pauseDuration))s"
     }
 
-    // MARK: - Tabata Helpers
-
-    // Helper per formattare la descrizione del Tabata
-    var tabataDescription: String? {
-        guard let rounds = tabataRounds,
-              let work = tabataWorkDuration,
-              let rest = tabataRestDuration else {
-            return nil
-        }
-        return "\(rounds) round × (\(Int(work))s lavoro : \(Int(rest))s recupero)"
-    }
-
-    // Durata totale di un protocollo Tabata
-    var tabataTotalDuration: TimeInterval? {
-        guard let rounds = tabataRounds,
-              let work = tabataWorkDuration,
-              let rest = tabataRestDuration else {
-            return nil
-        }
-        // Ogni round: work + rest, ma l'ultimo round non ha rest
-        return TimeInterval(rounds - 1) * (work + rest) + work
-    }
 }
 
 // MARK: - Validation Extensions

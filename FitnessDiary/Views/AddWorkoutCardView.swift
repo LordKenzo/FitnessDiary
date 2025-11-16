@@ -179,7 +179,11 @@ struct AddWorkoutCardView: View {
                 methodType: blockData.methodType,
                 globalSets: blockData.globalSets,
                 globalRestTime: blockData.globalRestTime,
-                notes: blockData.notes
+                notes: blockData.notes,
+                tabataWorkDuration: blockData.tabataWorkDuration,
+                tabataRestDuration: blockData.tabataRestDuration,
+                tabataRounds: blockData.tabataRounds,
+                tabataRecoveryBetweenRounds: blockData.tabataRecoveryBetweenRounds
             )
 
             // Crea gli esercizi del blocco
@@ -209,10 +213,7 @@ struct AddWorkoutCardView: View {
                         clusterMinPercentage: setData.clusterMinPercentage,
                         clusterMaxPercentage: setData.clusterMaxPercentage,
                         restPauseCount: setData.restPauseCount,
-                        restPauseDuration: setData.restPauseDuration,
-                        tabataWorkDuration: setData.tabataWorkDuration,
-                        tabataRestDuration: setData.tabataRestDuration,
-                        tabataRounds: setData.tabataRounds
+                        restPauseDuration: setData.restPauseDuration
                     )
                     exerciseItem.sets.append(workoutSet)
                 }

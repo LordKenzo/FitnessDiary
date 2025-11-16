@@ -160,7 +160,6 @@ struct SetRow: View {
     let oneRepMax: Double?
     var isClusterSet: Bool = false
     var isRestPauseSet: Bool = false
-    var isTabataSet: Bool = false
     var setTypeSupport: SetTypeSupport = .repsOnly
     var targetParameters: StrengthExpressionParameters? = nil
 
@@ -311,12 +310,6 @@ struct SetRow: View {
                 if isRestPauseSet {
                     Divider()
                     restPauseFields
-                }
-
-                // Campi Tabata
-                if isTabataSet {
-                    Divider()
-                    tabataFields
                 }
             } else {
                 HStack(spacing: 16) {
@@ -622,120 +615,6 @@ struct SetRow: View {
                     Text(description)
                         .font(.caption)
                         .foregroundStyle(.blue)
-                    Spacer()
-                }
-            }
-        }
-    }
-
-    // MARK: - Tabata Fields
-
-    private var tabataFields: some View {
-        VStack(spacing: 8) {
-            // Numero di round
-            HStack(spacing: 16) {
-                Text("Round")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 60, alignment: .leading)
-
-                Stepper {
-                    HStack(spacing: 4) {
-                        Text("\(set.tabataRounds ?? 8)")
-                            .font(.subheadline)
-                        Text("round")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                } onIncrement: {
-                    set.tabataRounds = min(12, (set.tabataRounds ?? 8) + 1)
-                } onDecrement: {
-                    set.tabataRounds = max(4, (set.tabataRounds ?? 8) - 1)
-                }
-                .frame(width: 120)
-
-                Spacer()
-            }
-
-            // Durata lavoro
-            HStack(spacing: 16) {
-                Text("Lavoro")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 60, alignment: .leading)
-
-                HStack(spacing: 4) {
-                    TextField("Sec", value: Binding(
-                        get: {
-                            if let work = set.tabataWorkDuration {
-                                return Int(work)
-                            }
-                            return 20
-                        },
-                        set: { newValue in
-                            set.tabataWorkDuration = TimeInterval(min(60, max(10, newValue)))
-                        }
-                    ), format: .number)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.center)
-                        .frame(width: 50)
-                        .textFieldStyle(.roundedBorder)
-                    Text("sec")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-            }
-
-            // Durata recupero
-            HStack(spacing: 16) {
-                Text("Recupero")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 60, alignment: .leading)
-
-                HStack(spacing: 4) {
-                    TextField("Sec", value: Binding(
-                        get: {
-                            if let rest = set.tabataRestDuration {
-                                return Int(rest)
-                            }
-                            return 10
-                        },
-                        set: { newValue in
-                            set.tabataRestDuration = TimeInterval(min(30, max(5, newValue)))
-                        }
-                    ), format: .number)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.center)
-                        .frame(width: 50)
-                        .textFieldStyle(.roundedBorder)
-                    Text("sec")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-            }
-
-            // Descrizione Tabata e durata totale
-            if let description = set.tabataDescription {
-                HStack(spacing: 16) {
-                    Spacer()
-                        .frame(width: 60)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(description)
-                            .font(.caption)
-                            .foregroundStyle(.blue)
-                        if let totalDuration = set.tabataTotalDuration {
-                            let minutes = Int(totalDuration) / 60
-                            let seconds = Int(totalDuration) % 60
-                            Text("Durata totale: \(minutes)'\(seconds)\"")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
                     Spacer()
                 }
             }

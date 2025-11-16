@@ -61,7 +61,10 @@ struct EditWorkoutExerciseItemView: View {
         Form {
             exerciseSection
 
-            targetExpressionSection
+            // Target expression solo per metodi repsOnly (non per EMOM, AMRAP, Circuit, Tabata)
+            if methodType?.supportedSetType != .durationOnly {
+                targetExpressionSection
+            }
 
             if !isInMethod {
                 restTimeSection
@@ -196,15 +199,14 @@ struct EditWorkoutExerciseItemView: View {
     private var setsList: some View {
         let isCluster = methodType?.requiresClusterManagement ?? false
         let isRestPause = methodType?.requiresRestPauseManagement ?? false
-        let isTabata = methodType?.requiresTabataManagement ?? false
         let setTypeSupport = methodType?.supportedSetType ?? .repsOnly
         if isInMethod {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, isTabataSet: isTabata, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
             }
         } else {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, isTabataSet: isTabata, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
             }
             .onMove(perform: moveSets)
             .onDelete(perform: deleteSets)

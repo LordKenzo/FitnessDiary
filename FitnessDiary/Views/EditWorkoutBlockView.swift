@@ -13,6 +13,13 @@ struct EditWorkoutBlockView: View {
     @State private var notes: String
     @State private var showingExercisePicker = false
 
+    // Tabata parameters
+    @State private var tabataWorkSeconds: Int
+    @State private var tabataRestSeconds: Int
+    @State private var tabataRounds: Int
+    @State private var tabataRecoveryMinutes: Int
+    @State private var tabataRecoverySeconds: Int
+
     init(blockData: Binding<WorkoutBlockData>) {
         self._blockData = blockData
         _globalSets = State(initialValue: blockData.wrappedValue.globalSets)
@@ -20,6 +27,14 @@ struct EditWorkoutBlockView: View {
         _globalRestMinutes = State(initialValue: Int(restTime) / 60)
         _globalRestSeconds = State(initialValue: Int(restTime) % 60)
         _notes = State(initialValue: blockData.wrappedValue.notes ?? "")
+
+        // Initialize Tabata parameters
+        _tabataWorkSeconds = State(initialValue: Int(blockData.wrappedValue.tabataWorkDuration ?? 20))
+        _tabataRestSeconds = State(initialValue: Int(blockData.wrappedValue.tabataRestDuration ?? 10))
+        _tabataRounds = State(initialValue: blockData.wrappedValue.tabataRounds ?? 5)
+        let recoveryTime = blockData.wrappedValue.tabataRecoveryBetweenRounds ?? 60
+        _tabataRecoveryMinutes = State(initialValue: Int(recoveryTime) / 60)
+        _tabataRecoverySeconds = State(initialValue: Int(recoveryTime) % 60)
     }
 
     var body: some View {
@@ -84,6 +99,76 @@ struct EditWorkoutBlockView: View {
 
                     TextField("Note (opzionale)", text: $notes, axis: .vertical)
                         .lineLimit(2...4)
+                }
+            }
+
+            // Tabata parameters section - solo per Tabata
+            if blockData.methodType == .tabata {
+                Section("Parametri Tabata") {
+                    // Tempo di lavoro
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Tempo Lavoro")
+                            .font(.subheadline)
+
+                        HStack(spacing: 8) {
+                            TextField("Secondi", value: $tabataWorkSeconds, format: .number)
+                                .keyboardType(.numberPad)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 80)
+                            Text("secondi (10-60s)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    // Tempo di recupero tra esercizi
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Recupero tra Esercizi")
+                            .font(.subheadline)
+
+                        HStack(spacing: 8) {
+                            TextField("Secondi", value: $tabataRestSeconds, format: .number)
+                                .keyboardType(.numberPad)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 80)
+                            Text("secondi (5-30s)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    // Numero di giri
+                    Stepper("Giri: \(tabataRounds)", value: $tabataRounds, in: 1...10)
+
+                    // Recupero tra i giri
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Recupero tra Giri")
+                            .font(.subheadline)
+
+                        HStack(spacing: 16) {
+                            Picker("Minuti", selection: $tabataRecoveryMinutes) {
+                                ForEach(0..<5, id: \.self) { min in
+                                    Text("\(min)m").tag(min)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
+
+                            Picker("Secondi", selection: $tabataRecoverySeconds) {
+                                ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
+                                    Text("\(sec)s").tag(sec)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
+                        }
+                    }
+                } footer: {
+                    let totalTime = calculateTabataTotalDuration()
+                    let minutes = totalTime / 60
+                    let seconds = totalTime % 60
+                    Text("Durata totale: \(minutes) min \(seconds) sec (\(tabataRounds) giri × 8 esercizi)")
+                        .font(.caption)
                 }
             }
 
@@ -207,7 +292,6 @@ struct EditWorkoutBlockView: View {
         let setsCount = blockData.blockType == .method ? globalSets : 1
         let isCluster = blockData.methodType?.requiresClusterManagement ?? false
         let isRestPause = blockData.methodType?.requiresRestPauseManagement ?? false
-        let isTabata = blockData.methodType?.requiresTabataManagement ?? false
 
         // Determina il tipo di serie corretto per il metodo
         let setTypeSupport = blockData.methodType?.supportedSetType
@@ -240,10 +324,7 @@ struct EditWorkoutBlockView: View {
                 clusterMinPercentage: isCluster ? 80 : nil,
                 clusterMaxPercentage: isCluster ? 95 : nil,
                 restPauseCount: isRestPause ? 2 : nil,
-                restPauseDuration: isRestPause ? 15 : nil,
-                tabataWorkDuration: isTabata ? 20 : nil,
-                tabataRestDuration: isTabata ? 10 : nil,
-                tabataRounds: isTabata ? 8 : nil
+                restPauseDuration: isRestPause ? 15 : nil
             ))
         }
 
@@ -274,10 +355,26 @@ struct EditWorkoutBlockView: View {
         blockData.globalRestTime = TimeInterval(globalRestMinutes * 60 + globalRestSeconds)
         blockData.notes = notes.isEmpty ? nil : notes
 
+        // Salva parametri Tabata se è un metodo Tabata
+        if blockData.methodType == .tabata {
+            blockData.tabataWorkDuration = TimeInterval(tabataWorkSeconds)
+            blockData.tabataRestDuration = TimeInterval(tabataRestSeconds)
+            blockData.tabataRounds = tabataRounds
+            blockData.tabataRecoveryBetweenRounds = TimeInterval(tabataRecoveryMinutes * 60 + tabataRecoverySeconds)
+        }
+
         // Se è un metodo, sincronizza il numero di serie di tutti gli esercizi
         if blockData.blockType == .method {
             syncExerciseSets()
         }
+    }
+
+    private func calculateTabataTotalDuration() -> Int {
+        // Durata di un giro: 8 esercizi × (tempo lavoro + tempo recupero) - ultimo recupero
+        let roundDuration = 8 * (tabataWorkSeconds + tabataRestSeconds) - tabataRestSeconds
+        // Durata totale: giri × durata giro + recuperi tra giri
+        let totalTime = tabataRounds * roundDuration + (tabataRounds - 1) * (tabataRecoveryMinutes * 60 + tabataRecoverySeconds)
+        return totalTime
     }
 
     /// Sincronizza il numero di serie di tutti gli esercizi con globalSets (per onSave)
@@ -294,7 +391,6 @@ struct EditWorkoutBlockView: View {
     private func syncSetsForCount(_ targetSetsCount: Int) {
         let isCluster = blockData.methodType?.requiresClusterManagement ?? false
         let isRestPause = blockData.methodType?.requiresRestPauseManagement ?? false
-        let isTabata = blockData.methodType?.requiresTabataManagement ?? false
 
         // Determina il tipo di serie corretto per il metodo
         let setTypeSupport = blockData.methodType?.supportedSetType
@@ -331,10 +427,7 @@ struct EditWorkoutBlockView: View {
                         clusterMinPercentage: isCluster ? 80 : nil,
                         clusterMaxPercentage: isCluster ? 95 : nil,
                         restPauseCount: isRestPause ? 2 : nil,
-                        restPauseDuration: isRestPause ? 15 : nil,
-                        tabataWorkDuration: isTabata ? 20 : nil,
-                        tabataRestDuration: isTabata ? 10 : nil,
-                        tabataRounds: isTabata ? 8 : nil
+                        restPauseDuration: isRestPause ? 15 : nil
                     )
                     blockData.exerciseItems[index].sets.append(newSet)
                 }
