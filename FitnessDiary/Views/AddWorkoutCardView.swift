@@ -171,56 +171,10 @@ struct AddWorkoutCardView: View {
             assignedTo: selectedClients
         )
 
-        // Crea i blocchi
+        // Crea i blocchi usando WorkoutBlockHelper
+        // Questo elimina la duplicazione di codice e centralizza la logica di conversione
         for blockData in workoutBlocks {
-            let block = WorkoutBlock(
-                order: blockData.order,
-                blockType: blockData.blockType,
-                methodType: blockData.methodType,
-                globalSets: blockData.globalSets,
-                globalRestTime: blockData.globalRestTime,
-                notes: blockData.notes,
-                tabataWorkDuration: blockData.tabataWorkDuration,
-                tabataRestDuration: blockData.tabataRestDuration,
-                tabataRounds: blockData.tabataRounds,
-                tabataRecoveryBetweenRounds: blockData.tabataRecoveryBetweenRounds
-            )
-
-            // Crea gli esercizi del blocco
-            for exerciseItemData in blockData.exerciseItems {
-                let exerciseItem = WorkoutExerciseItem(
-                    order: exerciseItemData.order,
-                    exercise: exerciseItemData.exercise,
-                    notes: exerciseItemData.notes,
-                    restTime: exerciseItemData.restTime,
-                    targetExpression: exerciseItemData.targetExpression
-                )
-
-                // Crea le serie
-                for setData in exerciseItemData.sets {
-                    let workoutSet = WorkoutSet(
-                        order: setData.order,
-                        setType: setData.setType,
-                        reps: setData.reps,
-                        weight: setData.weight,
-                        duration: setData.duration,
-                        notes: setData.notes,
-                        loadType: setData.loadType,
-                        percentageOfMax: setData.percentageOfMax,
-                        clusterSize: setData.clusterSize,
-                        clusterRestTime: setData.clusterRestTime,
-                        clusterProgression: setData.clusterProgression,
-                        clusterMinPercentage: setData.clusterMinPercentage,
-                        clusterMaxPercentage: setData.clusterMaxPercentage,
-                        restPauseCount: setData.restPauseCount,
-                        restPauseDuration: setData.restPauseDuration
-                    )
-                    exerciseItem.sets.append(workoutSet)
-                }
-
-                block.exerciseItems.append(exerciseItem)
-            }
-
+            let block = WorkoutBlockHelper.workoutBlockToModel(blockData)
             newCard.blocks.append(block)
         }
 

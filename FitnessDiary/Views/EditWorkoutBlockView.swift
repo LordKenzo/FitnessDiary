@@ -354,7 +354,14 @@ struct EditWorkoutBlockView: View {
 
     private func saveChanges() {
         blockData.globalSets = globalSets
-        blockData.globalRestTime = TimeInterval(globalRestMinutes * 60 + globalRestSeconds)
+
+        // Salva rest time solo se il metodo lo permette
+        if blockData.methodType?.allowsRestBetweenSets ?? true {
+            blockData.globalRestTime = TimeInterval(globalRestMinutes * 60 + globalRestSeconds)
+        } else {
+            blockData.globalRestTime = nil // Dropset non deve avere rest time
+        }
+
         blockData.notes = notes.isEmpty ? nil : notes
 
         // Salva parametri Tabata se è un metodo Tabata
