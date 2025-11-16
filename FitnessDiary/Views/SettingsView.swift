@@ -33,7 +33,7 @@ struct SettingsView: View {
                 
                 Section("Libreria") {
                     NavigationLink {
-                        Text("Muscoli") // MusclesView in futuro
+                        MuscleListView()
                     } label: {
                         Label("Muscoli", systemImage: "figure.arms.open")
                     }
@@ -52,5 +52,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
-        .modelContainer(for: UserProfile.self, inMemory: true)
+        .modelContainer(for: [UserProfile.self, Muscle.self], inMemory: true)
 }
