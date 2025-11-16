@@ -42,93 +42,19 @@ struct EditWorkoutExerciseItemView: View {
 
     var body: some View {
         Form {
-            Section("Esercizio") {
-                Button {
-                    showingExercisePicker = true
-                } label: {
-                    HStack {
-                        Text("Esercizio")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        Text(exerciseItemData.exercise.name)
-                            .foregroundStyle(.secondary)
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-            }
+            exerciseSection
 
             if !isInMethod {
-                Section("Tempo di Recupero") {
-                    HStack {
-                        Picker("Minuti", selection: $restMinutes) {
-                            ForEach(0..<10, id: \.self) { min in
-                                Text("\(min) min").tag(min)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-
-                        Picker("Secondi", selection: $restSeconds) {
-                            ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
-                                Text("\(sec) sec").tag(sec)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                    }
-                    .frame(height: 120)
-                }
+                restTimeSection
             }
 
-            Section("Note") {
-                TextField("Note (opzionale)", text: $notes, axis: .vertical)
-                    .lineLimit(2...4)
-            }
+            notesSection
 
-            // Warning di validazione
             if let error = validationError {
-                Section {
-                    HStack(spacing: 12) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                        Text(error)
-                            .font(.subheadline)
-                            .foregroundStyle(.orange)
-                    }
-                }
+                validationWarningSection(error: error)
             }
 
-            Section {
-                ForEach($exerciseItemData.sets) { $set in
-                    SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax)
-                }
-                // Permetti modifica ordine e cancellazione solo se NON in un metodo
-                .onMove(perform: isInMethod ? nil : moveSets)
-                .onDelete(perform: isInMethod ? nil : deleteSets)
-
-                // Mostra pulsante aggiungi solo se NON in un metodo
-                if !isInMethod {
-                    Button {
-                        addSet()
-                    } label: {
-                        Label("Aggiungi Serie", systemImage: "plus.circle.fill")
-                    }
-                }
-            } header: {
-                HStack {
-                    Text(isInMethod ? "Ripetizioni per Serie" : "Serie")
-                    Spacer()
-                    // EditButton solo se NON in un metodo
-                    if !isInMethod {
-                        EditButton()
-                    }
-                }
-            } footer: {
-                if isInMethod {
-                    Text("Il numero di serie è gestito dal blocco metodologia")
-                        .font(.caption)
-                }
-            }
+            setsSection
         }
         .navigationTitle("Configura Esercizio")
         .navigationBarTitleDisplayMode(.inline)
@@ -140,6 +66,98 @@ struct EditWorkoutExerciseItemView: View {
         .toolbar(content: toolbarContent)
         .onAppear {
             loadUserProfile()
+        }
+    }
+
+    // MARK: - View Components
+
+    private var exerciseSection: some View {
+        Section("Esercizio") {
+            Button {
+                showingExercisePicker = true
+            } label: {
+                HStack {
+                    Text("Esercizio")
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Text(exerciseItemData.exercise.name)
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+        }
+    }
+
+    private var restTimeSection: some View {
+        Section("Tempo di Recupero") {
+            HStack {
+                Picker("Minuti", selection: $restMinutes) {
+                    ForEach(0..<10, id: \.self) { min in
+                        Text("\(min) min").tag(min)
+                    }
+                }
+                .pickerStyle(.wheel)
+
+                Picker("Secondi", selection: $restSeconds) {
+                    ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
+                        Text("\(sec) sec").tag(sec)
+                    }
+                }
+                .pickerStyle(.wheel)
+            }
+            .frame(height: 120)
+        }
+    }
+
+    private var notesSection: some View {
+        Section("Note") {
+            TextField("Note (opzionale)", text: $notes, axis: .vertical)
+                .lineLimit(2...4)
+        }
+    }
+
+    private func validationWarningSection(error: String) -> some View {
+        Section {
+            HStack(spacing: 12) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                Text(error)
+                    .font(.subheadline)
+                    .foregroundStyle(.orange)
+            }
+        }
+    }
+
+    private var setsSection: some View {
+        Section {
+            ForEach($exerciseItemData.sets) { $set in
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax)
+            }
+            .onMove(perform: isInMethod ? nil : moveSets)
+            .onDelete(perform: isInMethod ? nil : deleteSets)
+
+            if !isInMethod {
+                Button {
+                    addSet()
+                } label: {
+                    Label("Aggiungi Serie", systemImage: "plus.circle.fill")
+                }
+            }
+        } header: {
+            HStack {
+                Text(isInMethod ? "Ripetizioni per Serie" : "Serie")
+                Spacer()
+                if !isInMethod {
+                    EditButton()
+                }
+            }
+        } footer: {
+            if isInMethod {
+                Text("Il numero di serie è gestito dal blocco metodologia")
+                    .font(.caption)
+            }
         }
     }
 
