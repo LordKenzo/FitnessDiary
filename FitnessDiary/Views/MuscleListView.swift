@@ -3,7 +3,7 @@ import SwiftData
 
 struct MuscleListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Muscle.category) private var muscles: [Muscle]
+    @Query(sort: \Muscle.name) private var muscles: [Muscle]
     @State private var showingAddMuscle = false
     @State private var selectedMuscle: Muscle?
 

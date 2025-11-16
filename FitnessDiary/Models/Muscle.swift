@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class Muscle {
+final class Muscle: Identifiable {
     var id: UUID
     var name: String
     var category: MuscleCategory
