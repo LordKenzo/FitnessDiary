@@ -959,8 +959,8 @@ struct MultiPhotoFullscreenView: View {
             Color.black.ignoresSafeArea()
 
             TabView(selection: $currentIndex) {
-                ForEach(Array(photos.enumerated()), id: \.offset) { index, photoData in
-                    if let uiImage = UIImage(data: photoData) {
+                ForEach(photos.indices, id: \.self) { index in
+                    if let uiImage = UIImage(data: photos[index]) {
                         GeometryReader { geometry in
                             Image(uiImage: uiImage)
                                 .resizable()
