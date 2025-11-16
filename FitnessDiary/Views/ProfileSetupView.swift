@@ -158,6 +158,9 @@ struct ProfileSetupView: View {
         }
     }
     
+    /// Produces a human-readable BPM range for the specified heart rate zone using the view's current age and maxHeartRate.
+    /// - Parameter zone: The heart rate zone to describe.
+    /// - Returns: A string with the zone's BPM range (e.g., "0 - 120 bpm").
     private func zoneRange(for zone: HeartRateZone) -> String {
         let profile = UserProfile(age: age, maxHeartRate: maxHeartRate)
         switch zone {
@@ -174,6 +177,9 @@ struct ProfileSetupView: View {
         }
     }
     
+    /// Imports available user data from HealthKit and applies it to the view's profile fields.
+    /// 
+    /// Requests HealthKit authorization and fetches the user's weight, height, age, and gender; when values are returned they update `weight`, `height`, `age`, and `gender`, and `maxHeartRate` is recalculated from `age`. While the operation runs `isLoadingHealthData` is set to `true` and is reset when the import completes.
     private func importFromHealthKit() async {
         isLoadingHealthData = true
         defer { isLoadingHealthData = false }
@@ -200,6 +206,9 @@ struct ProfileSetupView: View {
         }
     }
     
+    /// Creates a UserProfile from the view's current fields, persists it to the model context, and closes the view.
+    /// 
+    /// If a profile image is available it is attached to the created profile before insertion. The profile is inserted into `modelContext` and the view is dismissed.
     private func saveProfile() {
         let profile = UserProfile(
             name: name,
