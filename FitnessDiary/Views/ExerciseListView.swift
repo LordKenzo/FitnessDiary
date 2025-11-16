@@ -11,15 +11,19 @@ struct ExerciseListView: View {
     @State private var showingAddExercise = false
     @State private var selectedExercise: Exercise?
     @State private var searchText = ""
-    @State private var filterMetabolicType: MetabolicType?
-    @State private var filterExerciseType: ExerciseType?
+    @State private var filterPrimaryMetabolism: PrimaryMetabolism?
+    @State private var filterBiomechanicalStructure: BiomechanicalStructure?
+    @State private var filterTrainingRole: TrainingRole?
+    @State private var filterCategory: ExerciseCategory?
 
     private var filteredExercises: [Exercise] {
         exercises.filter { exercise in
             let matchesSearch = searchText.isEmpty || exercise.name.localizedCaseInsensitiveContains(searchText)
-            let matchesMetabolic = filterMetabolicType == nil || exercise.metabolicType == filterMetabolicType
-            let matchesExercise = filterExerciseType == nil || exercise.exerciseType == filterExerciseType
-            return matchesSearch && matchesMetabolic && matchesExercise
+            let matchesMetabolism = filterPrimaryMetabolism == nil || exercise.primaryMetabolism == filterPrimaryMetabolism
+            let matchesBiomechanical = filterBiomechanicalStructure == nil || exercise.biomechanicalStructure == filterBiomechanicalStructure
+            let matchesRole = filterTrainingRole == nil || exercise.trainingRole == filterTrainingRole
+            let matchesCategory = filterCategory == nil || exercise.category == filterCategory
+            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory
         }
     }
 
@@ -60,33 +64,57 @@ struct ExerciseListView: View {
 
             ToolbarItem(placement: .topBarLeading) {
                 Menu {
-                    Section("Tipo Metabolico") {
-                        Button(action: { filterMetabolicType = nil }) {
-                            Label("Tutti", systemImage: filterMetabolicType == nil ? "checkmark" : "")
+                    Section("Metabolismo Primario") {
+                        Button(action: { filterPrimaryMetabolism = nil }) {
+                            Label("Tutti", systemImage: filterPrimaryMetabolism == nil ? "checkmark" : "")
                         }
-                        ForEach(MetabolicType.allCases, id: \.self) { type in
-                            Button(action: { filterMetabolicType = type }) {
-                                Label(type.rawValue, systemImage: filterMetabolicType == type ? "checkmark" : type.icon)
+                        ForEach(PrimaryMetabolism.allCases, id: \.self) { type in
+                            Button(action: { filterPrimaryMetabolism = type }) {
+                                Label(type.rawValue, systemImage: filterPrimaryMetabolism == type ? "checkmark" : type.icon)
                             }
                         }
                     }
 
-                    Section("Tipo Esercizio") {
-                        Button(action: { filterExerciseType = nil }) {
-                            Label("Tutti", systemImage: filterExerciseType == nil ? "checkmark" : "")
+                    Section("Struttura Biomeccanica") {
+                        Button(action: { filterBiomechanicalStructure = nil }) {
+                            Label("Tutti", systemImage: filterBiomechanicalStructure == nil ? "checkmark" : "")
                         }
-                        ForEach(ExerciseType.allCases, id: \.self) { type in
-                            Button(action: { filterExerciseType = type }) {
-                                Label(type.rawValue, systemImage: filterExerciseType == type ? "checkmark" : type.icon)
+                        ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
+                            Button(action: { filterBiomechanicalStructure = type }) {
+                                Label(type.rawValue, systemImage: filterBiomechanicalStructure == type ? "checkmark" : type.icon)
                             }
                         }
                     }
 
-                    if filterMetabolicType != nil || filterExerciseType != nil {
+                    Section("Ruolo nell'Allenamento") {
+                        Button(action: { filterTrainingRole = nil }) {
+                            Label("Tutti", systemImage: filterTrainingRole == nil ? "checkmark" : "")
+                        }
+                        ForEach(TrainingRole.allCases, id: \.self) { role in
+                            Button(action: { filterTrainingRole = role }) {
+                                Label(role.rawValue, systemImage: filterTrainingRole == role ? "checkmark" : role.icon)
+                            }
+                        }
+                    }
+
+                    Section("Categoria") {
+                        Button(action: { filterCategory = nil }) {
+                            Label("Tutti", systemImage: filterCategory == nil ? "checkmark" : "")
+                        }
+                        ForEach(ExerciseCategory.allCases, id: \.self) { category in
+                            Button(action: { filterCategory = category }) {
+                                Label(category.rawValue, systemImage: filterCategory == category ? "checkmark" : category.icon)
+                            }
+                        }
+                    }
+
+                    if filterPrimaryMetabolism != nil || filterBiomechanicalStructure != nil || filterTrainingRole != nil || filterCategory != nil {
                         Divider()
                         Button("Rimuovi Filtri", role: .destructive) {
-                            filterMetabolicType = nil
-                            filterExerciseType = nil
+                            filterPrimaryMetabolism = nil
+                            filterBiomechanicalStructure = nil
+                            filterTrainingRole = nil
+                            filterCategory = nil
                         }
                     }
                 } label: {
@@ -144,13 +172,23 @@ struct ExerciseRow: View {
                     .font(.headline)
 
                 HStack(spacing: 8) {
-                    Label(exercise.metabolicType.rawValue, systemImage: exercise.metabolicType.icon)
+                    Label(exercise.trainingRole.rawValue, systemImage: exercise.trainingRole.icon)
                         .font(.caption)
-                        .foregroundStyle(exercise.metabolicType.color)
+                        .foregroundStyle(exercise.trainingRole.color)
 
-                    Label(exercise.exerciseType.rawValue, systemImage: exercise.exerciseType.icon)
+                    Label(exercise.category.rawValue, systemImage: exercise.category.icon)
                         .font(.caption)
+                        .foregroundStyle(exercise.category.color)
+                }
+
+                HStack(spacing: 8) {
+                    Label(exercise.biomechanicalStructure.rawValue, systemImage: exercise.biomechanicalStructure.icon)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
+
+                    Label(exercise.primaryMetabolism.rawValue, systemImage: exercise.primaryMetabolism.icon)
+                        .font(.caption2)
+                        .foregroundStyle(exercise.primaryMetabolism.color)
                 }
 
                 // Muscoli primari
@@ -295,8 +333,10 @@ struct AddExerciseView: View {
 
     @State private var name = ""
     @State private var description = ""
-    @State private var metabolicType: MetabolicType = .mixed
-    @State private var exerciseType: ExerciseType = .multiJoint
+    @State private var biomechanicalStructure: BiomechanicalStructure = .multiJoint
+    @State private var trainingRole: TrainingRole = .base
+    @State private var primaryMetabolism: PrimaryMetabolism = .mixed
+    @State private var category: ExerciseCategory = .training
     @State private var youtubeURL = ""
     @State private var selectedPrimaryMuscles: Set<Muscle> = []
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
@@ -320,18 +360,32 @@ struct AddExerciseView: View {
                         .lineLimit(3...6)
                 }
 
-                Section("Tipologia") {
-                    Picker("Tipo Metabolico", selection: $metabolicType) {
-                        ForEach(MetabolicType.allCases, id: \.self) { type in
+                Section("Tassonomia") {
+                    Picker("Struttura Biomeccanica", selection: $biomechanicalStructure) {
+                        ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
                             Label(type.rawValue, systemImage: type.icon)
                                 .tag(type)
                         }
                     }
 
-                    Picker("Tipo Esercizio", selection: $exerciseType) {
-                        ForEach(ExerciseType.allCases, id: \.self) { type in
-                            Label(type.rawValue, systemImage: type.icon)
-                                .tag(type)
+                    Picker("Ruolo nell'Allenamento", selection: $trainingRole) {
+                        ForEach(TrainingRole.allCases, id: \.self) { role in
+                            Label(role.rawValue, systemImage: role.icon)
+                                .tag(role)
+                        }
+                    }
+
+                    Picker("Metabolismo Primario", selection: $primaryMetabolism) {
+                        ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
+                            Label(metabolism.rawValue, systemImage: metabolism.icon)
+                                .tag(metabolism)
+                        }
+                    }
+
+                    Picker("Categoria", selection: $category) {
+                        ForEach(ExerciseCategory.allCases, id: \.self) { cat in
+                            Label(cat.rawValue, systemImage: cat.icon)
+                                .tag(cat)
                         }
                     }
                 }
@@ -440,8 +494,10 @@ struct AddExerciseView: View {
             photo1Data: photoData1,
             photo2Data: photoData2,
             photo3Data: photoData3,
-            metabolicType: metabolicType,
-            exerciseType: exerciseType,
+            biomechanicalStructure: biomechanicalStructure,
+            trainingRole: trainingRole,
+            primaryMetabolism: primaryMetabolism,
+            category: category,
             youtubeURL: youtubeURL.isEmpty ? nil : youtubeURL,
             primaryMuscles: Array(selectedPrimaryMuscles),
             secondaryMuscles: Array(selectedSecondaryMuscles),
@@ -481,18 +537,32 @@ struct EditExerciseView: View {
                         .lineLimit(3...6)
                 }
 
-                Section("Tipologia") {
-                    Picker("Tipo Metabolico", selection: $exercise.metabolicType) {
-                        ForEach(MetabolicType.allCases, id: \.self) { type in
+                Section("Tassonomia") {
+                    Picker("Struttura Biomeccanica", selection: $exercise.biomechanicalStructure) {
+                        ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
                             Label(type.rawValue, systemImage: type.icon)
                                 .tag(type)
                         }
                     }
 
-                    Picker("Tipo Esercizio", selection: $exercise.exerciseType) {
-                        ForEach(ExerciseType.allCases, id: \.self) { type in
-                            Label(type.rawValue, systemImage: type.icon)
-                                .tag(type)
+                    Picker("Ruolo nell'Allenamento", selection: $exercise.trainingRole) {
+                        ForEach(TrainingRole.allCases, id: \.self) { role in
+                            Label(role.rawValue, systemImage: role.icon)
+                                .tag(role)
+                        }
+                    }
+
+                    Picker("Metabolismo Primario", selection: $exercise.primaryMetabolism) {
+                        ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
+                            Label(metabolism.rawValue, systemImage: metabolism.icon)
+                                .tag(metabolism)
+                        }
+                    }
+
+                    Picker("Categoria", selection: $exercise.category) {
+                        ForEach(ExerciseCategory.allCases, id: \.self) { cat in
+                            Label(cat.rawValue, systemImage: cat.icon)
+                                .tag(cat)
                         }
                     }
                 }
@@ -725,13 +795,21 @@ struct AddVariantView: View {
                                         .foregroundStyle(.primary)
 
                                     HStack(spacing: 8) {
-                                        Label(candidate.metabolicType.rawValue, systemImage: candidate.metabolicType.icon)
+                                        Label(candidate.trainingRole.rawValue, systemImage: candidate.trainingRole.icon)
                                             .font(.caption)
-                                            .foregroundStyle(candidate.metabolicType.color)
+                                            .foregroundStyle(candidate.trainingRole.color)
 
-                                        if let equipment = candidate.equipment {
+                                        Label(candidate.category.rawValue, systemImage: candidate.category.icon)
+                                            .font(.caption)
+                                            .foregroundStyle(candidate.category.color)
+                                    }
+
+                                    if let equipment = candidate.equipment {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: equipment.category.icon)
+                                                .font(.caption2)
                                             Text(equipment.name)
-                                                .font(.caption)
+                                                .font(.caption2)
                                                 .foregroundStyle(.secondary)
                                         }
                                     }

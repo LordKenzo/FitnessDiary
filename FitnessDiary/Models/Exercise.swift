@@ -13,8 +13,11 @@ final class Exercise: Identifiable {
     @Attribute(.externalStorage) var photo2Data: Data?
     @Attribute(.externalStorage) var photo3Data: Data?
 
-    var metabolicType: MetabolicType
-    var exerciseType: ExerciseType
+    // Tassonomia esercizio
+    var biomechanicalStructure: BiomechanicalStructure
+    var trainingRole: TrainingRole
+    var primaryMetabolism: PrimaryMetabolism
+    var category: ExerciseCategory
 
     // URL YouTube
     var youtubeURL: String?
@@ -36,8 +39,10 @@ final class Exercise: Identifiable {
         photo1Data: Data? = nil,
         photo2Data: Data? = nil,
         photo3Data: Data? = nil,
-        metabolicType: MetabolicType,
-        exerciseType: ExerciseType,
+        biomechanicalStructure: BiomechanicalStructure = .multiJoint,
+        trainingRole: TrainingRole = .base,
+        primaryMetabolism: PrimaryMetabolism = .mixed,
+        category: ExerciseCategory = .training,
         youtubeURL: String? = nil,
         primaryMuscles: [Muscle] = [],
         secondaryMuscles: [Muscle] = [],
@@ -50,8 +55,10 @@ final class Exercise: Identifiable {
         self.photo1Data = photo1Data
         self.photo2Data = photo2Data
         self.photo3Data = photo3Data
-        self.metabolicType = metabolicType
-        self.exerciseType = exerciseType
+        self.biomechanicalStructure = biomechanicalStructure
+        self.trainingRole = trainingRole
+        self.primaryMetabolism = primaryMetabolism
+        self.category = category
         self.youtubeURL = youtubeURL
         self.primaryMuscles = primaryMuscles
         self.secondaryMuscles = secondaryMuscles
@@ -102,7 +109,47 @@ final class Exercise: Identifiable {
     }
 }
 
-enum MetabolicType: String, Codable, CaseIterable {
+// MARK: - 1. Struttura Biomeccanica
+enum BiomechanicalStructure: String, Codable, CaseIterable {
+    case singleJoint = "Monoarticolare"
+    case multiJoint = "Multiarticolare"
+
+    var icon: String {
+        switch self {
+        case .singleJoint: return "circle.fill"
+        case .multiJoint: return "circles.hexagongrid.fill"
+        }
+    }
+}
+
+// MARK: - 2. Ruolo nell'Allenamento
+enum TrainingRole: String, Codable, CaseIterable {
+    case fundamental = "Fondamentale"
+    case base = "Base"
+    case accessory = "Accessorio"
+    case technicalSpecific = "Tecnico Specifico"
+
+    var icon: String {
+        switch self {
+        case .fundamental: return "star.fill"
+        case .base: return "square.stack.3d.up.fill"
+        case .accessory: return "wrench.and.screwdriver.fill"
+        case .technicalSpecific: return "target"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .fundamental: return .orange
+        case .base: return .green
+        case .accessory: return .cyan
+        case .technicalSpecific: return .indigo
+        }
+    }
+}
+
+// MARK: - 3. Metabolismo Primario
+enum PrimaryMetabolism: String, Codable, CaseIterable {
     case aerobic = "Aerobico"
     case anaerobic = "Anaerobico"
     case mixed = "Misto"
@@ -124,14 +171,34 @@ enum MetabolicType: String, Codable, CaseIterable {
     }
 }
 
-enum ExerciseType: String, Codable, CaseIterable {
-    case singleJoint = "Monoarticolare"
-    case multiJoint = "Poliarticolare"
+// MARK: - 4. Categoria/Contesto
+enum ExerciseCategory: String, Codable, CaseIterable {
+    case training = "Allenamento"
+    case warmup = "Riscaldamento"
+    case stretching = "Stretching"
+    case mobility = "Mobilità"
+    case breathing = "Respirazione"
+    case other = "Altro"
 
     var icon: String {
         switch self {
-        case .singleJoint: return "circle.fill"
-        case .multiJoint: return "circles.hexagongrid.fill"
+        case .training: return "figure.strengthtraining.traditional"
+        case .warmup: return "flame.fill"
+        case .stretching: return "figure.flexibility"
+        case .mobility: return "figure.roll"
+        case .breathing: return "lungs.fill"
+        case .other: return "ellipsis.circle"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .training: return .primary
+        case .warmup: return .orange
+        case .stretching: return .mint
+        case .mobility: return .teal
+        case .breathing: return .cyan
+        case .other: return .gray
         }
     }
 }
