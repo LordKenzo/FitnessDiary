@@ -1111,6 +1111,15 @@ struct PhotoEditorRow: View {
     let photoIndex: Int
     @State private var showingFullscreen = false
 
+    private var availablePhotos: [Data] {
+        allPhotos.compactMap { $0 }
+    }
+
+    private var availablePhotoIndex: Int {
+        let index = allPhotos.prefix(photoIndex + 1).compactMap { $0 }.count - 1
+        return max(0, index)
+    }
+
     var body: some View {
         HStack {
             if let data = currentData, let uiImage = UIImage(data: data) {
@@ -1160,11 +1169,8 @@ struct PhotoEditorRow: View {
             }
         }
         .fullScreenCover(isPresented: $showingFullscreen) {
-            let availablePhotos = allPhotos.compactMap { $0 }
             if !availablePhotos.isEmpty {
-                // Calcola l'indice corretto nella lista di foto disponibili
-                let availableIndex = allPhotos.prefix(photoIndex + 1).compactMap { $0 }.count - 1
-                MultiPhotoFullscreenView(photos: availablePhotos, initialIndex: max(0, availableIndex))
+                MultiPhotoFullscreenView(photos: availablePhotos, initialIndex: availablePhotoIndex)
             }
         }
     }
