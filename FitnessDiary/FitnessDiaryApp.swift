@@ -13,6 +13,6 @@ struct FitnessDiaryApp: App {
                 ContentView() // La tua vista principale
             }
         }
-        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self, WorkoutCard.self, WorkoutFolder.self, WorkoutExercise.self, WorkoutSet.self])
+        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self, WorkoutCard.self, WorkoutFolder.self, WorkoutBlock.self, WorkoutExerciseItem.self, WorkoutSet.self])
     }
 }

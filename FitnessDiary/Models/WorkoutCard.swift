@@ -10,16 +10,16 @@ final class WorkoutCard: Identifiable {
     var folder: WorkoutFolder?
     var assignedTo: [Client] // array di clienti assegnati (vuoto = scheda del trainer)
     @Relationship(deleteRule: .cascade)
-    var exercises: [WorkoutExercise]
+    var blocks: [WorkoutBlock] // array di blocchi (esercizi singoli o metodologie)
 
-    init(name: String, description: String? = nil, folder: WorkoutFolder? = nil, assignedTo: [Client] = [], exercises: [WorkoutExercise] = []) {
+    init(name: String, description: String? = nil, folder: WorkoutFolder? = nil, assignedTo: [Client] = [], blocks: [WorkoutBlock] = []) {
         self.id = UUID()
         self.name = name
         self.cardDescription = description
         self.createdDate = Date()
         self.folder = folder
         self.assignedTo = assignedTo
-        self.exercises = exercises
+        self.blocks = blocks
     }
 
     // Helper per sapere se la scheda è assegnata
@@ -43,13 +43,26 @@ final class WorkoutCard: Identifiable {
         }
     }
 
-    // Helper per il numero totale di esercizi
+    // Helper per il numero totale di blocchi
+    var totalBlocks: Int {
+        blocks.count
+    }
+
+    // Helper per il numero totale di esercizi (sommando tutti gli esercizi in tutti i blocchi)
     var totalExercises: Int {
-        exercises.count
+        blocks.reduce(0) { $0 + $1.exerciseItems.count }
     }
 
     // Helper per il numero totale di serie
     var totalSets: Int {
-        exercises.reduce(0) { $0 + $1.sets.count }
+        blocks.reduce(0) { total, block in
+            if block.blockType == .method {
+                // Per metodologie, conta le serie globali del blocco
+                return total + block.globalSets
+            } else {
+                // Per esercizi singoli, conta le serie dell'esercizio
+                return total + (block.exerciseItems.first?.sets.count ?? 0)
+            }
+        }
     }
 }

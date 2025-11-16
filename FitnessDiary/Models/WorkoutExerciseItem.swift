@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class WorkoutExercise: Identifiable {
+final class WorkoutExerciseItem: Identifiable {
     var id: UUID
     var order: Int
     var exercise: Exercise? // relationship con l'esercizio dalla libreria
