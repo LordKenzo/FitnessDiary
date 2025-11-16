@@ -159,7 +159,9 @@ struct SetRow: View {
     let exercise: Exercise?
     let oneRepMax: Double?
     var isClusterSet: Bool = false
-    var setTypeSupport: SetTypeSupport = .both
+    var isRestPauseSet: Bool = false
+    var isTabataSet: Bool = false
+    var setTypeSupport: SetTypeSupport = .repsOnly
     var targetParameters: StrengthExpressionParameters? = nil
 
     // Validazione del carico rispetto all'obiettivo
@@ -191,20 +193,10 @@ struct SetRow: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 60, alignment: .leading)
 
-                // Mostra Picker solo se il metodo supporta entrambi i tipi
-                if setTypeSupport == .both {
-                    Picker("Tipo", selection: $set.setType) {
-                        ForEach([SetType.reps, SetType.duration], id: \.self) { type in
-                            Text(type.rawValue).tag(type)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                } else {
-                    // Mostra tipo fisso
-                    Text(set.setType.rawValue)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+                // Mostra tipo fisso (i metodi ora supportano solo un tipo)
+                Text(set.setType.rawValue)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
 
             if set.setType == .reps {
@@ -313,6 +305,18 @@ struct SetRow: View {
                 if isClusterSet {
                     Divider()
                     clusterFields
+                }
+
+                // Campi Rest-Pause
+                if isRestPauseSet {
+                    Divider()
+                    restPauseFields
+                }
+
+                // Campi Tabata
+                if isTabataSet {
+                    Divider()
+                    tabataFields
                 }
             } else {
                 HStack(spacing: 16) {
@@ -543,6 +547,194 @@ struct SetRow: View {
                         Text("Il cluster non può essere maggiore delle ripetizioni")
                             .font(.caption)
                             .foregroundStyle(.orange)
+                    }
+                    Spacer()
+                }
+            }
+        }
+    }
+
+    // MARK: - Rest-Pause Fields
+
+    private var restPauseFields: some View {
+        VStack(spacing: 8) {
+            // Numero di pause
+            HStack(spacing: 16) {
+                Text("Pause")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 60, alignment: .leading)
+
+                Stepper("") {
+                    set.restPauseCount = min(5, (set.restPauseCount ?? 2) + 1)
+                } onDecrement: {
+                    set.restPauseCount = max(1, (set.restPauseCount ?? 2) - 1)
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("\(set.restPauseCount ?? 2)")
+                            .font(.subheadline)
+                        Text("pause")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .frame(width: 120)
+
+                Spacer()
+            }
+
+            // Durata pause
+            HStack(spacing: 16) {
+                Text("Durata")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 60, alignment: .leading)
+
+                HStack(spacing: 4) {
+                    TextField("Sec", value: Binding(
+                        get: {
+                            if let duration = set.restPauseDuration {
+                                return Int(duration)
+                            }
+                            return 15
+                        },
+                        set: { newValue in
+                            set.restPauseDuration = TimeInterval(min(30, max(5, newValue)))
+                        }
+                    ), format: .number)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 50)
+                        .textFieldStyle(.roundedBorder)
+                    Text("sec (5-30)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+
+            // Descrizione rest-pause se valida
+            if let description = set.restPauseDescription {
+                HStack(spacing: 16) {
+                    Spacer()
+                        .frame(width: 60)
+                    Text(description)
+                        .font(.caption)
+                        .foregroundStyle(.blue)
+                    Spacer()
+                }
+            }
+        }
+    }
+
+    // MARK: - Tabata Fields
+
+    private var tabataFields: some View {
+        VStack(spacing: 8) {
+            // Numero di round
+            HStack(spacing: 16) {
+                Text("Round")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 60, alignment: .leading)
+
+                Stepper("") {
+                    set.tabataRounds = min(12, (set.tabataRounds ?? 8) + 1)
+                } onDecrement: {
+                    set.tabataRounds = max(4, (set.tabataRounds ?? 8) - 1)
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("\(set.tabataRounds ?? 8)")
+                            .font(.subheadline)
+                        Text("round")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .frame(width: 120)
+
+                Spacer()
+            }
+
+            // Durata lavoro
+            HStack(spacing: 16) {
+                Text("Lavoro")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 60, alignment: .leading)
+
+                HStack(spacing: 4) {
+                    TextField("Sec", value: Binding(
+                        get: {
+                            if let work = set.tabataWorkDuration {
+                                return Int(work)
+                            }
+                            return 20
+                        },
+                        set: { newValue in
+                            set.tabataWorkDuration = TimeInterval(min(60, max(10, newValue)))
+                        }
+                    ), format: .number)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 50)
+                        .textFieldStyle(.roundedBorder)
+                    Text("sec")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+
+            // Durata recupero
+            HStack(spacing: 16) {
+                Text("Recupero")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 60, alignment: .leading)
+
+                HStack(spacing: 4) {
+                    TextField("Sec", value: Binding(
+                        get: {
+                            if let rest = set.tabataRestDuration {
+                                return Int(rest)
+                            }
+                            return 10
+                        },
+                        set: { newValue in
+                            set.tabataRestDuration = TimeInterval(min(30, max(5, newValue)))
+                        }
+                    ), format: .number)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 50)
+                        .textFieldStyle(.roundedBorder)
+                    Text("sec")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+
+            // Descrizione Tabata e durata totale
+            if let description = set.tabataDescription {
+                HStack(spacing: 16) {
+                    Spacer()
+                        .frame(width: 60)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(description)
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                        if let totalDuration = set.tabataTotalDuration {
+                            let minutes = Int(totalDuration) / 60
+                            let seconds = Int(totalDuration) % 60
+                            Text("Durata totale: \(minutes)'\(seconds)\"")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     Spacer()
                 }

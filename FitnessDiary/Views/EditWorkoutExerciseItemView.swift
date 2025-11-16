@@ -195,14 +195,16 @@ struct EditWorkoutExerciseItemView: View {
     @ViewBuilder
     private var setsList: some View {
         let isCluster = methodType?.requiresClusterManagement ?? false
-        let setTypeSupport = methodType?.supportedSetType ?? .both
+        let isRestPause = methodType?.requiresRestPauseManagement ?? false
+        let isTabata = methodType?.requiresTabataManagement ?? false
+        let setTypeSupport = methodType?.supportedSetType ?? .repsOnly
         if isInMethod {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, isTabataSet: isTabata, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
             }
         } else {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, isTabataSet: isTabata, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
             }
             .onMove(perform: moveSets)
             .onDelete(perform: deleteSets)
