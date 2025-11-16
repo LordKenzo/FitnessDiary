@@ -6,6 +6,7 @@ struct ExerciseListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
     @Query(sort: \Muscle.name) private var muscles: [Muscle]
+    @Query(sort: \Equipment.name) private var equipment: [Equipment]
 
     @State private var showingAddExercise = false
     @State private var selectedExercise: Exercise?
@@ -94,10 +95,10 @@ struct ExerciseListView: View {
             }
         }
         .sheet(isPresented: $showingAddExercise) {
-            AddExerciseView(muscles: muscles)
+            AddExerciseView(muscles: muscles, equipment: equipment)
         }
         .sheet(item: $selectedExercise) { exercise in
-            EditExerciseView(exercise: exercise, muscles: muscles)
+            EditExerciseView(exercise: exercise, muscles: muscles, equipment: equipment)
         }
     }
 
@@ -165,6 +166,19 @@ struct ExerciseRow: View {
                             .font(.caption2)
                             .foregroundStyle(.gray)
                         Text(exercise.secondaryMuscles.map { $0.name }.joined(separator: ", "))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+
+                // Attrezzo
+                if let equipment = exercise.equipment {
+                    HStack(spacing: 4) {
+                        Image(systemName: equipment.category.icon)
+                            .font(.caption2)
+                            .foregroundStyle(.blue)
+                        Text(equipment.name)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
@@ -246,6 +260,7 @@ struct AddExerciseView: View {
     @Environment(\.dismiss) private var dismiss
 
     let muscles: [Muscle]
+    let equipment: [Equipment]
 
     @State private var name = ""
     @State private var description = ""
@@ -254,6 +269,7 @@ struct AddExerciseView: View {
     @State private var youtubeURL = ""
     @State private var selectedPrimaryMuscles: Set<Muscle> = []
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
+    @State private var selectedEquipment: Equipment?
 
     @State private var photoItem1: PhotosPickerItem?
     @State private var photoItem2: PhotosPickerItem?
@@ -285,6 +301,16 @@ struct AddExerciseView: View {
                         ForEach(ExerciseType.allCases, id: \.self) { type in
                             Label(type.rawValue, systemImage: type.icon)
                                 .tag(type)
+                        }
+                    }
+                }
+
+                Section("Attrezzo") {
+                    Picker("Seleziona attrezzo (opzionale)", selection: $selectedEquipment) {
+                        Text("Nessuno").tag(nil as Equipment?)
+                        ForEach(equipment) { item in
+                            Label(item.name, systemImage: item.category.icon)
+                                .tag(item as Equipment?)
                         }
                     }
                 }
@@ -345,7 +371,8 @@ struct AddExerciseView: View {
             exerciseType: exerciseType,
             youtubeURL: youtubeURL.isEmpty ? nil : youtubeURL,
             primaryMuscles: Array(selectedPrimaryMuscles),
-            secondaryMuscles: Array(selectedSecondaryMuscles)
+            secondaryMuscles: Array(selectedSecondaryMuscles),
+            equipment: selectedEquipment
         )
         modelContext.insert(exercise)
         dismiss()
@@ -358,6 +385,7 @@ struct EditExerciseView: View {
 
     @Bindable var exercise: Exercise
     let muscles: [Muscle]
+    let equipment: [Equipment]
 
     @State private var selectedPrimaryMuscles: Set<Muscle> = []
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
@@ -390,6 +418,16 @@ struct EditExerciseView: View {
                         ForEach(ExerciseType.allCases, id: \.self) { type in
                             Label(type.rawValue, systemImage: type.icon)
                                 .tag(type)
+                        }
+                    }
+                }
+
+                Section("Attrezzo") {
+                    Picker("Seleziona attrezzo (opzionale)", selection: $exercise.equipment) {
+                        Text("Nessuno").tag(nil as Equipment?)
+                        ForEach(equipment) { item in
+                            Label(item.name, systemImage: item.category.icon)
+                                .tag(item as Equipment?)
                         }
                     }
                 }
@@ -558,5 +596,5 @@ struct PhotoEditorRow: View {
     NavigationStack {
         ExerciseListView()
     }
-    .modelContainer(for: [Exercise.self, Muscle.self], inMemory: true)
+    .modelContainer(for: [Exercise.self, Muscle.self, Equipment.self], inMemory: true)
 }

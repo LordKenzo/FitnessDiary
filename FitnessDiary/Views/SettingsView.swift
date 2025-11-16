@@ -37,7 +37,13 @@ struct SettingsView: View {
                     } label: {
                         Label("Muscoli", systemImage: "figure.arms.open")
                     }
-                    
+
+                    NavigationLink {
+                        EquipmentListView()
+                    } label: {
+                        Label("Attrezzi", systemImage: "dumbbell")
+                    }
+
                     NavigationLink {
                         ExerciseListView()
                     } label: {
@@ -52,5 +58,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
-        .modelContainer(for: [UserProfile.self, Muscle.self, Exercise.self], inMemory: true)
+        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self], inMemory: true)
 }

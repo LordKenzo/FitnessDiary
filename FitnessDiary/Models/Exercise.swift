@@ -23,6 +23,9 @@ final class Exercise: Identifiable {
     var primaryMuscles: [Muscle]
     var secondaryMuscles: [Muscle]
 
+    // Attrezzo primario (opzionale)
+    var equipment: Equipment?
+
     init(
         id: UUID = UUID(),
         name: String,
@@ -34,7 +37,8 @@ final class Exercise: Identifiable {
         exerciseType: ExerciseType,
         youtubeURL: String? = nil,
         primaryMuscles: [Muscle] = [],
-        secondaryMuscles: [Muscle] = []
+        secondaryMuscles: [Muscle] = [],
+        equipment: Equipment? = nil
     ) {
         self.id = id
         self.name = name
@@ -47,6 +51,7 @@ final class Exercise: Identifiable {
         self.youtubeURL = youtubeURL
         self.primaryMuscles = primaryMuscles
         self.secondaryMuscles = secondaryMuscles
+        self.equipment = equipment
     }
 
     // Helper per ottenere le foto come UIImage
