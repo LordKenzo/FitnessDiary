@@ -146,17 +146,38 @@ struct ExerciseListView: View {
 
 struct ExerciseRow: View {
     let exercise: Exercise
+    @State private var showingFullscreenPhoto = false
 
     var body: some View {
         HStack(spacing: 12) {
             // Anteprima foto o placeholder
             if let photoData = exercise.photo1Data,
                let uiImage = UIImage(data: photoData) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                Button {
+                    showingFullscreenPhoto = true
+                } label: {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.blue.opacity(0.2), lineWidth: 1)
+                        )
+                        .overlay(alignment: .bottomTrailing) {
+                            Image(systemName: "eye.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.white)
+                                .background(
+                                    Circle()
+                                        .fill(.blue)
+                                        .frame(width: 16, height: 16)
+                                )
+                                .offset(x: 2, y: 2)
+                        }
+                }
+                .buttonStyle(.plain)
             } else {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.gray.opacity(0.2))
@@ -253,6 +274,11 @@ struct ExerciseRow: View {
             }
         }
         .padding(.vertical, 4)
+        .fullScreenCover(isPresented: $showingFullscreenPhoto) {
+            if let photoData = exercise.photo1Data {
+                FullscreenPhotoView(imageData: photoData)
+            }
+        }
     }
 }
 
@@ -643,17 +669,23 @@ struct EditExerciseView: View {
                     PhotoEditorRow(
                         title: "Foto 1",
                         item: $photoItem1,
-                        currentData: $exercise.photo1Data
+                        currentData: $exercise.photo1Data,
+                        allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
+                        photoIndex: 0
                     )
                     PhotoEditorRow(
                         title: "Foto 2",
                         item: $photoItem2,
-                        currentData: $exercise.photo2Data
+                        currentData: $exercise.photo2Data,
+                        allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
+                        photoIndex: 1
                     )
                     PhotoEditorRow(
                         title: "Foto 3",
                         item: $photoItem3,
-                        currentData: $exercise.photo3Data
+                        currentData: $exercise.photo3Data,
+                        allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
+                        photoIndex: 2
                     )
                 }
 
@@ -840,28 +872,214 @@ struct AddVariantView: View {
     }
 }
 
+// MARK: - Fullscreen Photo Viewer
+struct FullscreenPhotoView: View {
+    @Environment(\.dismiss) private var dismiss
+    let imageData: Data
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            if let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+                    .scaleEffect(scale)
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { value in
+                                scale = lastScale * value
+                            }
+                            .onEnded { _ in
+                                lastScale = scale
+                                // Reset if zoomed out too much
+                                if scale < 1.0 {
+                                    withAnimation {
+                                        scale = 1.0
+                                        lastScale = 1.0
+                                    }
+                                }
+                                // Limit max zoom
+                                if scale > 4.0 {
+                                    withAnimation {
+                                        scale = 4.0
+                                        lastScale = 4.0
+                                    }
+                                }
+                            }
+                    )
+                    .onTapGesture(count: 2) {
+                        // Double tap to reset zoom
+                        withAnimation {
+                            scale = 1.0
+                            lastScale = 1.0
+                        }
+                    }
+            }
+
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title)
+                            .foregroundStyle(.white)
+                            .shadow(radius: 3)
+                    }
+                    .padding()
+                }
+                Spacer()
+            }
+        }
+    }
+}
+
+// MARK: - Multi-Photo Fullscreen Viewer
+struct MultiPhotoFullscreenView: View {
+    @Environment(\.dismiss) private var dismiss
+    let photos: [Data]
+    let initialIndex: Int
+    @State private var currentIndex: Int
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+
+    init(photos: [Data], initialIndex: Int = 0) {
+        self.photos = photos
+        self.initialIndex = initialIndex
+        _currentIndex = State(initialValue: initialIndex)
+    }
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            TabView(selection: $currentIndex) {
+                ForEach(Array(photos.enumerated()), id: \.offset) { index, photoData in
+                    if let uiImage = UIImage(data: photoData) {
+                        GeometryReader { geometry in
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: geometry.size.width, height: geometry.size.height)
+                                .scaleEffect(scale)
+                                .gesture(
+                                    MagnificationGesture()
+                                        .onChanged { value in
+                                            scale = lastScale * value
+                                        }
+                                        .onEnded { _ in
+                                            lastScale = scale
+                                            if scale < 1.0 {
+                                                withAnimation {
+                                                    scale = 1.0
+                                                    lastScale = 1.0
+                                                }
+                                            }
+                                            if scale > 4.0 {
+                                                withAnimation {
+                                                    scale = 4.0
+                                                    lastScale = 4.0
+                                                }
+                                            }
+                                        }
+                                )
+                                .onTapGesture(count: 2) {
+                                    withAnimation {
+                                        scale = 1.0
+                                        lastScale = 1.0
+                                    }
+                                }
+                        }
+                    }
+                    .tag(index)
+                }
+            }
+            .tabViewStyle(.page)
+            .indexViewStyle(.page(backgroundDisplayMode: .always))
+            .onChange(of: currentIndex) { _, _ in
+                // Reset zoom when changing photo
+                scale = 1.0
+                lastScale = 1.0
+            }
+
+            VStack {
+                HStack {
+                    if photos.count > 1 {
+                        Text("\(currentIndex + 1) / \(photos.count)")
+                            .font(.caption)
+                            .foregroundStyle(.white)
+                            .padding(8)
+                            .background(
+                                Capsule()
+                                    .fill(.black.opacity(0.5))
+                            )
+                            .padding()
+                    }
+
+                    Spacer()
+
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title)
+                            .foregroundStyle(.white)
+                            .shadow(radius: 3)
+                    }
+                    .padding()
+                }
+                Spacer()
+            }
+        }
+    }
+}
+
 // Helper view per PhotoPicker nella AddExerciseView
 struct PhotoPickerRow: View {
     let title: String
     @Binding var item: PhotosPickerItem?
     @Binding var photoData: Data?
+    @State private var showingFullscreen = false
 
     var body: some View {
         HStack {
             if let data = photoData, let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                Button {
+                    showingFullscreen = true
+                } label: {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                    Button("Rimuovi", role: .destructive) {
-                        photoData = nil
-                        item = nil
+                    HStack(spacing: 12) {
+                        Button {
+                            showingFullscreen = true
+                        } label: {
+                            Label("Visualizza", systemImage: "eye")
+                                .font(.caption)
+                        }
+
+                        Button("Rimuovi", role: .destructive) {
+                            photoData = nil
+                            item = nil
+                        }
+                        .font(.caption)
                     }
-                    .font(.caption)
                 }
             } else {
                 PhotosPicker(selection: $item, matching: .images) {
@@ -876,6 +1094,11 @@ struct PhotoPickerRow: View {
                 }
             }
         }
+        .fullScreenCover(isPresented: $showingFullscreen) {
+            if let data = photoData {
+                FullscreenPhotoView(imageData: data)
+            }
+        }
     }
 }
 
@@ -884,23 +1107,44 @@ struct PhotoEditorRow: View {
     let title: String
     @Binding var item: PhotosPickerItem?
     @Binding var currentData: Data?
+    let allPhotos: [Data?]
+    let photoIndex: Int
+    @State private var showingFullscreen = false
 
     var body: some View {
         HStack {
             if let data = currentData, let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                Button {
+                    showingFullscreen = true
+                } label: {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                    Button("Rimuovi", role: .destructive) {
-                        currentData = nil
-                        item = nil
+                    HStack(spacing: 12) {
+                        Button {
+                            showingFullscreen = true
+                        } label: {
+                            Label("Visualizza", systemImage: "eye")
+                                .font(.caption)
+                        }
+
+                        Button("Rimuovi", role: .destructive) {
+                            currentData = nil
+                            item = nil
+                        }
+                        .font(.caption)
                     }
-                    .font(.caption)
                 }
             } else {
                 PhotosPicker(selection: $item, matching: .images) {
@@ -913,6 +1157,14 @@ struct PhotoEditorRow: View {
                 if let data = try? await newValue?.loadTransferable(type: Data.self) {
                     currentData = data
                 }
+            }
+        }
+        .fullScreenCover(isPresented: $showingFullscreen) {
+            let availablePhotos = allPhotos.compactMap { $0 }
+            if !availablePhotos.isEmpty {
+                // Calcola l'indice corretto nella lista di foto disponibili
+                let availableIndex = allPhotos.prefix(photoIndex + 1).compactMap { $0 }.count - 1
+                MultiPhotoFullscreenView(photos: availablePhotos, initialIndex: max(0, availableIndex))
             }
         }
     }
