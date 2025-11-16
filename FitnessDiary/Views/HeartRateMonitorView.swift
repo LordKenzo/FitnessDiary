@@ -268,6 +268,7 @@ struct HeartRateMonitorView: View {
         guard let profile = userProfile else { return nil }
         
         let hr = bluetoothManager.currentHeartRate
+        guard hr > 0 else { return nil }
         
         if hr <= profile.zone1Max {
             return .zone1
@@ -281,6 +282,8 @@ struct HeartRateMonitorView: View {
             return .zone5
         }
     }
+
+
     
     private var currentZoneColor: Color {
         currentZone?.color ?? .gray

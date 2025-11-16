@@ -16,6 +16,10 @@ final class BluetoothHeartRateManager: NSObject {
     private var centralManager: CBCentralManager!
     private var connectedPeripheral: CBPeripheral?
     
+    // Timeout gestione connessione
+    private var connectionTimer: Timer?
+    private let connectionTimeout: TimeInterval = 10.0
+    
     private let heartRateServiceUUID = CBUUID(string: "180D")  // Heart Rate Service
     private let heartRateCharacteristicUUID = CBUUID(string: "2A37") // Heart Rate Measurement
     
@@ -52,11 +56,23 @@ final class BluetoothHeartRateManager: NSObject {
         stopScanning()
         
         guard let peripheral = discoveredDevices.first(where: { $0.id == device.id })?.peripheral else {
-            errorMessage = "Dispositivo non trovato"
+            errorMessage = NSLocalizedString("bluetooth.device_not_found",
+                                             value: "Dispositivo non trovato",
+                                             comment: "Device not found error")
             return
         }
         
         connectionStatus = .connecting
+        
+        connectionTimer?.invalidate()
+        connectionTimer = Timer.scheduledTimer(
+            timeInterval: connectionTimeout,
+            target: self,
+            selector: #selector(handleConnectionTimeoutTimer(_:)),
+            userInfo: peripheral.identifier,   // passiamo solo l'UUID
+            repeats: false
+        )
+        
         centralManager.connect(peripheral, options: nil)
     }
     
@@ -64,6 +80,8 @@ final class BluetoothHeartRateManager: NSObject {
         guard let peripheral = connectedPeripheral else { return }
         centralManager.cancelPeripheralConnection(peripheral)
     }
+    
+    
 }
 
 // MARK: - CBCentralManagerDelegate
@@ -112,13 +130,14 @@ extension BluetoothHeartRateManager: CBCentralManagerDelegate {
         _ central: CBCentralManager,
         didConnect peripheral: CBPeripheral
     ) {
+        connectionTimer?.invalidate()
+        
         connectedPeripheral = peripheral
         peripheral.delegate = self
         connectionStatus = .connected
         isConnected = true
         errorMessage = nil
         
-        // Scopri i servizi (in particolare Heart Rate)
         peripheral.discoverServices([heartRateServiceUUID])
     }
     
@@ -127,9 +146,15 @@ extension BluetoothHeartRateManager: CBCentralManagerDelegate {
         didFailToConnect peripheral: CBPeripheral,
         error: Error?
     ) {
+        connectionTimer?.invalidate()
+        
         connectionStatus = .disconnected
         isConnected = false
-        errorMessage = "Connessione fallita: \(error?.localizedDescription ?? "Errore sconosciuto")"
+        errorMessage = NSLocalizedString(
+            "bluetooth.connection_failed",
+            value: "Connessione fallita: \(error?.localizedDescription ?? "Errore sconosciuto")",
+            comment: "Bluetooth connection failed"
+        )
     }
     
     func centralManager(
@@ -137,13 +162,19 @@ extension BluetoothHeartRateManager: CBCentralManagerDelegate {
         didDisconnectPeripheral peripheral: CBPeripheral,
         error: Error?
     ) {
+        connectionTimer?.invalidate()
+        
         connectedPeripheral = nil
         connectionStatus = .disconnected
         isConnected = false
         currentHeartRate = 0
         
         if let error = error {
-            errorMessage = "Disconnesso: \(error.localizedDescription)"
+            errorMessage = NSLocalizedString(
+                "bluetooth.disconnected_with_error",
+                value: "Disconnesso: \(error.localizedDescription)",
+                comment: "Bluetooth disconnected with error"
+            )
         }
     }
 }
@@ -218,6 +249,44 @@ extension BluetoothHeartRateManager: CBPeripheralDelegate {
         
         return 0
     }
+    
+    private func handleConnectionTimeout(_ peripheral: CBPeripheral) {
+        // Se nel frattempo si è connesso/disconnesso, non fare nulla
+        guard connectionStatus == .connecting else { return }
+        
+        centralManager.cancelPeripheralConnection(peripheral)
+        connectionStatus = .disconnected
+        isConnected = false
+        
+        errorMessage = NSLocalizedString(
+            "bluetooth.connection_timeout",
+            value: "Timeout di connessione",
+            comment: "Bluetooth connection timeout error"
+        )
+    }
+    
+    @objc private func handleConnectionTimeoutTimer(_ timer: Timer) {
+        // Siamo sul main runloop → ok per UI / stato
+        guard connectionStatus == .connecting else { return }
+        
+        guard
+            let deviceID = timer.userInfo as? UUID,
+            let peripheral = discoveredDevices.first(where: { $0.id == deviceID })?.peripheral
+        else {
+            return
+        }
+        
+        centralManager.cancelPeripheralConnection(peripheral)
+        connectionStatus = .disconnected
+        isConnected = false
+        
+        errorMessage = NSLocalizedString(
+            "bluetooth.connection_timeout",
+            value: "Timeout di connessione",
+            comment: "Bluetooth connection timeout error"
+        )
+    }
+
 }
 
 // MARK: - Supporting Types
@@ -252,12 +321,28 @@ enum ConnectionStatus {
     
     var description: String {
         switch self {
-        case .disconnected: return "Disconnesso"
-        case .connecting:   return "Connessione in corso..."
-        case .connected:    return "Connesso"
+        case .disconnected:
+            return NSLocalizedString(
+                "connection.disconnected",
+                value: "Disconnesso",
+                comment: "Connection state: disconnected"
+            )
+        case .connecting:
+            return NSLocalizedString(
+                "connection.connecting",
+                value: "Connessione in corso...",
+                comment: "Connection state: connecting"
+            )
+        case .connected:
+            return NSLocalizedString(
+                "connection.connected",
+                value: "Connesso",
+                comment: "Connection state: connected"
+            )
         }
     }
 }
+
 
 extension CBManagerState {
     var description: String {
