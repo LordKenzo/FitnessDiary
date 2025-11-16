@@ -58,7 +58,7 @@ extension WorkoutSetData {
 
     // Helper per formattare la descrizione del cluster
     var clusterDescription: String? {
-        guard let totalReps = reps,
+        guard reps != nil,
               let clusterSize = clusterSize,
               let clusters = numberOfClusters,
               let restTime = clusterRestTime else {
