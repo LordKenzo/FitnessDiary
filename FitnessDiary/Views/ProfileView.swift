@@ -82,7 +82,7 @@ struct ProfileDetailView: View {
 
             Section("Massimali 1RM") {
                 NavigationLink {
-                    OneRepMaxView(oneRepMaxRecords: $profile.oneRepMaxRecords)
+                    OneRepMaxView(records: $profile.oneRepMaxRecords)
                 } label: {
                     HStack {
                         Label("Gestisci Massimali", systemImage: "figure.strengthtraining.traditional")

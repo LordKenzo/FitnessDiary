@@ -387,7 +387,7 @@ struct EditClientView: View {
 
                 Section("Massimali 1RM") {
                     NavigationLink {
-                        OneRepMaxView(oneRepMaxRecords: $client.oneRepMaxRecords)
+                        OneRepMaxView(records: $client.oneRepMaxRecords)
                     } label: {
                         HStack {
                             Label("Gestisci Massimali", systemImage: "figure.strengthtraining.traditional")
