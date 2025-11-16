@@ -1,6 +1,9 @@
 import Foundation
 import SwiftData
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 @Model
 final class WorkoutFolder: Identifiable {
@@ -52,6 +55,7 @@ extension Color {
     }
 
     func toHex() -> String? {
+        #if canImport(UIKit)
         guard let components = UIColor(self).cgColor.components, components.count >= 3 else {
             return nil
         }
@@ -59,5 +63,9 @@ extension Color {
         let g = Float(components[1])
         let b = Float(components[2])
         return String(format: "#%02lX%02lX%02lX", lroundf(r * 255), lroundf(g * 255), lroundf(b * 255))
+        #else
+        // Fallback per piattaforme senza UIKit
+        return nil
+        #endif
     }
 }
