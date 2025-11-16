@@ -39,7 +39,7 @@ struct SettingsView: View {
                     }
                     
                     NavigationLink {
-                        Text("Esercizi") // ExercisesView in futuro
+                        ExerciseListView()
                     } label: {
                         Label("Esercizi", systemImage: "figure.strengthtraining.traditional")
                     }
@@ -52,5 +52,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
-        .modelContainer(for: [UserProfile.self, Muscle.self], inMemory: true)
+        .modelContainer(for: [UserProfile.self, Muscle.self, Exercise.self], inMemory: true)
 }

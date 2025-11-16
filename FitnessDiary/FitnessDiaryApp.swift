@@ -7,6 +7,6 @@ struct FitnessDiaryApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [UserProfile.self, Muscle.self])
+        .modelContainer(for: [UserProfile.self, Muscle.self, Exercise.self])
     }
 }
