@@ -133,14 +133,6 @@ struct MultiPhotoFullscreenView: View {
                 lastScale = 1.0
             }
 
-            .tabViewStyle(.page)
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
-            .onChange(of: currentIndex) {
-                // Reset zoom when changing photo
-                scale = 1.0
-                lastScale = 1.0
-            }
-            
             VStack {
                 HStack {
                     if photos.count > 1 {
