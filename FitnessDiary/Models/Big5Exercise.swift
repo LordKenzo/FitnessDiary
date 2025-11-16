@@ -20,7 +20,7 @@ enum Big5Exercise: String, Codable, CaseIterable, Identifiable {
         case .hipThrust:
             return "figure.strengthtraining.traditional"
         case .squat:
-            return "figure.squat"
+            return "figure.strengthtraining.traditional"
         }
     }
 
