@@ -6,6 +6,7 @@ final class WorkoutExercise: Identifiable {
     var id: UUID
     var order: Int
     var exercise: Exercise? // relationship con l'esercizio dalla libreria
+    @Relationship(deleteRule: .cascade)
     var sets: [WorkoutSet]
     var notes: String?
     var restTime: TimeInterval? // tempo di recupero tra le serie in secondi

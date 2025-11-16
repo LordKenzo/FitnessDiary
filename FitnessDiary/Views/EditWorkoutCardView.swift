@@ -195,7 +195,11 @@ struct EditWorkoutCardView: View {
         card.folder = selectedFolder
         card.assignedTo = selectedClients
 
-        // Rimuovi tutti gli esercizi esistenti
+        // Elimina esplicitamente tutti gli esercizi esistenti dal database
+        // (anche se @Relationship(deleteRule: .cascade) dovrebbe gestirlo automaticamente)
+        for exercise in card.exercises {
+            modelContext.delete(exercise)
+        }
         card.exercises.removeAll()
 
         // Ricrea gli esercizi dalla lista modificata

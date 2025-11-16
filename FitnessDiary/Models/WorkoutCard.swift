@@ -9,6 +9,7 @@ final class WorkoutCard: Identifiable {
     var createdDate: Date
     var folder: WorkoutFolder?
     var assignedTo: [Client] // array di clienti assegnati (vuoto = scheda del trainer)
+    @Relationship(deleteRule: .cascade)
     var exercises: [WorkoutExercise]
 
     init(name: String, description: String? = nil, folder: WorkoutFolder? = nil, assignedTo: [Client] = [], exercises: [WorkoutExercise] = []) {
