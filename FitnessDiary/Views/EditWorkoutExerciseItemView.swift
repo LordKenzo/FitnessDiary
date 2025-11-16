@@ -3,7 +3,7 @@ import SwiftData
 
 struct EditWorkoutExerciseItemView: View {
     @Environment(\.dismiss) private var dismiss
-    @Query private var profiles: [UserProfile]
+    @Environment(\.modelContext) private var modelContext
     @Binding var exerciseItemData: WorkoutExerciseItemData
     let exercises: [Exercise]
     let isInMethod: Bool // se true, nasconde il tempo di recupero (gestito dal blocco)
@@ -13,9 +13,10 @@ struct EditWorkoutExerciseItemView: View {
     @State private var restMinutes: Int
     @State private var restSeconds: Int
     @State private var showingExercisePicker = false
+    @State private var userProfile: UserProfile?
 
     private var oneRepMax: Double? {
-        guard let profile = profiles.first,
+        guard let profile = userProfile,
               let big5 = exerciseItemData.exercise.big5Exercise else {
             return nil
         }
@@ -137,6 +138,14 @@ struct EditWorkoutExerciseItemView: View {
             }
         }
         .toolbar(content: toolbarContent)
+        .onAppear {
+            loadUserProfile()
+        }
+    }
+
+    private func loadUserProfile() {
+        let descriptor = FetchDescriptor<UserProfile>()
+        userProfile = try? modelContext.fetch(descriptor).first
     }
 
     @ToolbarContentBuilder
