@@ -135,9 +135,30 @@ struct AddExerciseView: View {
                 }
 
                 Section("Foto (Max 3)") {
-                    PhotoPickerRow(title: "Foto 1", item: $photoItem1, photoData: $photoData1)
-                    PhotoPickerRow(title: "Foto 2", item: $photoItem2, photoData: $photoData2)
-                    PhotoPickerRow(title: "Foto 3", item: $photoItem3, photoData: $photoData3)
+                    PhotoPickerRow(
+                        title: "Foto 1",
+                        item: $photoItem1,
+                        photoData: $photoData1,
+                        photoData1: photoData1,
+                        photoData2: photoData2,
+                        photoData3: photoData3
+                    )
+                    PhotoPickerRow(
+                        title: "Foto 2",
+                        item: $photoItem2,
+                        photoData: $photoData2,
+                        photoData1: photoData1,
+                        photoData2: photoData2,
+                        photoData3: photoData3
+                    )
+                    PhotoPickerRow(
+                        title: "Foto 3",
+                        item: $photoItem3,
+                        photoData: $photoData3,
+                        photoData1: photoData1,
+                        photoData2: photoData2,
+                        photoData3: photoData3
+                    )
                 }
 
                 Section("Video") {
@@ -191,8 +212,11 @@ struct PhotoPickerRow: View {
     let title: String
     @Binding var item: PhotosPickerItem?
     @Binding var photoData: Data?
+    let photoData1: Data?
+    let photoData2: Data?
+    let photoData3: Data?
     @State private var showingFullscreen = false
-
+    
     var body: some View {
         HStack {
             if let data = photoData, let uiImage = UIImage(data: data) {
@@ -210,7 +234,7 @@ struct PhotoPickerRow: View {
                         )
                 }
                 .buttonStyle(.plain)
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                     HStack(spacing: 12) {
@@ -220,18 +244,20 @@ struct PhotoPickerRow: View {
                             Label("Visualizza", systemImage: "eye")
                                 .font(.caption)
                         }
-
-                        Button("Rimuovi", role: .destructive) {
-                            photoData = nil
-                            item = nil
-                        }
-                        .font(.caption)
                     }
                 }
             } else {
                 PhotosPicker(selection: $item, matching: .images) {
                     Label(title, systemImage: "photo")
                 }
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                photoData = nil
+                item = nil
+            } label: {
+                Label("Elimina", systemImage: "trash")
             }
         }
         .onChange(of: item) { _, newValue in
@@ -242,7 +268,11 @@ struct PhotoPickerRow: View {
             }
         }
         .fullScreenCover(isPresented: $showingFullscreen) {
-            if let data = photoData {
+            let allPhotos = [photoData1, photoData2, photoData3].compactMap { $0 }
+            
+            if allPhotos.count > 1, let currentIndex = allPhotos.firstIndex(of: photoData!) {
+                MultiPhotoFullscreenView(photos: allPhotos, initialIndex: currentIndex)
+            } else if let data = photoData {
                 FullscreenPhotoView(imageData: data)
             }
         }

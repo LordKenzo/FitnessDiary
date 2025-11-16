@@ -6,11 +6,11 @@ struct FullscreenPhotoView: View {
     let imageData: Data
     @State private var scale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
-
+    
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-
+            
             if let uiImage = UIImage(data: imageData) {
                 Image(uiImage: uiImage)
                     .resizable()
@@ -23,14 +23,12 @@ struct FullscreenPhotoView: View {
                             }
                             .onEnded { _ in
                                 lastScale = scale
-                                // Reset if zoomed out too much
                                 if scale < 1.0 {
                                     withAnimation {
                                         scale = 1.0
                                         lastScale = 1.0
                                     }
                                 }
-                                // Limit max zoom
                                 if scale > 4.0 {
                                     withAnimation {
                                         scale = 4.0
@@ -40,14 +38,13 @@ struct FullscreenPhotoView: View {
                             }
                     )
                     .onTapGesture(count: 2) {
-                        // Double tap to reset zoom
                         withAnimation {
                             scale = 1.0
                             lastScale = 1.0
                         }
                     }
             }
-
+            
             VStack {
                 HStack {
                     Spacer()
@@ -72,23 +69,24 @@ struct MultiPhotoFullscreenView: View {
     @Environment(\.dismiss) private var dismiss
     let photos: [Data]
     let initialIndex: Int
+    
     @State private var currentIndex: Int
     @State private var scale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
-
+    
     init(photos: [Data], initialIndex: Int = 0) {
         self.photos = photos
         self.initialIndex = initialIndex
         _currentIndex = State(initialValue: initialIndex)
     }
-
+    
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-
+            
             TabView(selection: $currentIndex) {
-                ForEach(photos.indices, id: \.self) { index in
-                    if let uiImage = UIImage(data: photos[index]) {
+                ForEach(Array(photos.enumerated()), id: \.offset) { (index: Int, data: Data) in
+                    if let uiImage = UIImage(data: data) {
                         GeometryReader { geometry in
                             Image(uiImage: uiImage)
                                 .resizable()
@@ -123,18 +121,26 @@ struct MultiPhotoFullscreenView: View {
                                     }
                                 }
                         }
+                        .tag(index)
                     }
-                    .tag(index)
                 }
             }
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))
-            .onChange(of: currentIndex) { _, _ in
+            .onChange(of: currentIndex) {
                 // Reset zoom when changing photo
                 scale = 1.0
                 lastScale = 1.0
             }
 
+            .tabViewStyle(.page)
+            .indexViewStyle(.page(backgroundDisplayMode: .always))
+            .onChange(of: currentIndex) {
+                // Reset zoom when changing photo
+                scale = 1.0
+                lastScale = 1.0
+            }
+            
             VStack {
                 HStack {
                     if photos.count > 1 {
@@ -148,9 +154,9 @@ struct MultiPhotoFullscreenView: View {
                             )
                             .padding()
                     }
-
+                    
                     Spacer()
-
+                    
                     Button {
                         dismiss()
                     } label: {

@@ -375,7 +375,7 @@ struct PhotoEditorRow: View {
                         )
                 }
                 .buttonStyle(.plain)
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                     HStack(spacing: 12) {
@@ -385,12 +385,6 @@ struct PhotoEditorRow: View {
                             Label("Visualizza", systemImage: "eye")
                                 .font(.caption)
                         }
-
-                        Button("Rimuovi", role: .destructive) {
-                            currentData = nil
-                            item = nil
-                        }
-                        .font(.caption)
                     }
                 }
             } else {
@@ -399,6 +393,15 @@ struct PhotoEditorRow: View {
                 }
             }
         }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                currentData = nil
+                item = nil
+            } label: {
+                Label("Elimina", systemImage: "trash")
+            }
+        }
+
         .onChange(of: item) { _, newValue in
             Task {
                 if let data = try? await newValue?.loadTransferable(type: Data.self) {

@@ -7,7 +7,6 @@ struct ExerciseListView: View {
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
     @Query(sort: \Muscle.name) private var muscles: [Muscle]
     @Query(sort: \Equipment.name) private var equipment: [Equipment]
-
     @State private var showingAddExercise = false
     @State private var selectedExercise: Exercise?
     @State private var searchText = ""
@@ -15,7 +14,8 @@ struct ExerciseListView: View {
     @State private var filterBiomechanicalStructure: BiomechanicalStructure?
     @State private var filterTrainingRole: TrainingRole?
     @State private var filterCategory: ExerciseCategory?
-
+    @State private var filterPrimaryMuscle: Muscle?
+    
     private var filteredExercises: [Exercise] {
         exercises.filter { exercise in
             let matchesSearch = searchText.isEmpty || exercise.name.localizedCaseInsensitiveContains(searchText)
@@ -23,10 +23,11 @@ struct ExerciseListView: View {
             let matchesBiomechanical = filterBiomechanicalStructure == nil || exercise.biomechanicalStructure == filterBiomechanicalStructure
             let matchesRole = filterTrainingRole == nil || exercise.trainingRole == filterTrainingRole
             let matchesCategory = filterCategory == nil || exercise.category == filterCategory
-            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory
+            let matchesPrimaryMuscle = filterPrimaryMuscle == nil || exercise.primaryMuscles.contains(where: { $0.id == filterPrimaryMuscle!.id })
+            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory && matchesPrimaryMuscle
         }
     }
-
+    
     var body: some View {
         List {
             if exercises.isEmpty {
@@ -54,71 +55,16 @@ struct ExerciseListView: View {
         .searchable(text: $searchText, prompt: "Cerca esercizio")
         .navigationTitle("Esercizi")
         .toolbar {
+            ToolbarItemGroup(placement: .topBarLeading) {
+                muscleFilterMenu()
+                otherFiltersMenu()
+            }
+            
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingAddExercise = true
                 } label: {
                     Image(systemName: "plus")
-                }
-            }
-
-            ToolbarItem(placement: .topBarLeading) {
-                Menu {
-                    Section("Metabolismo Primario") {
-                        Button(action: { filterPrimaryMetabolism = nil }) {
-                            Label("Tutti", systemImage: filterPrimaryMetabolism == nil ? "checkmark" : "")
-                        }
-                        ForEach(PrimaryMetabolism.allCases, id: \.self) { type in
-                            Button(action: { filterPrimaryMetabolism = type }) {
-                                Label(type.rawValue, systemImage: filterPrimaryMetabolism == type ? "checkmark" : type.icon)
-                            }
-                        }
-                    }
-
-                    Section("Struttura Biomeccanica") {
-                        Button(action: { filterBiomechanicalStructure = nil }) {
-                            Label("Tutti", systemImage: filterBiomechanicalStructure == nil ? "checkmark" : "")
-                        }
-                        ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
-                            Button(action: { filterBiomechanicalStructure = type }) {
-                                Label(type.rawValue, systemImage: filterBiomechanicalStructure == type ? "checkmark" : type.icon)
-                            }
-                        }
-                    }
-
-                    Section("Ruolo nell'Allenamento") {
-                        Button(action: { filterTrainingRole = nil }) {
-                            Label("Tutti", systemImage: filterTrainingRole == nil ? "checkmark" : "")
-                        }
-                        ForEach(TrainingRole.allCases, id: \.self) { role in
-                            Button(action: { filterTrainingRole = role }) {
-                                Label(role.rawValue, systemImage: filterTrainingRole == role ? "checkmark" : role.icon)
-                            }
-                        }
-                    }
-
-                    Section("Categoria") {
-                        Button(action: { filterCategory = nil }) {
-                            Label("Tutti", systemImage: filterCategory == nil ? "checkmark" : "")
-                        }
-                        ForEach(ExerciseCategory.allCases, id: \.self) { category in
-                            Button(action: { filterCategory = category }) {
-                                Label(category.rawValue, systemImage: filterCategory == category ? "checkmark" : category.icon)
-                            }
-                        }
-                    }
-
-                    if filterPrimaryMetabolism != nil || filterBiomechanicalStructure != nil || filterTrainingRole != nil || filterCategory != nil {
-                        Divider()
-                        Button("Rimuovi Filtri", role: .destructive) {
-                            filterPrimaryMetabolism = nil
-                            filterBiomechanicalStructure = nil
-                            filterTrainingRole = nil
-                            filterCategory = nil
-                        }
-                    }
-                } label: {
-                    Image(systemName: "line.3.horizontal.decrease.circle")
                 }
             }
         }
@@ -129,20 +75,127 @@ struct ExerciseListView: View {
             EditExerciseView(exercise: exercise, muscles: muscles, equipment: equipment)
         }
     }
-
+    
     private func deleteExercises(at offsets: IndexSet) {
         for index in offsets {
             let exerciseToDelete = filteredExercises[index]
-
-            // Rimuovi questo esercizio da tutte le varianti degli altri esercizi
             for variant in exerciseToDelete.variants {
                 variant.variants.removeAll { $0.id == exerciseToDelete.id }
             }
-
             modelContext.delete(exerciseToDelete)
         }
     }
+    
+    @ViewBuilder
+    private func muscleFilterMenu() -> some View {
+        Menu {
+            Button(action: { filterPrimaryMuscle = nil }) {
+                Label("Tutti i muscoli", systemImage: filterPrimaryMuscle == nil ? "checkmark" : "")
+            }
+            ForEach(muscles) { muscle in
+                Button(action: { filterPrimaryMuscle = muscle }) {
+                    Label(muscle.name, systemImage: filterPrimaryMuscle?.id == muscle.id ? "checkmark" : "figure.strengthtraining.traditional")
+                }
+            }
+        } label: {
+            Image(systemName: "figure.strengthtraining.traditional")
+        }
+    }
+
+    
+    @ViewBuilder
+    private func otherFiltersMenu() -> some View {
+        Menu {
+            Section("Metabolismo Primario") {
+                metabolismFilterSection()
+            }
+            Section("Struttura Biomeccanica") {
+                biomechanicalStructureFilterSection()
+            }
+            Section("Ruolo nell'Allenamento") {
+                trainingRoleFilterSection()
+            }
+            Section("Categoria") {
+                categoryFilterSection()
+            }
+            if isAnyFilterActive() {
+                Divider()
+                removeAllFiltersButton()
+            }
+        } label: {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+        }
+    }
+    
+    @ViewBuilder
+    private func metabolismFilterSection() -> some View {
+        Button(action: { filterPrimaryMetabolism = nil }) {
+            Label("Tutti", systemImage: filterPrimaryMetabolism == nil ? "checkmark" : "")
+        }
+        ForEach(PrimaryMetabolism.allCases, id: \.self) { type in
+            Button(action: { filterPrimaryMetabolism = type }) {
+                Label(type.rawValue, systemImage: filterPrimaryMetabolism == type ? "checkmark" : type.icon)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func biomechanicalStructureFilterSection() -> some View {
+        Button(action: { filterBiomechanicalStructure = nil }) {
+            Label("Tutti", systemImage: filterBiomechanicalStructure == nil ? "checkmark" : "")
+        }
+        ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
+            Button(action: { filterBiomechanicalStructure = type }) {
+                Label(type.rawValue, systemImage: filterBiomechanicalStructure == type ? "checkmark" : type.icon)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func trainingRoleFilterSection() -> some View {
+        Button(action: { filterTrainingRole = nil }) {
+            Label("Tutti", systemImage: filterTrainingRole == nil ? "checkmark" : "")
+        }
+        ForEach(TrainingRole.allCases, id: \.self) { role in
+            Button(action: { filterTrainingRole = role }) {
+                Label(role.rawValue, systemImage: filterTrainingRole == role ? "checkmark" : role.icon)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func categoryFilterSection() -> some View {
+        Button(action: { filterCategory = nil }) {
+            Label("Tutti", systemImage: filterCategory == nil ? "checkmark" : "")
+        }
+        ForEach(ExerciseCategory.allCases, id: \.self) { category in
+            Button(action: { filterCategory = category }) {
+                Label(category.rawValue, systemImage: filterCategory == category ? "checkmark" : category.icon)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func removeAllFiltersButton() -> some View {
+        Button("Rimuovi Filtri", role: .destructive) {
+            filterPrimaryMetabolism = nil
+            filterBiomechanicalStructure = nil
+            filterTrainingRole = nil
+            filterCategory = nil
+            filterPrimaryMuscle = nil
+        }
+    }
+    
+    private func isAnyFilterActive() -> Bool {
+        return filterPrimaryMetabolism != nil ||
+        filterBiomechanicalStructure != nil ||
+        filterTrainingRole != nil ||
+        filterCategory != nil ||
+        filterPrimaryMuscle != nil
+    }
 }
+
+
 
 // MARK: - Exercise Row
 struct ExerciseRow: View {
@@ -188,31 +241,26 @@ struct ExerciseRow: View {
                             .foregroundStyle(.secondary)
                     }
             }
-
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text(exercise.name)
                     .font(.headline)
-
+                
                 HStack(spacing: 8) {
-                    Label(exercise.trainingRole.rawValue, systemImage: exercise.trainingRole.icon)
+                    Image(systemName: exercise.trainingRole.icon)
                         .font(.caption)
                         .foregroundStyle(exercise.trainingRole.color)
-
-                    Label(exercise.category.rawValue, systemImage: exercise.category.icon)
+                    Image(systemName: exercise.category.icon)
                         .font(.caption)
                         .foregroundStyle(exercise.category.color)
-                }
-
-                HStack(spacing: 8) {
-                    Label(exercise.biomechanicalStructure.rawValue, systemImage: exercise.biomechanicalStructure.icon)
+                    Image(systemName: exercise.biomechanicalStructure.icon)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-
-                    Label(exercise.primaryMetabolism.rawValue, systemImage: exercise.primaryMetabolism.icon)
+                    Image(systemName: exercise.primaryMetabolism.icon)
                         .font(.caption2)
                         .foregroundStyle(exercise.primaryMetabolism.color)
                 }
-
+                
                 // Muscoli primari
                 if !exercise.primaryMuscles.isEmpty {
                     HStack(spacing: 4) {
@@ -225,7 +273,7 @@ struct ExerciseRow: View {
                             .lineLimit(1)
                     }
                 }
-
+                
                 // Muscoli secondari
                 if !exercise.secondaryMuscles.isEmpty {
                     HStack(spacing: 4) {
@@ -238,7 +286,7 @@ struct ExerciseRow: View {
                             .lineLimit(1)
                     }
                 }
-
+                
                 // Attrezzo
                 if let equipment = exercise.equipment {
                     HStack(spacing: 4) {
@@ -252,16 +300,15 @@ struct ExerciseRow: View {
                     }
                 }
             }
-
+            
             Spacer()
-
+            
             VStack(alignment: .trailing, spacing: 4) {
                 if exercise.youtubeURL != nil {
                     Image(systemName: "video.fill")
                         .foregroundStyle(.red)
                         .font(.caption)
                 }
-
                 if !exercise.variants.isEmpty {
                     HStack(spacing: 2) {
                         Image(systemName: "arrow.triangle.branch")
