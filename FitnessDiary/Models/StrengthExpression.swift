@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 import SwiftData
 
 // Tipo di espressione di forza
@@ -30,6 +31,21 @@ enum StrengthExpressionType: String, Codable, CaseIterable, Identifiable {
             return "tortoise.fill"
         case .hypertrophy:
             return "figure.strengthtraining.traditional"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .maxStrength:
+            return .red
+        case .maxDynamicStrength:
+            return .orange
+        case .speedStrength:
+            return .purple
+        case .resistantStrength:
+            return .green
+        case .hypertrophy:
+            return .yellow
         }
     }
 }

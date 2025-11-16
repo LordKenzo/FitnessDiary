@@ -61,7 +61,7 @@ struct StrengthExpressionRow: View {
         HStack(spacing: 12) {
             Image(systemName: parameters.type.icon)
                 .font(.title2)
-                .foregroundStyle(.blue)
+                .foregroundStyle(parameters.type.color)
                 .frame(width: 30)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -91,7 +91,7 @@ struct EditStrengthExpressionView: View {
                 HStack {
                     Image(systemName: parameters.type.icon)
                         .font(.largeTitle)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(parameters.type.color)
                     Text(parameters.type.rawValue)
                         .font(.title2)
                         .fontWeight(.semibold)
