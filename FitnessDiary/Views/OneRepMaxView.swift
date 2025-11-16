@@ -69,9 +69,19 @@ struct OneRepMaxView: View {
 
     private func saveChanges() {
         for exercise in Big5Exercise.allCases {
-            if let text = editingValues[exercise], !text.isEmpty,
-               let weight = Double(text.replacingOccurrences(of: ",", with: ".")) {
-                // Update or create record
+            let rawText = (editingValues[exercise] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // If the field is empty, delete any existing record
+            if rawText.isEmpty {
+                if let existingRecord = records.first(where: { $0.exercise == exercise }) {
+                    records.removeAll(where: { $0.id == existingRecord.id })
+                    modelContext.delete(existingRecord)
+                }
+                continue
+            }
+
+            // Only update/create when we can parse a valid number
+            if let weight = Double(rawText.replacingOccurrences(of: ",", with: ".")) {
                 if let existingRecord = records.first(where: { $0.exercise == exercise }) {
                     existingRecord.weight = weight
                     existingRecord.recordedDate = Date()
@@ -80,13 +90,8 @@ struct OneRepMaxView: View {
                     records.append(newRecord)
                     modelContext.insert(newRecord)
                 }
-            } else {
-                // Remove record if text is empty
-                if let existingRecord = records.first(where: { $0.exercise == exercise }) {
-                    records.removeAll(where: { $0.id == existingRecord.id })
-                    modelContext.delete(existingRecord)
-                }
             }
+            // If text is not a valid number, keep the existing record untouched
         }
     }
 }

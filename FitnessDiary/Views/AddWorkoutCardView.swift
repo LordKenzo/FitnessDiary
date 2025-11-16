@@ -142,89 +142,24 @@ struct AddWorkoutCardView: View {
     }
 
     private func addSimpleBlock(_ exercise: Exercise) {
-        let exerciseItem = WorkoutExerciseItemData(
-            exercise: exercise,
-            order: 0,
-            sets: [WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: nil, loadType: .absolute, percentageOfMax: nil)]
-        )
-
-        let newBlock = WorkoutBlockData(
-            blockType: .simple,
-            methodType: nil,
-            order: workoutBlocks.count,
-            globalSets: 3,
-            globalRestTime: 90,
-            notes: nil,
-            exerciseItems: [exerciseItem]
-        )
-        workoutBlocks.append(newBlock)
+        WorkoutBlockHelper.addSimpleBlock(to: &workoutBlocks, exercise: exercise)
     }
 
     private func addMethodBlock(_ method: MethodType) {
-        let newBlock = WorkoutBlockData(
-            blockType: .method,
-            methodType: method,
-            order: workoutBlocks.count,
-            globalSets: 3,
-            globalRestTime: 120,
-            notes: nil,
-            exerciseItems: []
-        )
-        workoutBlocks.append(newBlock)
+        WorkoutBlockHelper.addMethodBlock(to: &workoutBlocks, method: method)
     }
 
     private func moveBlock(from source: IndexSet, to destination: Int) {
-        workoutBlocks.move(fromOffsets: source, toOffset: destination)
-        for (index, _) in workoutBlocks.enumerated() {
-            workoutBlocks[index].order = index
-        }
+        WorkoutBlockHelper.moveBlock(in: &workoutBlocks, from: source, to: destination)
     }
 
     private func deleteBlock(at offsets: IndexSet) {
-        workoutBlocks.remove(atOffsets: offsets)
-        for (index, _) in workoutBlocks.enumerated() {
-            workoutBlocks[index].order = index
-        }
+        WorkoutBlockHelper.deleteBlock(in: &workoutBlocks, at: offsets)
     }
 
     // Helper to convert WorkoutBlockData to WorkoutBlock for preview
     private func workoutBlockToModel(_ blockData: WorkoutBlockData) -> WorkoutBlock {
-        let block = WorkoutBlock(
-            order: blockData.order,
-            blockType: blockData.blockType,
-            methodType: blockData.methodType,
-            globalSets: blockData.globalSets,
-            globalRestTime: blockData.globalRestTime,
-            notes: blockData.notes,
-            exerciseItems: []
-        )
-
-        for itemData in blockData.exerciseItems {
-            let exerciseItem = WorkoutExerciseItem(
-                order: itemData.order,
-                exercise: itemData.exercise,
-                notes: itemData.notes,
-                restTime: itemData.restTime
-            )
-
-            for setData in itemData.sets {
-                let workoutSet = WorkoutSet(
-                    order: setData.order,
-                    setType: setData.setType,
-                    reps: setData.reps,
-                    weight: setData.weight,
-                    duration: setData.duration,
-                    notes: setData.notes,
-                    loadType: setData.loadType,
-                    percentageOfMax: setData.percentageOfMax
-                )
-                exerciseItem.sets.append(workoutSet)
-            }
-
-            block.exerciseItems.append(exerciseItem)
-        }
-
-        return block
+        return WorkoutBlockHelper.workoutBlockToModel(blockData)
     }
 
     private func saveCard() {

@@ -7,8 +7,10 @@ final class WorkoutCard: Identifiable {
     var name: String
     var cardDescription: String?
     var createdDate: Date
+    @Relationship(deleteRule: .nullify)
     var folders: [WorkoutFolder] // array di folder (una scheda può stare in più folder)
     var isAssignedToMe: Bool // toggle separato per assegnazione a me stesso
+    @Relationship(deleteRule: .nullify)
     var assignedTo: [Client] // array di clienti assegnati
     @Relationship(deleteRule: .cascade)
     var blocks: [WorkoutBlock] // array di blocchi (esercizi singoli o metodologie)

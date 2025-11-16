@@ -100,7 +100,7 @@ struct WorkoutBlockRow: View {
 
     let exerciseItem2 = WorkoutExerciseItem(
         order: 0,
-        exercise: exercise,
+        exercise: exercise2,
         notes: nil,
         restTime: nil
     )
