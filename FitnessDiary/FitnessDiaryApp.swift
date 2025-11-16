@@ -1,11 +1,5 @@
-//
-//  FitnessDiaryApp.swift
-//  FitnessDiary
-//
-//  Created by Lorenzo Franceschini on 16/11/25.
-//
-
 import SwiftUI
+import SwiftData
 
 @main
 struct FitnessDiaryApp: App {
@@ -13,5 +7,6 @@ struct FitnessDiaryApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [UserProfile.self])
     }
 }

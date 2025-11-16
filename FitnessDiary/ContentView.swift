@@ -1,24 +1,33 @@
-//
-//  ContentView.swift
-//  FitnessDiary
-//
-//  Created by Lorenzo Franceschini on 16/11/25.
-//
-
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            ProfileView()
+                .tabItem {
+                    Label("Profilo", systemImage: "person.circle")
+                }
+            
+            Text("Esercizi")
+                .tabItem {
+                    Label("Esercizi", systemImage: "figure.strengthtraining.traditional")
+                }
+            
+            Text("Schede")
+                .tabItem {
+                    Label("Schede", systemImage: "list.bullet.clipboard")
+                }
+            
+            Text("Allenamento")
+                .tabItem {
+                    Label("Allenamento", systemImage: "stopwatch")
+                }
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: UserProfile.self, inMemory: true)
 }
