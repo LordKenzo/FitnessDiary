@@ -36,6 +36,33 @@ struct WorkoutSetData: Identifiable {
     var notes: String?
     var loadType: LoadType
     var percentageOfMax: Double?
+
+    // Cluster Set parameters
+    var clusterSize: Int? // Quante ripetizioni per cluster (es. 2)
+    var clusterRestTime: TimeInterval? // Pausa tra i cluster in secondi (15-60)
+}
+
+// MARK: - Cluster Set Extensions
+
+extension WorkoutSetData {
+    // Helper per calcolare il numero di cluster in una serie
+    var numberOfClusters: Int? {
+        guard let totalReps = reps, let clusterSize = clusterSize, clusterSize > 0 else {
+            return nil
+        }
+        return Int(ceil(Double(totalReps) / Double(clusterSize)))
+    }
+
+    // Helper per formattare la descrizione del cluster
+    var clusterDescription: String? {
+        guard let totalReps = reps,
+              let clusterSize = clusterSize,
+              let clusters = numberOfClusters,
+              let restTime = clusterRestTime else {
+            return nil
+        }
+        return "\(clusters) cluster da \(clusterSize) reps (\(Int(restTime))s pausa)"
+    }
 }
 
 // MARK: - Validation Extensions

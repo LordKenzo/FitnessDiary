@@ -8,6 +8,7 @@ struct EditWorkoutExerciseItemView: View {
     let exercises: [Exercise]
     let isInMethod: Bool // se true, nasconde il tempo di recupero (gestito dal blocco)
     var methodValidation: LoadProgressionValidation? // validazione da applicare se in un metodo
+    var methodType: MethodType? // tipo di metodo (per gestire cluster set)
 
     @State private var notes: String
     @State private var restMinutes: Int
@@ -28,11 +29,12 @@ struct EditWorkoutExerciseItemView: View {
         return exerciseItemData.validateLoadProgression(for: validation)
     }
 
-    init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false, methodValidation: LoadProgressionValidation? = nil) {
+    init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false, methodValidation: LoadProgressionValidation? = nil, methodType: MethodType? = nil) {
         self._exerciseItemData = exerciseItemData
         self.exercises = exercises
         self.isInMethod = isInMethod
         self.methodValidation = methodValidation
+        self.methodType = methodType
         _notes = State(initialValue: exerciseItemData.wrappedValue.notes ?? "")
 
         let restTime = exerciseItemData.wrappedValue.restTime ?? 60
@@ -144,13 +146,14 @@ struct EditWorkoutExerciseItemView: View {
 
     @ViewBuilder
     private var setsList: some View {
+        let isCluster = methodType?.requiresClusterManagement ?? false
         if isInMethod {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster)
             }
         } else {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster)
             }
             .onMove(perform: moveSets)
             .onDelete(perform: deleteSets)

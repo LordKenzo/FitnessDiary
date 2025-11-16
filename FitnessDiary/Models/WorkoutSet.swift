@@ -23,7 +23,11 @@ final class WorkoutSet: Identifiable {
     var loadType: LoadType? // tipo di carico: assoluto (kg) o percentuale (% 1RM) - opzionale per backward compatibility
     var percentageOfMax: Double? // percentuale dell'1RM (quando loadType = .percentage)
 
-    init(order: Int, setType: SetType = .reps, reps: Int? = nil, weight: Double? = nil, duration: TimeInterval? = nil, notes: String? = nil, loadType: LoadType = .absolute, percentageOfMax: Double? = nil) {
+    // Cluster Set parameters
+    var clusterSize: Int? // Quante ripetizioni per cluster (es. 2 reps per cluster)
+    var clusterRestTime: TimeInterval? // Pausa tra i cluster in secondi (15-60)
+
+    init(order: Int, setType: SetType = .reps, reps: Int? = nil, weight: Double? = nil, duration: TimeInterval? = nil, notes: String? = nil, loadType: LoadType = .absolute, percentageOfMax: Double? = nil, clusterSize: Int? = nil, clusterRestTime: TimeInterval? = nil) {
         self.id = UUID()
         self.order = order
         self.setType = setType
@@ -33,6 +37,8 @@ final class WorkoutSet: Identifiable {
         self.notes = notes
         self.loadType = loadType
         self.percentageOfMax = percentageOfMax
+        self.clusterSize = clusterSize
+        self.clusterRestTime = clusterRestTime
     }
 
     // Computed property che ritorna il loadType effettivo, defaultando a .absolute per dati legacy
@@ -76,5 +82,24 @@ final class WorkoutSet: Identifiable {
         } else {
             return "\(seconds)s"
         }
+    }
+
+    // Helper per calcolare il numero di cluster in una serie
+    var numberOfClusters: Int? {
+        guard let totalReps = reps, let clusterSize = clusterSize, clusterSize > 0 else {
+            return nil
+        }
+        return Int(ceil(Double(totalReps) / Double(clusterSize)))
+    }
+
+    // Helper per formattare la descrizione del cluster
+    var clusterDescription: String? {
+        guard let totalReps = reps,
+              let clusterSize = clusterSize,
+              let clusters = numberOfClusters,
+              let restTime = clusterRestTime else {
+            return nil
+        }
+        return "\(clusters) cluster da \(clusterSize) reps (\(Int(restTime))s pausa)"
     }
 }

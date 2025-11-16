@@ -95,7 +95,8 @@ struct EditWorkoutBlockView: View {
                             exerciseItemData: $blockData.exerciseItems[index],
                             exercises: exercises,
                             isInMethod: blockData.blockType == .method,
-                            methodValidation: blockData.methodType?.loadProgressionValidation
+                            methodValidation: blockData.methodType?.loadProgressionValidation,
+                            methodType: blockData.methodType
                         )
                     } label: {
                         WorkoutExerciseItemRow(
@@ -204,6 +205,7 @@ struct EditWorkoutBlockView: View {
     private func addExercise(_ exercise: Exercise) {
         // Se è un metodo, crea le serie in base a globalSets
         let setsCount = blockData.blockType == .method ? globalSets : 1
+        let isCluster = blockData.methodType?.requiresClusterManagement ?? false
         var sets: [WorkoutSetData] = []
         for i in 0..<setsCount {
             sets.append(WorkoutSetData(
@@ -212,7 +214,9 @@ struct EditWorkoutBlockView: View {
                 reps: 10,
                 weight: nil,
                 loadType: .absolute,
-                percentageOfMax: nil
+                percentageOfMax: nil,
+                clusterSize: isCluster ? 2 : nil,
+                clusterRestTime: isCluster ? 30 : nil
             ))
         }
 
@@ -261,6 +265,8 @@ struct EditWorkoutBlockView: View {
 
     /// Logica comune di sincronizzazione
     private func syncSetsForCount(_ targetSetsCount: Int) {
+        let isCluster = blockData.methodType?.requiresClusterManagement ?? false
+
         for index in blockData.exerciseItems.indices {
             let currentSetsCount = blockData.exerciseItems[index].sets.count
 
@@ -273,7 +279,9 @@ struct EditWorkoutBlockView: View {
                         reps: 10,
                         weight: nil,
                         loadType: .absolute,
-                        percentageOfMax: nil
+                        percentageOfMax: nil,
+                        clusterSize: isCluster ? 2 : nil,
+                        clusterRestTime: isCluster ? 30 : nil
                     )
                     blockData.exerciseItems[index].sets.append(newSet)
                 }

@@ -158,6 +158,7 @@ struct SetRow: View {
     @Binding var set: WorkoutSetData
     let exercise: Exercise?
     let oneRepMax: Double?
+    var isClusterSet: Bool = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -254,6 +255,12 @@ struct SetRow: View {
                         }
                     }
                 }
+
+                // Campi Cluster Set
+                if isClusterSet {
+                    Divider()
+                    clusterFields
+                }
             } else {
                 HStack(spacing: 16) {
                     Spacer()
@@ -302,6 +309,91 @@ struct SetRow: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var clusterFields: some View {
+        VStack(spacing: 8) {
+            // Cluster Size
+            HStack(spacing: 16) {
+                Text("Cluster")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 60, alignment: .leading)
+
+                HStack(spacing: 4) {
+                    TextField("Reps", value: $set.clusterSize, format: .number)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 50)
+                        .textFieldStyle(.roundedBorder)
+                    Text("reps/cluster")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+
+            // Cluster Rest Time
+            HStack(spacing: 16) {
+                Text("Pausa")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 60, alignment: .leading)
+
+                HStack(spacing: 4) {
+                    TextField("Sec", value: Binding(
+                        get: {
+                            if let rest = set.clusterRestTime {
+                                return Int(rest)
+                            }
+                            return 15
+                        },
+                        set: { newValue in
+                            set.clusterRestTime = TimeInterval(min(60, max(15, newValue)))
+                        }
+                    ), format: .number)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 50)
+                        .textFieldStyle(.roundedBorder)
+                    Text("sec (15-60)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+
+            // Descrizione cluster se valida
+            if let description = set.clusterDescription {
+                HStack(spacing: 16) {
+                    Spacer()
+                        .frame(width: 60)
+                    Text(description)
+                        .font(.caption)
+                        .foregroundStyle(.blue)
+                    Spacer()
+                }
+            }
+
+            // Validazione: cluster non può essere > ripetizioni
+            if let totalReps = set.reps, let clusterSize = set.clusterSize, clusterSize > totalReps {
+                HStack(spacing: 16) {
+                    Spacer()
+                        .frame(width: 60)
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text("Il cluster non può essere maggiore delle ripetizioni")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                    Spacer()
                 }
             }
         }
