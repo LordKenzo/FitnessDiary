@@ -113,6 +113,18 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    // Numero massimo di esercizi consentiti (nil = nessun limite)
+    var maxExercises: Int? {
+        switch self {
+        case .superset:
+            return 2
+        case .triset:
+            return 3
+        default:
+            return nil // Nessun limite massimo
+        }
+    }
+
     // Descrizione breve della metodologia
     var description: String {
         switch self {
@@ -123,19 +135,19 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
         case .giantSet:
             return "Quattro o più esercizi eseguiti consecutivamente"
         case .dropset:
-            return "Serie scalate con riduzione progressiva del carico"
+            return "Singola serie estesa con riduzione immediata del carico (pause minime o assenti)"
         case .pyramidAscending:
-            return "Serie con aumento progressivo del carico"
+            return "Serie con aumento progressivo del carico e recupero completo"
         case .pyramidDescending:
-            return "Serie con riduzione progressiva del carico"
+            return "Serie con riduzione progressiva del carico e recupero completo tra le serie"
         case .contrastTraining:
             return "Alternanza tra esercizi di forza massimale e potenza"
         case .complexTraining:
-            return "Combinazione di esercizi complementari"
+            return "Combina esercizi di forza (alto carico) con esercizi esplosivi/pliometrici (basso carico, alta velocità)"
         case .rest_pause:
             return "Serie con pause brevi per massimizzare le ripetizioni"
         case .cluster:
-            return "Serie frazionate con micro-pause tra le ripetizioni"
+            return "Serie frazionate con micro-pause intra-serie tra cluster di ripetizioni"
         case .emom:
             return "Every Minute On the Minute - ripetizioni ogni minuto"
         case .amrap:
@@ -156,6 +168,27 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return .constant
         default:
             return .none
+        }
+    }
+
+    // Indica se il metodo permette il recupero tra le serie
+    // Se false, le serie sono considerate come un'unica serie estesa
+    var allowsRestBetweenSets: Bool {
+        switch self {
+        case .dropset:
+            return false // Drop set è una singola serie estesa senza recupero
+        default:
+            return true
+        }
+    }
+
+    // Indica se il metodo richiede gestione dei cluster (micro-pause intra-serie)
+    var requiresClusterManagement: Bool {
+        switch self {
+        case .cluster:
+            return true
+        default:
+            return false
         }
     }
 }

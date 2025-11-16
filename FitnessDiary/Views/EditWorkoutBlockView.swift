@@ -52,27 +52,34 @@ struct EditWorkoutBlockView: View {
                             syncExerciseSetsInRealTime()
                         }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Recupero tra serie")
-                            .font(.subheadline)
+                    // Recupero tra serie - nascosto per Drop Set
+                    if blockData.methodType?.allowsRestBetweenSets ?? true {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Recupero tra serie")
+                                .font(.subheadline)
 
-                        HStack(spacing: 16) {
-                            Picker("Minuti", selection: $globalRestMinutes) {
-                                ForEach(0..<10, id: \.self) { min in
-                                    Text("\(min)m").tag(min)
+                            HStack(spacing: 16) {
+                                Picker("Minuti", selection: $globalRestMinutes) {
+                                    ForEach(0..<10, id: \.self) { min in
+                                        Text("\(min)m").tag(min)
+                                    }
                                 }
-                            }
-                            .pickerStyle(.wheel)
-                            .frame(width: 80)
+                                .pickerStyle(.wheel)
+                                .frame(width: 80)
 
-                            Picker("Secondi", selection: $globalRestSeconds) {
-                                ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
-                                    Text("\(sec)s").tag(sec)
+                                Picker("Secondi", selection: $globalRestSeconds) {
+                                    ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
+                                        Text("\(sec)s").tag(sec)
+                                    }
                                 }
+                                .pickerStyle(.wheel)
+                                .frame(width: 80)
                             }
-                            .pickerStyle(.wheel)
-                            .frame(width: 80)
                         }
+                    } else {
+                        Text("Questo metodo non prevede recupero tra le serie")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
                     }
 
                     TextField("Note (opzionale)", text: $notes, axis: .vertical)
@@ -106,14 +113,20 @@ struct EditWorkoutBlockView: View {
                 } label: {
                     Label("Aggiungi Esercizio", systemImage: "plus.circle.fill")
                 }
-                .disabled(blockData.blockType == .simple && !blockData.exerciseItems.isEmpty)
+                .disabled(cannotAddMoreExercises)
             } header: {
                 HStack {
                     Text("Esercizi (\(blockData.exerciseItems.count))")
                     if blockData.blockType == .method, let method = blockData.methodType {
-                        Text("• min \(method.minExercises)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        if let max = method.maxExercises {
+                            Text("• \(method.minExercises)-\(max)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text("• min \(method.minExercises)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     Spacer()
                     if !blockData.exerciseItems.isEmpty {
@@ -125,8 +138,13 @@ struct EditWorkoutBlockView: View {
                     Text("Un blocco semplice può contenere solo un esercizio")
                         .font(.caption)
                 } else if blockData.blockType == .method, let method = blockData.methodType {
-                    Text("Questo metodo richiede almeno \(method.minExercises) esercizi")
-                        .font(.caption)
+                    if let max = method.maxExercises {
+                        Text("Questo metodo richiede esattamente \(method.minExercises) esercizi")
+                            .font(.caption)
+                    } else {
+                        Text("Questo metodo richiede almeno \(method.minExercises) esercizi")
+                            .font(.caption)
+                    }
                 }
             }
         }
@@ -156,9 +174,31 @@ struct EditWorkoutBlockView: View {
             return false
         }
         if blockData.blockType == .method, let method = blockData.methodType {
-            return blockData.exerciseItems.count >= method.minExercises
+            let count = blockData.exerciseItems.count
+            // Controlla il minimo
+            if count < method.minExercises {
+                return false
+            }
+            // Controlla il massimo se presente
+            if let max = method.maxExercises, count > max {
+                return false
+            }
         }
         return true
+    }
+
+    private var cannotAddMoreExercises: Bool {
+        // Blocco semplice può avere solo 1 esercizio
+        if blockData.blockType == .simple && !blockData.exerciseItems.isEmpty {
+            return true
+        }
+        // Controlla se il metodo ha un limite massimo
+        if blockData.blockType == .method, let method = blockData.methodType {
+            if let max = method.maxExercises {
+                return blockData.exerciseItems.count >= max
+            }
+        }
+        return false
     }
 
     private func addExercise(_ exercise: Exercise) {
