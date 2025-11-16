@@ -15,6 +15,9 @@ struct ClientListView: View {
     @State private var showingAddClient = false
     @State private var selectedClient: Client?
     @State private var searchText = ""
+    @State private var clientToDelete: Client?
+    @State private var showingDeleteConfirmation = false
+    @State private var showingDeleteAllConfirmation = false
 
     private var filteredClients: [Client] {
         if searchText.isEmpty {
@@ -48,8 +51,24 @@ struct ClientListView: View {
                         .onTapGesture {
                             selectedClient = client
                         }
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                // TODO: Navigare alle schede del cliente
+                                // Placeholder per futura implementazione
+                            } label: {
+                                Label("Schede", systemImage: "list.bullet.clipboard")
+                            }
+                            .tint(.blue)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                clientToDelete = client
+                                showingDeleteConfirmation = true
+                            } label: {
+                                Label("Elimina", systemImage: "trash")
+                            }
+                        }
                 }
-                .onDelete(perform: deleteClients)
             }
         }
         .searchable(text: $searchText, prompt: "Cerca cliente")
@@ -66,7 +85,7 @@ struct ClientListView: View {
                     if !clients.isEmpty {
                         Divider()
                         Button(role: .destructive) {
-                            deleteAllClients()
+                            showingDeleteAllConfirmation = true
                         } label: {
                             Label("Elimina Tutti", systemImage: "trash")
                         }
@@ -82,12 +101,29 @@ struct ClientListView: View {
         .sheet(item: $selectedClient) { client in
             EditClientView(client: client)
         }
+        .alert("Elimina Cliente", isPresented: $showingDeleteConfirmation, presenting: clientToDelete) { client in
+            Button("Annulla", role: .cancel) {
+                clientToDelete = nil
+            }
+            Button("Elimina", role: .destructive) {
+                deleteClient(client)
+            }
+        } message: { client in
+            Text("Sei sicuro di voler eliminare \(client.fullName)? Questa azione non può essere annullata.")
+        }
+        .alert("Elimina Tutti i Clienti", isPresented: $showingDeleteAllConfirmation) {
+            Button("Annulla", role: .cancel) { }
+            Button("Elimina Tutti", role: .destructive) {
+                deleteAllClients()
+            }
+        } message: {
+            Text("Sei sicuro di voler eliminare tutti i \(clients.count) clienti? Questa azione non può essere annullata.")
+        }
     }
 
-    private func deleteClients(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(filteredClients[index])
-        }
+    private func deleteClient(_ client: Client) {
+        modelContext.delete(client)
+        clientToDelete = nil
     }
 
     private func deleteAllClients() {
