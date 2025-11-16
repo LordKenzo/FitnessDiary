@@ -242,12 +242,12 @@ struct SetRow: View {
         ),
         order: 0,
         sets: [
-            WorkoutSetData(order: 0, reps: 10, weight: 60),
-            WorkoutSetData(order: 1, reps: 8, weight: 70)
+            WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: 60),
+            WorkoutSetData(order: 1, setType: .reps, reps: 8, weight: 70)
         ]
     )
 
-    return NavigationStack {
+    NavigationStack {
         EditWorkoutExerciseView(
             exerciseData: .constant(exerciseData),
             exercises: []

@@ -247,6 +247,6 @@ struct EditWorkoutCardView: View {
     container.mainContext.insert(card)
     container.mainContext.insert(exercise)
 
-    return EditWorkoutCardView(card: card, folders: [], clients: [])
+    EditWorkoutCardView(card: card, folders: [], clients: [])
         .modelContainer(container)
 }

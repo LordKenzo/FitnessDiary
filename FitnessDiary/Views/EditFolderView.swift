@@ -94,6 +94,6 @@ struct EditFolderView: View {
     let folder = WorkoutFolder(name: "Forza", colorHex: "#FF0000")
     container.mainContext.insert(folder)
 
-    return EditFolderView(folder: folder)
+    EditFolderView(folder: folder)
         .modelContainer(container)
 }
