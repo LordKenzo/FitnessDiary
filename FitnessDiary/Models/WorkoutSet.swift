@@ -20,7 +20,7 @@ final class WorkoutSet: Identifiable {
     var weight: Double? // kg (quando loadType = .absolute)
     var duration: TimeInterval? // secondi, per esercizi a tempo
     var notes: String?
-    var loadType: LoadType // tipo di carico: assoluto (kg) o percentuale (% 1RM)
+    var loadType: LoadType? // tipo di carico: assoluto (kg) o percentuale (% 1RM) - opzionale per backward compatibility
     var percentageOfMax: Double? // percentuale dell'1RM (quando loadType = .percentage)
 
     init(order: Int, setType: SetType = .reps, reps: Int? = nil, weight: Double? = nil, duration: TimeInterval? = nil, notes: String? = nil, loadType: LoadType = .absolute, percentageOfMax: Double? = nil) {
@@ -35,9 +35,14 @@ final class WorkoutSet: Identifiable {
         self.percentageOfMax = percentageOfMax
     }
 
+    // Computed property che ritorna il loadType effettivo, defaultando a .absolute per dati legacy
+    var actualLoadType: LoadType {
+        return loadType ?? .absolute
+    }
+
     // Helper per calcolare il peso effettivo da percentuale e 1RM
     func calculatedWeight(oneRepMax: Double?) -> Double? {
-        switch loadType {
+        switch actualLoadType {
         case .absolute:
             return weight
         case .percentage:
@@ -50,7 +55,7 @@ final class WorkoutSet: Identifiable {
 
     // Helper per calcolare la percentuale da peso assoluto e 1RM
     func calculatedPercentage(oneRepMax: Double?) -> Double? {
-        switch loadType {
+        switch actualLoadType {
         case .absolute:
             guard let weight = weight, let max = oneRepMax, max > 0 else {
                 return nil
