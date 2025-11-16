@@ -269,8 +269,8 @@ struct PhotoPickerRow: View {
         }
         .fullScreenCover(isPresented: $showingFullscreen) {
             let allPhotos = [photoData1, photoData2, photoData3].compactMap { $0 }
-            
-            if allPhotos.count > 1, let currentIndex = allPhotos.firstIndex(of: photoData!) {
+
+            if allPhotos.count > 1, let currentPhotoData = photoData, let currentIndex = allPhotos.firstIndex(of: currentPhotoData) {
                 MultiPhotoFullscreenView(photos: allPhotos, initialIndex: currentIndex)
             } else if let data = photoData {
                 FullscreenPhotoView(imageData: data)
