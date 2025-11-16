@@ -290,18 +290,8 @@ struct WorkoutCardRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(card.name)
-                    .font(.headline)
-                Spacer()
-                HStack(spacing: 4) {
-                    Image(systemName: card.isAssignedToMe && card.assignedTo.isEmpty ? "person.fill" : "person.circle.fill")
-                        .font(.caption)
-                    Text(card.assignmentText)
-                        .font(.caption)
-                }
-                .foregroundStyle(card.isAssignedToMe && card.assignedTo.isEmpty ? .green : .blue)
-            }
+            Text(card.name)
+                .font(.headline)
 
             if let description = card.cardDescription, !description.isEmpty {
                 Text(description)
