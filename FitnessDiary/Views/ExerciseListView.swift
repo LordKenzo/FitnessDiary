@@ -188,10 +188,23 @@ struct ExerciseRow: View {
 
             Spacer()
 
-            if exercise.youtubeURL != nil {
-                Image(systemName: "video.fill")
-                    .foregroundStyle(.red)
-                    .font(.caption)
+            VStack(alignment: .trailing, spacing: 4) {
+                if exercise.youtubeURL != nil {
+                    Image(systemName: "video.fill")
+                        .foregroundStyle(.red)
+                        .font(.caption)
+                }
+
+                if !exercise.variants.isEmpty {
+                    HStack(spacing: 2) {
+                        Image(systemName: "arrow.triangle.branch")
+                            .foregroundStyle(.purple)
+                            .font(.caption2)
+                        Text("\(exercise.variants.count)")
+                            .font(.caption2)
+                            .foregroundStyle(.purple)
+                    }
+                }
             }
         }
         .padding(.vertical, 4)
@@ -386,12 +399,14 @@ struct EditExerciseView: View {
     @Bindable var exercise: Exercise
     let muscles: [Muscle]
     let equipment: [Equipment]
+    @Query(sort: \Exercise.name) private var allExercises: [Exercise]
 
     @State private var selectedPrimaryMuscles: Set<Muscle> = []
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
     @State private var photoItem1: PhotosPickerItem?
     @State private var photoItem2: PhotosPickerItem?
     @State private var photoItem3: PhotosPickerItem?
+    @State private var showingAddVariant = false
 
     var body: some View {
         NavigationStack {
@@ -470,6 +485,52 @@ struct EditExerciseView: View {
                     )
                 }
 
+                Section {
+                    if exercise.variants.isEmpty {
+                        Text("Nessuna variante")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(exercise.variants) { variant in
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(variant.name)
+                                        .font(.body)
+                                    if let equipment = variant.equipment {
+                                        Text(equipment.name)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                Spacer()
+                                Button(role: .destructive) {
+                                    removeVariant(variant)
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .foregroundStyle(.red)
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                    }
+
+                    Button {
+                        showingAddVariant = true
+                    } label: {
+                        Label("Aggiungi Variante", systemImage: "plus.circle")
+                    }
+                    .disabled(exercise.variants.count >= 10)
+                } header: {
+                    HStack {
+                        Text("Varianti (\(exercise.variants.count)/10)")
+                        Spacer()
+                        if !exercise.variants.isEmpty {
+                            Text("Bidirezionale")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
                 Section("Video") {
                     TextField("URL YouTube (opzionale)", text: Binding(
                         get: { exercise.youtubeURL ?? "" },
@@ -505,11 +566,91 @@ struct EditExerciseView: View {
                 selectedPrimaryMuscles = Set(exercise.primaryMuscles)
                 selectedSecondaryMuscles = Set(exercise.secondaryMuscles)
             }
+            .sheet(isPresented: $showingAddVariant) {
+                AddVariantView(exercise: exercise, allExercises: allExercises)
+            }
         }
+    }
+
+    private func removeVariant(_ variant: Exercise) {
+        exercise.removeVariant(variant)
     }
 
     private func deleteExercise() {
         modelContext.delete(exercise)
+        dismiss()
+    }
+}
+
+// MARK: - Add Variant View
+struct AddVariantView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Bindable var exercise: Exercise
+    let allExercises: [Exercise]
+
+    private var availableExercises: [Exercise] {
+        allExercises.filter { candidate in
+            // Escludi l'esercizio stesso
+            candidate.id != exercise.id &&
+            // Escludi esercizi già nelle varianti
+            !exercise.variants.contains(where: { $0.id == candidate.id })
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if availableExercises.isEmpty {
+                    ContentUnavailableView {
+                        Label("Nessun esercizio disponibile", systemImage: "figure.strengthtraining.traditional")
+                    } description: {
+                        Text("Tutti gli esercizi sono già varianti o hai raggiunto il limite")
+                    }
+                } else {
+                    ForEach(availableExercises) { candidate in
+                        Button {
+                            addVariant(candidate)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(candidate.name)
+                                        .font(.body)
+                                        .foregroundStyle(.primary)
+
+                                    HStack(spacing: 8) {
+                                        Label(candidate.metabolicType.rawValue, systemImage: candidate.metabolicType.icon)
+                                            .font(.caption)
+                                            .foregroundStyle(candidate.metabolicType.color)
+
+                                        if let equipment = candidate.equipment {
+                                            Text(equipment.name)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }
+                                Spacer()
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundStyle(.blue)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Aggiungi Variante")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Chiudi") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private func addVariant(_ variant: Exercise) {
+        exercise.addVariant(variant)
         dismiss()
     }
 }

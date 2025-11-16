@@ -26,6 +26,9 @@ final class Exercise: Identifiable {
     // Attrezzo primario (opzionale)
     var equipment: Equipment?
 
+    // Varianti dell'esercizio (max 10, relazione bidirezionale)
+    var variants: [Exercise]
+
     init(
         id: UUID = UUID(),
         name: String,
@@ -38,7 +41,8 @@ final class Exercise: Identifiable {
         youtubeURL: String? = nil,
         primaryMuscles: [Muscle] = [],
         secondaryMuscles: [Muscle] = [],
-        equipment: Equipment? = nil
+        equipment: Equipment? = nil,
+        variants: [Exercise] = []
     ) {
         self.id = id
         self.name = name
@@ -52,6 +56,30 @@ final class Exercise: Identifiable {
         self.primaryMuscles = primaryMuscles
         self.secondaryMuscles = secondaryMuscles
         self.equipment = equipment
+        self.variants = variants
+    }
+
+    // Helper per aggiungere una variante (bidirezionale)
+    func addVariant(_ variant: Exercise) {
+        // Previeni duplicati e auto-referenza
+        guard variant.id != self.id,
+              !variants.contains(where: { $0.id == variant.id }),
+              variants.count < 10 else { return }
+
+        variants.append(variant)
+
+        // Aggiungi reciprocamente (solo se non già presente)
+        if !variant.variants.contains(where: { $0.id == self.id }) {
+            variant.variants.append(self)
+        }
+    }
+
+    // Helper per rimuovere una variante (bidirezionale)
+    func removeVariant(_ variant: Exercise) {
+        variants.removeAll { $0.id == variant.id }
+
+        // Rimuovi reciprocamente
+        variant.variants.removeAll { $0.id == self.id }
     }
 
     // Helper per ottenere le foto come UIImage
