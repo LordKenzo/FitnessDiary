@@ -50,7 +50,7 @@ struct EditWorkoutExerciseView: View {
                     .pickerStyle(.wheel)
 
                     Picker("Secondi", selection: $restSeconds) {
-                        ForEach(Array(stride(from: 0, to: 60, by: 5))) { sec in
+                        ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
                             Text("\(sec) sec").tag(sec)
                         }
                     }
