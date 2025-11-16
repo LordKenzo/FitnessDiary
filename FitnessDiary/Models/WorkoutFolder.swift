@@ -11,15 +11,12 @@ final class WorkoutFolder: Identifiable {
     var name: String
     var colorHex: String // colore del folder in formato hex
     var order: Int
-    @Relationship(deleteRule: .nullify, inverse: \WorkoutCard.folder)
-    var cards: [WorkoutCard]
 
     init(name: String, colorHex: String = "#007AFF", order: Int = 0) {
         self.id = UUID()
         self.name = name
         self.colorHex = colorHex
         self.order = order
-        self.cards = []
     }
 
     // Helper per convertire hex in Color

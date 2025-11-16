@@ -231,24 +231,6 @@ struct WorkoutExerciseItemRow: View {
 }
 
 #Preview {
-    let exercise = Exercise(
-        name: "Panca Piana",
-        biomechanicalStructure: .multiJoint,
-        trainingRole: .fundamental,
-        primaryMetabolism: .anaerobic,
-        category: .training
-    )
-
-    let exerciseItem = WorkoutExerciseItemData(
-        exercise: exercise,
-        order: 0,
-        sets: [
-            WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: 80),
-            WorkoutSetData(order: 1, setType: .reps, reps: 8, weight: 85),
-            WorkoutSetData(order: 2, setType: .reps, reps: 6, weight: 90)
-        ]
-    )
-
     @Previewable @State var blockData = WorkoutBlockData(
         blockType: .method,
         methodType: .superset,
@@ -256,7 +238,23 @@ struct WorkoutExerciseItemRow: View {
         globalSets: 4,
         globalRestTime: 120,
         notes: "Test superset",
-        exerciseItems: [exerciseItem]
+        exerciseItems: [
+            WorkoutExerciseItemData(
+                exercise: Exercise(
+                    name: "Panca Piana",
+                    biomechanicalStructure: .multiJoint,
+                    trainingRole: .fundamental,
+                    primaryMetabolism: .anaerobic,
+                    category: .training
+                ),
+                order: 0,
+                sets: [
+                    WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: 80),
+                    WorkoutSetData(order: 1, setType: .reps, reps: 8, weight: 85),
+                    WorkoutSetData(order: 2, setType: .reps, reps: 6, weight: 90)
+                ]
+            )
+        ]
     )
 
     NavigationStack {

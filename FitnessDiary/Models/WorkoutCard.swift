@@ -7,24 +7,26 @@ final class WorkoutCard: Identifiable {
     var name: String
     var cardDescription: String?
     var createdDate: Date
-    var folder: WorkoutFolder?
-    var assignedTo: [Client] // array di clienti assegnati (vuoto = scheda del trainer)
+    var folders: [WorkoutFolder] // array di folder (una scheda può stare in più folder)
+    var isAssignedToMe: Bool // toggle separato per assegnazione a me stesso
+    var assignedTo: [Client] // array di clienti assegnati
     @Relationship(deleteRule: .cascade)
     var blocks: [WorkoutBlock] // array di blocchi (esercizi singoli o metodologie)
 
-    init(name: String, description: String? = nil, folder: WorkoutFolder? = nil, assignedTo: [Client] = [], blocks: [WorkoutBlock] = []) {
+    init(name: String, description: String? = nil, folders: [WorkoutFolder] = [], isAssignedToMe: Bool = true, assignedTo: [Client] = [], blocks: [WorkoutBlock] = []) {
         self.id = UUID()
         self.name = name
         self.cardDescription = description
         self.createdDate = Date()
-        self.folder = folder
+        self.folders = folders
+        self.isAssignedToMe = isAssignedToMe
         self.assignedTo = assignedTo
         self.blocks = blocks
     }
 
-    // Helper per sapere se la scheda è assegnata
+    // Helper per sapere se la scheda è assegnata (a me o a clienti)
     var isAssigned: Bool {
-        !assignedTo.isEmpty
+        isAssignedToMe || !assignedTo.isEmpty
     }
 
     // Helper per il numero di clienti assegnati
@@ -34,13 +36,29 @@ final class WorkoutCard: Identifiable {
 
     // Helper per il testo di assegnazione
     var assignmentText: String {
-        if assignedTo.isEmpty {
-            return "Mio"
+        if isAssignedToMe && assignedTo.isEmpty {
+            return "Mia"
+        } else if !isAssignedToMe && assignedTo.isEmpty {
+            return "Non assegnata"
+        } else if isAssignedToMe && assignedTo.count == 1 {
+            return "Mia • \(assignedTo[0].fullName)"
+        } else if isAssignedToMe && assignedTo.count > 1 {
+            return "Mia • \(assignedTo.count) clienti"
         } else if assignedTo.count == 1 {
             return assignedTo[0].fullName
         } else {
-            return "Assegnata a (\(assignedTo.count))"
+            return "\(assignedTo.count) clienti"
         }
+    }
+
+    // Helper per sapere se la scheda è in un folder specifico
+    func isInFolder(_ folder: WorkoutFolder) -> Bool {
+        folders.contains { $0.id == folder.id }
+    }
+
+    // Helper per sapere se la scheda non ha folder
+    var hasNoFolders: Bool {
+        folders.isEmpty
     }
 
     // Helper per il numero totale di blocchi

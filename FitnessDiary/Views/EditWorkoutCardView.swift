@@ -12,7 +12,8 @@ struct EditWorkoutCardView: View {
 
     @State private var name: String
     @State private var description: String
-    @State private var selectedFolder: WorkoutFolder?
+    @State private var selectedFolders: [WorkoutFolder]
+    @State private var isAssignedToMe: Bool
     @State private var selectedClients: [Client]
     @State private var workoutBlocks: [WorkoutBlockData] = []
     @State private var showingExercisePicker = false
@@ -24,7 +25,8 @@ struct EditWorkoutCardView: View {
         self.clients = clients
         _name = State(initialValue: card.name)
         _description = State(initialValue: card.cardDescription ?? "")
-        _selectedFolder = State(initialValue: card.folder)
+        _selectedFolders = State(initialValue: card.folders)
+        _isAssignedToMe = State(initialValue: card.isAssignedToMe)
         _selectedClients = State(initialValue: card.assignedTo)
 
         // Converti i blocchi esistenti in WorkoutBlockData
@@ -74,18 +76,26 @@ struct EditWorkoutCardView: View {
                 }
 
                 Section("Organizzazione") {
-                    Picker("Folder", selection: $selectedFolder) {
-                        Text("Nessuno").tag(nil as WorkoutFolder?)
-                        ForEach(folders) { folder in
-                            HStack {
-                                Circle()
-                                    .fill(folder.color)
-                                    .frame(width: 10, height: 10)
-                                Text(folder.name)
+                    NavigationLink {
+                        FolderSelectionView(
+                            selectedFolders: $selectedFolders,
+                            folders: folders
+                        )
+                    } label: {
+                        HStack {
+                            Text("Folder")
+                            Spacer()
+                            if selectedFolders.isEmpty {
+                                Text("Nessuno")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("(\(selectedFolders.count))")
+                                    .foregroundStyle(.secondary)
                             }
-                            .tag(folder as WorkoutFolder?)
                         }
                     }
+
+                    Toggle("Mia", isOn: $isAssignedToMe)
 
                     NavigationLink {
                         ClientSelectionView(
@@ -94,10 +104,10 @@ struct EditWorkoutCardView: View {
                         )
                     } label: {
                         HStack {
-                            Text("Assegnata a")
+                            Text("Assegnata a clienti")
                             Spacer()
                             if selectedClients.isEmpty {
-                                Text("Mio")
+                                Text("Nessuno")
                                     .foregroundStyle(.secondary)
                             } else {
                                 Text("(\(selectedClients.count))")
@@ -280,7 +290,8 @@ struct EditWorkoutCardView: View {
     private func saveChanges() {
         card.name = name
         card.cardDescription = description.isEmpty ? nil : description
-        card.folder = selectedFolder
+        card.folders = selectedFolders
+        card.isAssignedToMe = isAssignedToMe
         card.assignedTo = selectedClients
 
         // Elimina esplicitamente tutti i blocchi esistenti dal database

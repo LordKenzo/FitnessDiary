@@ -13,6 +13,7 @@ struct WorkoutCardListView: View {
     @State private var selectedFolder: WorkoutFolder?
     @State private var filterOwner: FilterOwner = .all
     @State private var selectedClient: Client?
+    @State private var expandedFolders: Set<UUID> = []
 
     enum FilterOwner: String, CaseIterable {
         case all = "Tutte"
@@ -28,7 +29,7 @@ struct WorkoutCardListView: View {
             case .all:
                 matchesOwner = true
             case .mine:
-                matchesOwner = card.assignedTo.isEmpty
+                matchesOwner = card.isAssignedToMe
             case .client:
                 if let selectedClient = selectedClient {
                     matchesOwner = card.assignedTo.contains(where: { $0.id == selectedClient.id })
@@ -41,11 +42,11 @@ struct WorkoutCardListView: View {
     }
 
     private var cardsWithoutFolder: [WorkoutCard] {
-        filteredCards.filter { $0.folder == nil }
+        filteredCards.filter { $0.hasNoFolders }
     }
 
     private func cards(for folder: WorkoutFolder) -> [WorkoutCard] {
-        filteredCards.filter { $0.folder?.id == folder.id }
+        filteredCards.filter { $0.isInFolder(folder) }
     }
 
     var body: some View {
@@ -63,39 +64,22 @@ struct WorkoutCardListView: View {
                         .buttonStyle(.borderedProminent)
                     }
                 } else {
-                    // Schede senza folder
-                    if !cardsWithoutFolder.isEmpty {
-                        Section {
-                            ForEach(cardsWithoutFolder) { card in
-                                WorkoutCardRow(card: card)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        selectedCard = card
-                                    }
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                        Button(role: .destructive) {
-                                            deleteCard(card)
-                                        } label: {
-                                            Label("Elimina", systemImage: "trash")
-                                        }
-                                        Button {
-                                            selectedCard = card
-                                        } label: {
-                                            Label("Modifica", systemImage: "pencil")
-                                        }
-                                        .tint(.blue)
-                                    }
-                            }
-                        } header: {
-                            Text("Senza Folder")
-                        }
-                    }
-
-                    // Schede organizzate per folder
+                    // Schede organizzate per folder (collassabili)
                     ForEach(folders) { folder in
                         let folderCards = cards(for: folder)
                         if !folderCards.isEmpty {
-                            Section {
+                            DisclosureGroup(
+                                isExpanded: Binding(
+                                    get: { expandedFolders.contains(folder.id) },
+                                    set: { isExpanded in
+                                        if isExpanded {
+                                            expandedFolders.insert(folder.id)
+                                        } else {
+                                            expandedFolders.remove(folder.id)
+                                        }
+                                    }
+                                )
+                            ) {
                                 ForEach(folderCards) { card in
                                     WorkoutCardRow(card: card)
                                         .contentShape(Rectangle())
@@ -116,12 +100,16 @@ struct WorkoutCardListView: View {
                                             .tint(.blue)
                                         }
                                 }
-                            } header: {
+                            } label: {
                                 HStack {
                                     Circle()
                                         .fill(folder.color)
                                         .frame(width: 12, height: 12)
                                     Text(folder.name)
+                                        .font(.headline)
+                                    Text("(\(folderCards.count))")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                     Spacer()
                                     Button {
                                         selectedFolder = folder
@@ -130,7 +118,56 @@ struct WorkoutCardListView: View {
                                             .font(.caption)
                                     }
                                     .buttonStyle(.plain)
+                                    .onTapGesture {
+                                        selectedFolder = folder
+                                    }
                                 }
+                            }
+                        }
+                    }
+
+                    // Schede senza folder (in basso)
+                    if !cardsWithoutFolder.isEmpty {
+                        DisclosureGroup(
+                            isExpanded: Binding(
+                                get: { expandedFolders.contains(UUID(uuidString: "00000000-0000-0000-0000-000000000000")!) },
+                                set: { isExpanded in
+                                    let noFolderUUID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
+                                    if isExpanded {
+                                        expandedFolders.insert(noFolderUUID)
+                                    } else {
+                                        expandedFolders.remove(noFolderUUID)
+                                    }
+                                }
+                            )
+                        ) {
+                            ForEach(cardsWithoutFolder) { card in
+                                WorkoutCardRow(card: card)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        selectedCard = card
+                                    }
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                        Button(role: .destructive) {
+                                            deleteCard(card)
+                                        } label: {
+                                            Label("Elimina", systemImage: "trash")
+                                        }
+                                        Button {
+                                            selectedCard = card
+                                        } label: {
+                                            Label("Modifica", systemImage: "pencil")
+                                        }
+                                        .tint(.blue)
+                                    }
+                            }
+                        } label: {
+                            HStack {
+                                Text("Senza Folder")
+                                    .font(.headline)
+                                Text("(\(cardsWithoutFolder.count))")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -200,7 +237,13 @@ struct WorkoutCardListView: View {
                 Divider()
                 ForEach(clients) { client in
                     Button(action: {
-                        selectedClient = client
+                        // Toggle: se clicco sul cliente già selezionato, torna a "tutti"
+                        if selectedClient?.id == client.id {
+                            filterOwner = .all
+                            selectedClient = nil
+                        } else {
+                            selectedClient = client
+                        }
                     }) {
                         Label(client.fullName, systemImage: selectedClient?.id == client.id ? "checkmark" : "person")
                     }
@@ -252,12 +295,12 @@ struct WorkoutCardRow: View {
                     .font(.headline)
                 Spacer()
                 HStack(spacing: 4) {
-                    Image(systemName: card.assignedTo.isEmpty ? "person.fill" : "person.circle.fill")
+                    Image(systemName: card.isAssignedToMe && card.assignedTo.isEmpty ? "person.fill" : "person.circle.fill")
                         .font(.caption)
                     Text(card.assignmentText)
                         .font(.caption)
                 }
-                .foregroundStyle(card.assignedTo.isEmpty ? .green : .blue)
+                .foregroundStyle(card.isAssignedToMe && card.assignedTo.isEmpty ? .green : .blue)
             }
 
             if let description = card.cardDescription, !description.isEmpty {
@@ -268,7 +311,10 @@ struct WorkoutCardRow: View {
             }
 
             HStack(spacing: 16) {
-                Label("\(card.totalExercises)", systemImage: "list.bullet")
+                Label("\(card.totalBlocks) blocchi", systemImage: "square.stack.3d.up")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Label("\(card.totalExercises) es.", systemImage: "figure.strengthtraining.traditional")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Label("\(card.totalSets) serie", systemImage: "number")
@@ -278,6 +324,30 @@ struct WorkoutCardRow: View {
                 Text(card.createdDate, style: .date)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
+            }
+
+            // Mostra folder se la scheda è in più folder
+            if !card.folders.isEmpty {
+                HStack(spacing: 4) {
+                    ForEach(card.folders.prefix(3)) { folder in
+                        HStack(spacing: 2) {
+                            Circle()
+                                .fill(folder.color)
+                                .frame(width: 8, height: 8)
+                            Text(folder.name)
+                                .font(.caption2)
+                        }
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(folder.color.opacity(0.1))
+                        .clipShape(Capsule())
+                    }
+                    if card.folders.count > 3 {
+                        Text("+\(card.folders.count - 3)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
         }
         .padding(.vertical, 4)
