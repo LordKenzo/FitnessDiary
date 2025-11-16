@@ -249,12 +249,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FitnessDiary/FitnessDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"FitnessDiary/Preview Content\"";
 				DEVELOPMENT_TEAM = FQ8ACGV9YM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Per scattare foto del profilo";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Per importare i tuoi dati di salute come peso e altezza";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Per salvare i tuoi progressi fitness";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Per aggiungere foto al tuo profilo";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -268,7 +273,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = lo.france.FitnessDiary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -278,12 +283,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FitnessDiary/FitnessDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"FitnessDiary/Preview Content\"";
 				DEVELOPMENT_TEAM = FQ8ACGV9YM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Per scattare foto del profilo";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Per importare i tuoi dati di salute come peso e altezza";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Per salvare i tuoi progressi fitness";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Per aggiungere foto al tuo profilo";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -297,7 +307,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = lo.france.FitnessDiary;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
