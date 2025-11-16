@@ -76,96 +76,108 @@ struct ClientWorkoutCardDetailView: View {
 
     var body: some View {
         List {
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(card.name)
-                        .font(.title2)
-                        .bold()
+            headerSection
+            statsSection
+            blocksSection
+        }
+        .navigationTitle(card.name)
+        .navigationBarTitleDisplayMode(.inline)
+    }
 
-                    if let description = card.cardDescription {
-                        Text(description)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
+    private var headerSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(card.name)
+                    .font(.title2)
+                    .bold()
+
+                if let description = card.cardDescription {
+                    Text(description)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
-                .padding(.vertical, 4)
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    private var statsSection: some View {
+        Section {
+            HStack {
+                Label("Blocchi", systemImage: "square.stack.3d.up")
+                Spacer()
+                Text("\(card.totalBlocks)")
+                    .foregroundStyle(.secondary)
             }
 
-            Section {
-                HStack {
-                    Label("Blocchi", systemImage: "square.stack.3d.up")
-                    Spacer()
-                    Text("\(card.totalBlocks)")
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack {
-                    Label("Esercizi", systemImage: "figure.strengthtraining.traditional")
-                    Spacer()
-                    Text("\(card.totalExercises)")
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack {
-                    Label("Serie totali", systemImage: "number")
-                    Spacer()
-                    Text("\(card.totalSets)")
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack {
-                    Label("Durata stimata", systemImage: "clock")
-                    Spacer()
-                    Text("~\(card.estimatedDurationMinutes) min")
-                        .foregroundStyle(.secondary)
-                }
-            } header: {
-                Text("Riepilogo")
+            HStack {
+                Label("Esercizi", systemImage: "figure.strengthtraining.traditional")
+                Spacer()
+                Text("\(card.totalExercises)")
+                    .foregroundStyle(.secondary)
             }
 
-            ForEach(Array(card.blocks.enumerated()), id: \.element.id) { index, block in
-                Section {
-                    ForEach(block.exerciseItems) { exerciseItem in
-                        NavigationLink {
-                            ClientWorkoutExerciseDetailView(
-                                exerciseItem: exerciseItem,
-                                client: client
-                            )
-                        } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(exerciseItem.exercise.name)
+            HStack {
+                Label("Serie totali", systemImage: "number")
+                Spacer()
+                Text("\(card.totalSets)")
+                    .foregroundStyle(.secondary)
+            }
+
+            HStack {
+                Label("Durata stimata", systemImage: "clock")
+                Spacer()
+                Text("~\(card.estimatedDurationMinutes) min")
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Riepilogo")
+        }
+    }
+
+    private var blocksSection: some View {
+        ForEach(Array(card.blocks.enumerated()), id: \.element.id) { index, block in
+            Section {
+                ForEach(block.exerciseItems) { exerciseItem in
+                    NavigationLink {
+                        ClientWorkoutExerciseDetailView(
+                            exerciseItem: exerciseItem,
+                            client: client
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            if let exercise = exerciseItem.exercise {
+                                Text(exercise.name)
                                     .font(.subheadline)
                                     .fontWeight(.medium)
+                            }
 
-                                if block.blockType == .simple {
-                                    Text("\(exerciseItem.sets.count) serie")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
+                            if block.blockType == .simple {
+                                Text("\(exerciseItem.sets.count) serie")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
-                } header: {
-                    HStack {
-                        if block.blockType == .method, let method = block.methodType {
-                            Image(systemName: method.icon)
-                                .foregroundStyle(method.color)
-                            Text(method.rawValue)
-                        } else {
-                            Text("Blocco \(index + 1)")
-                        }
+                }
+            } header: {
+                HStack {
+                    if block.blockType == .method, let method = block.methodType {
+                        Image(systemName: method.icon)
+                            .foregroundStyle(method.color)
+                        Text(method.rawValue)
+                    } else {
+                        Text("Blocco \(index + 1)")
+                    }
 
-                        if block.blockType == .method {
-                            Text("• \(block.globalSets) serie")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+                    if block.blockType == .method {
+                        Text("• \(block.globalSets) serie")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
         }
-        .navigationTitle(card.name)
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -181,8 +193,10 @@ struct ClientWorkoutExerciseDetailView: View {
     var body: some View {
         List {
             Section("Esercizio") {
-                Text(exerciseItem.exercise.name)
-                    .font(.headline)
+                if let exercise = exerciseItem.exercise {
+                    Text(exercise.name)
+                        .font(.headline)
+                }
             }
 
             if let oneRM = oneRepMax, let big5 = exerciseItem.exercise.big5Exercise {
