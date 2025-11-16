@@ -61,6 +61,8 @@ final class UserProfile {
         }
     }
     
+    /// Update the profile's maximum heart rate and recompute cardio zone upper bounds.
+    /// - Parameter maxHR: The new maximum heart rate in beats per minute; zone maxima are set to 60%, 70%, 80%, 90%, and 100% of this value.
     func updateHeartRateZones(maxHR: Int) {
         self.maxHeartRate = maxHR
         self.zone1Max = Int(Double(maxHR) * 0.60)
