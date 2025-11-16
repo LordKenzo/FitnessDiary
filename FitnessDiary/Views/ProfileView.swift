@@ -115,15 +115,15 @@ struct ProfileDetailView: View {
     private func zoneRange(for zone: HeartRateZone) -> String {
         switch zone {
         case .zone1:
-            return "< \(profile.zone1Max) bpm"
+            return "0 - \(profile.zone1Max) bpm"
         case .zone2:
-            return "\(profile.zone1Max)-\(profile.zone2Max) bpm"
+            return "\(profile.zone1Max + 1) - \(profile.zone2Max) bpm"
         case .zone3:
-            return "\(profile.zone2Max)-\(profile.zone3Max) bpm"
+            return "\(profile.zone2Max + 1) - \(profile.zone3Max) bpm"
         case .zone4:
-            return "\(profile.zone3Max)-\(profile.zone4Max) bpm"
+            return "\(profile.zone3Max + 1) - \(profile.zone4Max) bpm"
         case .zone5:
-            return "> \(profile.zone4Max) bpm"
+            return "\(profile.zone4Max + 1) - \(profile.zone5Max) bpm"
         }
     }
 }
