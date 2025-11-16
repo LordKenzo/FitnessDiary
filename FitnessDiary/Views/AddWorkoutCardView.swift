@@ -99,8 +99,6 @@ struct AddWorkoutCardView: View {
                         }
                     } label: {
                         Label("Aggiungi Blocco", systemImage: "plus.circle.fill")
-                    } primaryAction: {
-                        showingExercisePicker = true
                     }
                 } header: {
                     HStack {
