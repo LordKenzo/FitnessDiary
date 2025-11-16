@@ -14,6 +14,9 @@ final class HealthKitManager: ObservableObject {
         HKObjectType.characteristicType(forIdentifier: .biologicalSex)!
     ]
     
+    /// Requests permission to read the manager's configured HealthKit data types and sets `isAuthorized` to `true` on success.
+    /// - Throws: `HealthKitError.notAvailable` if HealthKit data is not available on the device.
+    /// - Throws: Any error produced by the HealthKit authorization request if the authorization fails.
     func requestAuthorization() async throws {
         guard HKHealthStore.isHealthDataAvailable() else {
             throw HealthKitError.notAvailable
@@ -23,6 +26,12 @@ final class HealthKitManager: ObservableObject {
         isAuthorized = true
     }
     
+    /// Retrieves the user's most recent weight and height samples from HealthKit, computes age from date of birth, and maps biological sex to `Gender`.
+    /// - Returns: A tuple with:
+    ///   - weight: The most recent body mass in kilograms, or `nil` if unavailable.
+    ///   - height: The most recent height in centimeters, or `nil` if unavailable.
+    ///   - age: The user's age in years computed from date of birth, or `nil` if unavailable.
+    ///   - gender: The user's mapped `Gender` (`.male`, `.female`, or `.other`), or `nil` if unavailable.
     func fetchUserData() async throws -> (weight: Double?, height: Double?, age: Int?, gender: Gender?) {
         // Peso
         let weight = try await fetchMostRecentSample(for: .bodyMass)
@@ -53,6 +62,10 @@ final class HealthKitManager: ObservableObject {
         return (weightInKg, heightInCm, age, gender)
     }
     
+    /// Fetches the most recent quantity sample for the given HealthKit quantity identifier.
+    /// - Parameter identifier: The `HKQuantityTypeIdentifier` to query (for example `.bodyMass` or `.height`).
+    /// - Returns: The most recent `HKQuantity` for the requested type, or `nil` if no sample exists.
+    /// - Throws: The error produced by the HealthKit query if the query fails.
     private func fetchMostRecentSample(for identifier: HKQuantityTypeIdentifier) async throws -> HKQuantity? {
         let type = HKQuantityType.quantityType(forIdentifier: identifier)!
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)

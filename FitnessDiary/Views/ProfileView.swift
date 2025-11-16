@@ -107,11 +107,17 @@ struct ProfileDetailView: View {
         }
     }
     
+    /// Computes the body mass index (BMI) for the current profile.
+    /// - Returns: The BMI value computed as weight in kilograms divided by height in meters squared.
     private func calculateBMI() -> Double {
         let heightInMeters = profile.height / 100
         return profile.weight / (heightInMeters * heightInMeters)
     }
     
+    /// Formats the BPM range string for a given heart rate zone using the current profile's zone thresholds.
+    /// - Parameters:
+    ///   - zone: The heart rate zone to format.
+    /// - Returns: A human-readable BPM range for the zone (e.g., "< 100 bpm", "100-120 bpm", "> 160 bpm").
     private func zoneRange(for zone: HeartRateZone) -> String {
         switch zone {
         case .zone1:

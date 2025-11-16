@@ -46,6 +46,11 @@ enum HeartRateZone: Int, CaseIterable {
         }
     }
     
+    /// Selects the heart rate training zone that corresponds to a measured heart rate using a user's zone thresholds.
+    /// - Parameters:
+    ///   - heartRate: Measured heart rate in beats per minute (bpm).
+    ///   - profile: `UserProfile` providing `zone1Max` through `zone4Max` threshold values used to determine the zone.
+    /// - Returns: The matching `HeartRateZone`: `zone1` if `heartRate` is less than or equal to `profile.zone1Max`, `zone2` if less than or equal to `profile.zone2Max`, `zone3` if less than or equal to `profile.zone3Max`, `zone4` if less than or equal to `profile.zone4Max`, and `zone5` otherwise.
     static func getZone(for heartRate: Int, profile: UserProfile) -> HeartRateZone {
         if heartRate <= profile.zone1Max {
             return .zone1
