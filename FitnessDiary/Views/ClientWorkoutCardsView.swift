@@ -3,10 +3,13 @@ import SwiftData
 
 struct ClientWorkoutCardsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Query private var allCards: [WorkoutCard]
     let client: Client
 
     var assignedCards: [WorkoutCard] {
-        client.assignedCards.sorted { $0.createdDate > $1.createdDate }
+        allCards.filter { card in
+            card.assignedTo.contains(where: { $0.id == client.id })
+        }.sorted { $0.createdDate > $1.createdDate }
     }
 
     var body: some View {
