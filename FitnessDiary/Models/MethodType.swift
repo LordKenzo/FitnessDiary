@@ -191,4 +191,23 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return false
         }
     }
+
+    // Tipo di serie supportato dal metodo
+    var supportedSetType: SetTypeSupport {
+        switch self {
+        case .superset, .triset, .giantSet, .dropset, .pyramidAscending, .pyramidDescending,
+             .contrastTraining, .complexTraining, .cluster, .rest_pause:
+            return .repsOnly
+        case .emom, .amrap:
+            return .durationOnly
+        case .circuit:
+            return .both // Circuit può essere a tempo o a ripetizioni
+        }
+    }
+}
+
+enum SetTypeSupport {
+    case repsOnly       // Solo ripetizioni (Superset, Cluster, ecc.)
+    case durationOnly   // Solo durata (EMOM, AMRAP)
+    case both          // Entrambi (Circuit Training)
 }

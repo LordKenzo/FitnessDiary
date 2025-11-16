@@ -159,6 +159,7 @@ struct SetRow: View {
     let exercise: Exercise?
     let oneRepMax: Double?
     var isClusterSet: Bool = false
+    var setTypeSupport: SetTypeSupport = .both
 
     var body: some View {
         VStack(spacing: 8) {
@@ -168,12 +169,20 @@ struct SetRow: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 60, alignment: .leading)
 
-                Picker("Tipo", selection: $set.setType) {
-                    ForEach([SetType.reps, SetType.duration], id: \.self) { type in
-                        Text(type.rawValue).tag(type)
+                // Mostra Picker solo se il metodo supporta entrambi i tipi
+                if setTypeSupport == .both {
+                    Picker("Tipo", selection: $set.setType) {
+                        ForEach([SetType.reps, SetType.duration], id: \.self) { type in
+                            Text(type.rawValue).tag(type)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                } else {
+                    // Mostra tipo fisso
+                    Text(set.setType.rawValue)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
-                .pickerStyle(.segmented)
             }
 
             if set.setType == .reps {

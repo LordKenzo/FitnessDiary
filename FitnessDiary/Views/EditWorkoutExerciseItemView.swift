@@ -147,13 +147,14 @@ struct EditWorkoutExerciseItemView: View {
     @ViewBuilder
     private var setsList: some View {
         let isCluster = methodType?.requiresClusterManagement ?? false
+        let setTypeSupport = methodType?.supportedSetType ?? .both
         if isInMethod {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, setTypeSupport: setTypeSupport)
             }
         } else {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster)
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, setTypeSupport: setTypeSupport)
             }
             .onMove(perform: moveSets)
             .onDelete(perform: deleteSets)

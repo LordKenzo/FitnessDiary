@@ -206,13 +206,27 @@ struct EditWorkoutBlockView: View {
         // Se è un metodo, crea le serie in base a globalSets
         let setsCount = blockData.blockType == .method ? globalSets : 1
         let isCluster = blockData.methodType?.requiresClusterManagement ?? false
+
+        // Determina il tipo di serie corretto per il metodo
+        let setTypeSupport = blockData.methodType?.supportedSetType ?? .both
+        let defaultSetType: SetType
+        switch setTypeSupport {
+        case .repsOnly:
+            defaultSetType = .reps
+        case .durationOnly:
+            defaultSetType = .duration
+        case .both:
+            defaultSetType = .reps // Default a reps per esercizi singoli e Circuit
+        }
+
         var sets: [WorkoutSetData] = []
         for i in 0..<setsCount {
             sets.append(WorkoutSetData(
                 order: i,
-                setType: .reps,
-                reps: 10,
+                setType: defaultSetType,
+                reps: defaultSetType == .reps ? 10 : nil,
                 weight: nil,
+                duration: defaultSetType == .duration ? 30 : nil,
                 loadType: .absolute,
                 percentageOfMax: nil,
                 clusterSize: isCluster ? 2 : nil,
@@ -270,6 +284,18 @@ struct EditWorkoutBlockView: View {
     private func syncSetsForCount(_ targetSetsCount: Int) {
         let isCluster = blockData.methodType?.requiresClusterManagement ?? false
 
+        // Determina il tipo di serie corretto per il metodo
+        let setTypeSupport = blockData.methodType?.supportedSetType ?? .both
+        let defaultSetType: SetType
+        switch setTypeSupport {
+        case .repsOnly:
+            defaultSetType = .reps
+        case .durationOnly:
+            defaultSetType = .duration
+        case .both:
+            defaultSetType = .reps
+        }
+
         for index in blockData.exerciseItems.indices {
             let currentSetsCount = blockData.exerciseItems[index].sets.count
 
@@ -278,9 +304,10 @@ struct EditWorkoutBlockView: View {
                 for setOrder in currentSetsCount..<targetSetsCount {
                     let newSet = WorkoutSetData(
                         order: setOrder,
-                        setType: .reps,
-                        reps: 10,
+                        setType: defaultSetType,
+                        reps: defaultSetType == .reps ? 10 : nil,
                         weight: nil,
+                        duration: defaultSetType == .duration ? 30 : nil,
                         loadType: .absolute,
                         percentageOfMax: nil,
                         clusterSize: isCluster ? 2 : nil,
