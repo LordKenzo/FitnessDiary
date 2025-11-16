@@ -293,16 +293,21 @@ struct EditWorkoutBlockView: View {
     /// Logica comune di sincronizzazione
     private func syncSetsForCount(_ targetSetsCount: Int) {
         let isCluster = blockData.methodType?.requiresClusterManagement ?? false
+        let isRestPause = blockData.methodType?.requiresRestPauseManagement ?? false
+        let isTabata = blockData.methodType?.requiresTabataManagement ?? false
 
         // Determina il tipo di serie corretto per il metodo
-        let setTypeSupport = blockData.methodType?.supportedSetType ?? .both
+        let setTypeSupport = blockData.methodType?.supportedSetType
         let defaultSetType: SetType
-        switch setTypeSupport {
-        case .repsOnly:
-            defaultSetType = .reps
-        case .durationOnly:
-            defaultSetType = .duration
-        case .both:
+        if let support = setTypeSupport {
+            switch support {
+            case .repsOnly:
+                defaultSetType = .reps
+            case .durationOnly:
+                defaultSetType = .duration
+            }
+        } else {
+            // Default per esercizi singoli
             defaultSetType = .reps
         }
 
@@ -324,7 +329,12 @@ struct EditWorkoutBlockView: View {
                         clusterRestTime: isCluster ? 30 : nil,
                         clusterProgression: isCluster ? .constant : nil,
                         clusterMinPercentage: isCluster ? 80 : nil,
-                        clusterMaxPercentage: isCluster ? 95 : nil
+                        clusterMaxPercentage: isCluster ? 95 : nil,
+                        restPauseCount: isRestPause ? 2 : nil,
+                        restPauseDuration: isRestPause ? 15 : nil,
+                        tabataWorkDuration: isTabata ? 20 : nil,
+                        tabataRestDuration: isTabata ? 10 : nil,
+                        tabataRounds: isTabata ? 8 : nil
                     )
                     blockData.exerciseItems[index].sets.append(newSet)
                 }

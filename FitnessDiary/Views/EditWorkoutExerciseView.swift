@@ -565,11 +565,7 @@ struct SetRow: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 60, alignment: .leading)
 
-                Stepper("") {
-                    set.restPauseCount = min(5, (set.restPauseCount ?? 2) + 1)
-                } onDecrement: {
-                    set.restPauseCount = max(1, (set.restPauseCount ?? 2) - 1)
-                } label: {
+                Stepper {
                     HStack(spacing: 4) {
                         Text("\(set.restPauseCount ?? 2)")
                             .font(.subheadline)
@@ -577,6 +573,10 @@ struct SetRow: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                } onIncrement: {
+                    set.restPauseCount = min(5, (set.restPauseCount ?? 2) + 1)
+                } onDecrement: {
+                    set.restPauseCount = max(1, (set.restPauseCount ?? 2) - 1)
                 }
                 .frame(width: 120)
 
@@ -639,11 +639,7 @@ struct SetRow: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 60, alignment: .leading)
 
-                Stepper("") {
-                    set.tabataRounds = min(12, (set.tabataRounds ?? 8) + 1)
-                } onDecrement: {
-                    set.tabataRounds = max(4, (set.tabataRounds ?? 8) - 1)
-                } label: {
+                Stepper {
                     HStack(spacing: 4) {
                         Text("\(set.tabataRounds ?? 8)")
                             .font(.subheadline)
@@ -651,6 +647,10 @@ struct SetRow: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                } onIncrement: {
+                    set.tabataRounds = min(12, (set.tabataRounds ?? 8) + 1)
+                } onDecrement: {
+                    set.tabataRounds = max(4, (set.tabataRounds ?? 8) - 1)
                 }
                 .frame(width: 120)
 
