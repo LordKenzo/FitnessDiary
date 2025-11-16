@@ -95,16 +95,20 @@ struct EditWorkoutExerciseView: View {
         }
         .navigationTitle("Configura Esercizio")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(content: {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Fatto") {
-                    saveChanges()
-                }
-            }
-        })
         .sheet(isPresented: $showingExercisePicker) {
             ExercisePickerView(exercises: exercises) { exercise in
                 exerciseData.exercise = exercise
+            }
+        }
+        .toolbar {
+            doneButton
+        }
+    }
+
+    private var doneButton: some ToolbarContent {
+        ToolbarItem(placement: .confirmationAction) {
+            Button("Fatto") {
+                saveChanges()
             }
         }
     }
