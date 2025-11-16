@@ -20,7 +20,8 @@ final class Exercise: Identifiable {
     var youtubeURL: String?
 
     // Relazione con muscoli target
-    var targetMuscles: [Muscle]
+    var primaryMuscles: [Muscle]
+    var secondaryMuscles: [Muscle]
 
     init(
         id: UUID = UUID(),
@@ -32,7 +33,8 @@ final class Exercise: Identifiable {
         metabolicType: MetabolicType,
         exerciseType: ExerciseType,
         youtubeURL: String? = nil,
-        targetMuscles: [Muscle] = []
+        primaryMuscles: [Muscle] = [],
+        secondaryMuscles: [Muscle] = []
     ) {
         self.id = id
         self.name = name
@@ -43,7 +45,8 @@ final class Exercise: Identifiable {
         self.metabolicType = metabolicType
         self.exerciseType = exerciseType
         self.youtubeURL = youtubeURL
-        self.targetMuscles = targetMuscles
+        self.primaryMuscles = primaryMuscles
+        self.secondaryMuscles = secondaryMuscles
     }
 
     // Helper per ottenere le foto come UIImage

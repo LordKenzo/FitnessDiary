@@ -145,11 +145,30 @@ struct ExerciseRow: View {
                         .foregroundStyle(.secondary)
                 }
 
-                if !exercise.targetMuscles.isEmpty {
-                    Text(exercise.targetMuscles.map { $0.name }.joined(separator: ", "))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                // Muscoli primari
+                if !exercise.primaryMuscles.isEmpty {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.yellow)
+                        Text(exercise.primaryMuscles.map { $0.name }.joined(separator: ", "))
+                            .font(.caption2)
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                    }
+                }
+
+                // Muscoli secondari
+                if !exercise.secondaryMuscles.isEmpty {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.leadinghalf.filled")
+                            .font(.caption2)
+                            .foregroundStyle(.gray)
+                        Text(exercise.secondaryMuscles.map { $0.name }.joined(separator: ", "))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
                 }
             }
 
@@ -165,6 +184,63 @@ struct ExerciseRow: View {
     }
 }
 
+// MARK: - Muscle Group Selector Component
+struct MuscleGroupSelector: View {
+    let muscles: [Muscle]
+    @Binding var selectedMuscles: Set<Muscle>
+    let title: String
+    let icon: String
+
+    private var musclesByCategory: [MuscleCategory: [Muscle]] {
+        Dictionary(grouping: muscles, by: { $0.category })
+    }
+
+    var body: some View {
+        Section {
+            if muscles.isEmpty {
+                Text("Nessun muscolo disponibile")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(MuscleCategory.allCases, id: \.self) { category in
+                    if let musclesInCategory = musclesByCategory[category], !musclesInCategory.isEmpty {
+                        DisclosureGroup {
+                            ForEach(musclesInCategory) { muscle in
+                                Button {
+                                    toggleMuscle(muscle)
+                                } label: {
+                                    HStack {
+                                        Text(muscle.name)
+                                            .foregroundStyle(.primary)
+                                        Spacer()
+                                        if selectedMuscles.contains(muscle) {
+                                            Image(systemName: "checkmark")
+                                                .foregroundStyle(.blue)
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            Label(category.rawValue, systemImage: category.icon)
+                                .font(.subheadline)
+                                .foregroundStyle(.primary)
+                        }
+                    }
+                }
+            }
+        } header: {
+            Label(title, systemImage: icon)
+        }
+    }
+
+    private func toggleMuscle(_ muscle: Muscle) {
+        if selectedMuscles.contains(muscle) {
+            selectedMuscles.remove(muscle)
+        } else {
+            selectedMuscles.insert(muscle)
+        }
+    }
+}
+
 struct AddExerciseView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -176,7 +252,8 @@ struct AddExerciseView: View {
     @State private var metabolicType: MetabolicType = .mixed
     @State private var exerciseType: ExerciseType = .multiJoint
     @State private var youtubeURL = ""
-    @State private var selectedMuscles: Set<Muscle> = []
+    @State private var selectedPrimaryMuscles: Set<Muscle> = []
+    @State private var selectedSecondaryMuscles: Set<Muscle> = []
 
     @State private var photoItem1: PhotosPickerItem?
     @State private var photoItem2: PhotosPickerItem?
@@ -212,28 +289,19 @@ struct AddExerciseView: View {
                     }
                 }
 
-                Section("Muscoli Target") {
-                    if muscles.isEmpty {
-                        Text("Nessun muscolo disponibile")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(muscles) { muscle in
-                            Button {
-                                toggleMuscle(muscle)
-                            } label: {
-                                HStack {
-                                    Text(muscle.name)
-                                        .foregroundStyle(.primary)
-                                    Spacer()
-                                    if selectedMuscles.contains(muscle) {
-                                        Image(systemName: "checkmark")
-                                            .foregroundStyle(.blue)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                MuscleGroupSelector(
+                    muscles: muscles,
+                    selectedMuscles: $selectedPrimaryMuscles,
+                    title: "Muscoli Primari",
+                    icon: "star.fill"
+                )
+
+                MuscleGroupSelector(
+                    muscles: muscles,
+                    selectedMuscles: $selectedSecondaryMuscles,
+                    title: "Muscoli Secondari",
+                    icon: "star.leadinghalf.filled"
+                )
 
                 Section("Foto (Max 3)") {
                     PhotoPickerRow(title: "Foto 1", item: $photoItem1, photoData: $photoData1)
@@ -266,14 +334,6 @@ struct AddExerciseView: View {
         }
     }
 
-    private func toggleMuscle(_ muscle: Muscle) {
-        if selectedMuscles.contains(muscle) {
-            selectedMuscles.remove(muscle)
-        } else {
-            selectedMuscles.insert(muscle)
-        }
-    }
-
     private func saveExercise() {
         let exercise = Exercise(
             name: name,
@@ -284,7 +344,8 @@ struct AddExerciseView: View {
             metabolicType: metabolicType,
             exerciseType: exerciseType,
             youtubeURL: youtubeURL.isEmpty ? nil : youtubeURL,
-            targetMuscles: Array(selectedMuscles)
+            primaryMuscles: Array(selectedPrimaryMuscles),
+            secondaryMuscles: Array(selectedSecondaryMuscles)
         )
         modelContext.insert(exercise)
         dismiss()
@@ -298,7 +359,8 @@ struct EditExerciseView: View {
     @Bindable var exercise: Exercise
     let muscles: [Muscle]
 
-    @State private var selectedMuscles: Set<Muscle> = []
+    @State private var selectedPrimaryMuscles: Set<Muscle> = []
+    @State private var selectedSecondaryMuscles: Set<Muscle> = []
     @State private var photoItem1: PhotosPickerItem?
     @State private var photoItem2: PhotosPickerItem?
     @State private var photoItem3: PhotosPickerItem?
@@ -332,27 +394,24 @@ struct EditExerciseView: View {
                     }
                 }
 
-                Section("Muscoli Target") {
-                    if muscles.isEmpty {
-                        Text("Nessun muscolo disponibile")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(muscles) { muscle in
-                            Button {
-                                toggleMuscle(muscle)
-                            } label: {
-                                HStack {
-                                    Text(muscle.name)
-                                        .foregroundStyle(.primary)
-                                    Spacer()
-                                    if selectedMuscles.contains(muscle) {
-                                        Image(systemName: "checkmark")
-                                            .foregroundStyle(.blue)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                MuscleGroupSelector(
+                    muscles: muscles,
+                    selectedMuscles: $selectedPrimaryMuscles,
+                    title: "Muscoli Primari",
+                    icon: "star.fill"
+                )
+                .onChange(of: selectedPrimaryMuscles) { _, newValue in
+                    exercise.primaryMuscles = Array(newValue)
+                }
+
+                MuscleGroupSelector(
+                    muscles: muscles,
+                    selectedMuscles: $selectedSecondaryMuscles,
+                    title: "Muscoli Secondari",
+                    icon: "star.leadinghalf.filled"
+                )
+                .onChange(of: selectedSecondaryMuscles) { _, newValue in
+                    exercise.secondaryMuscles = Array(newValue)
                 }
 
                 Section("Foto (Max 3)") {
@@ -405,18 +464,9 @@ struct EditExerciseView: View {
                 }
             }
             .onAppear {
-                selectedMuscles = Set(exercise.targetMuscles)
+                selectedPrimaryMuscles = Set(exercise.primaryMuscles)
+                selectedSecondaryMuscles = Set(exercise.secondaryMuscles)
             }
-        }
-    }
-
-    private func toggleMuscle(_ muscle: Muscle) {
-        if selectedMuscles.contains(muscle) {
-            selectedMuscles.remove(muscle)
-            exercise.targetMuscles.removeAll { $0.id == muscle.id }
-        } else {
-            selectedMuscles.insert(muscle)
-            exercise.targetMuscles.append(muscle)
         }
     }
 
