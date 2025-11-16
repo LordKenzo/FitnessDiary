@@ -1,9 +1,10 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct FitnessDiaryApp: App {
     @State private var showOnboarding = true
-    
+
     var body: some Scene {
         WindowGroup {
             if showOnboarding {
@@ -12,5 +13,6 @@ struct FitnessDiaryApp: App {
                 ContentView() // La tua vista principale
             }
         }
+        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self])
     }
 }

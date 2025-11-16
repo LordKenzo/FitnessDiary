@@ -22,7 +22,15 @@ struct SettingsView: View {
                         Label("Profilo", systemImage: "person.circle")
                     }
                 }
-                
+
+                Section("Clienti") {
+                    NavigationLink {
+                        ClientListView()
+                    } label: {
+                        Label("Gestione Clienti", systemImage: "person.3")
+                    }
+                }
+
                 Section("Monitoraggio") {
                     NavigationLink {
                         HeartRateMonitorView()
@@ -58,5 +66,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
-        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self], inMemory: true)
+        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self], inMemory: true)
 }

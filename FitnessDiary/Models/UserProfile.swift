@@ -77,4 +77,15 @@ enum Gender: String, Codable, CaseIterable {
     case male = "Maschio"
     case female = "Femmina"
     case other = "Altro"
+
+    var icon: String {
+        switch self {
+        case .male:
+            return "figure.arms.open"
+        case .female:
+            return "figure.dress.line.vertical.figure"
+        case .other:
+            return "person"
+        }
+    }
 }
