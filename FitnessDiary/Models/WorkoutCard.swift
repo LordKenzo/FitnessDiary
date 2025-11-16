@@ -85,4 +85,48 @@ final class WorkoutCard: Identifiable {
             }
         }
     }
+
+    // Stima della durata totale dell'allenamento in secondi
+    var estimatedDurationSeconds: TimeInterval {
+        blocks.reduce(0.0) { total, block in
+            return total + block.estimatedDurationSeconds
+        }
+    }
+
+    // Stima della durata in minuti (arrotondata)
+    var estimatedDurationMinutes: Int {
+        Int(estimatedDurationSeconds / 60)
+    }
+}
+
+// MARK: - WorkoutBlock Duration Estimation
+extension WorkoutBlock {
+    /// Stima della durata del blocco in secondi
+    var estimatedDurationSeconds: TimeInterval {
+        // Tempo di recupero totale: globalSets - 1 (recupero tra le serie) * globalRestTime
+        let totalRestTime = Double(max(0, globalSets - 1)) * (globalRestTime ?? 0)
+
+        // Tempo di esecuzione degli esercizi
+        var executionTime: TimeInterval = 0
+
+        for exerciseItem in exerciseItems {
+            // Per ogni esercizio, calcola il tempo di esecuzione delle sue serie
+            for set in exerciseItem.sets {
+                switch set.setType {
+                case .reps:
+                    // 1 secondo per ripetizione (stima)
+                    executionTime += TimeInterval(set.reps ?? 10)
+                case .duration:
+                    // Usa la durata specificata
+                    executionTime += set.duration ?? 30
+                }
+            }
+        }
+
+        // Se è un metodo con esercizi multipli (superset, triset, etc.),
+        // gli esercizi vengono fatti consecutivamente, quindi il tempo è la somma
+        // Se è un esercizio singolo, il tempo è quello calcolato
+
+        return totalRestTime + executionTime
+    }
 }

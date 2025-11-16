@@ -82,7 +82,8 @@ struct EditWorkoutBlockView: View {
                         EditWorkoutExerciseItemView(
                             exerciseItemData: $blockData.exerciseItems[index],
                             exercises: exercises,
-                            isInMethod: blockData.blockType == .method
+                            isInMethod: blockData.blockType == .method,
+                            methodValidation: blockData.methodType?.loadProgressionValidation
                         )
                     } label: {
                         WorkoutExerciseItemRow(
@@ -156,10 +157,24 @@ struct EditWorkoutBlockView: View {
     }
 
     private func addExercise(_ exercise: Exercise) {
+        // Se è un metodo, crea le serie in base a globalSets
+        let setsCount = blockData.blockType == .method ? globalSets : 1
+        var sets: [WorkoutSetData] = []
+        for i in 0..<setsCount {
+            sets.append(WorkoutSetData(
+                order: i,
+                setType: .reps,
+                reps: 10,
+                weight: nil,
+                loadType: .absolute,
+                percentageOfMax: nil
+            ))
+        }
+
         let newExerciseItem = WorkoutExerciseItemData(
             exercise: exercise,
             order: blockData.exerciseItems.count,
-            sets: [WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: nil, loadType: .absolute, percentageOfMax: nil)]
+            sets: sets
         )
         blockData.exerciseItems.append(newExerciseItem)
     }
@@ -182,6 +197,41 @@ struct EditWorkoutBlockView: View {
         blockData.globalSets = globalSets
         blockData.globalRestTime = TimeInterval(globalRestMinutes * 60 + globalRestSeconds)
         blockData.notes = notes.isEmpty ? nil : notes
+
+        // Se è un metodo, sincronizza il numero di serie di tutti gli esercizi
+        if blockData.blockType == .method {
+            syncExerciseSets()
+        }
+    }
+
+    /// Sincronizza il numero di serie di tutti gli esercizi con globalSets
+    private func syncExerciseSets() {
+        for index in blockData.exerciseItems.indices {
+            let currentSetsCount = blockData.exerciseItems[index].sets.count
+
+            if currentSetsCount < globalSets {
+                // Aggiungi serie mancanti
+                for setOrder in currentSetsCount..<globalSets {
+                    let newSet = WorkoutSetData(
+                        order: setOrder,
+                        setType: .reps,
+                        reps: 10,
+                        weight: nil,
+                        loadType: .absolute,
+                        percentageOfMax: nil
+                    )
+                    blockData.exerciseItems[index].sets.append(newSet)
+                }
+            } else if currentSetsCount > globalSets {
+                // Rimuovi serie in eccesso
+                blockData.exerciseItems[index].sets = Array(blockData.exerciseItems[index].sets.prefix(globalSets))
+            }
+
+            // Riordina gli indici
+            for setIndex in blockData.exerciseItems[index].sets.indices {
+                blockData.exerciseItems[index].sets[setIndex].order = setIndex
+            }
+        }
     }
 }
 

@@ -6,6 +6,14 @@ enum BlockType: String, Codable, CaseIterable {
     case method = "Con Metodo"
 }
 
+/// Tipo di validazione da applicare alla progressione dei carichi
+enum LoadProgressionValidation {
+    case none // Nessuna validazione
+    case ascending // I pesi devono aumentare serie dopo serie
+    case descending // I pesi devono diminuire serie dopo serie
+    case constant // Tutte le serie devono avere lo stesso peso
+}
+
 enum MethodType: String, Codable, CaseIterable, Identifiable {
     case superset = "Superset"
     case triset = "Triset"
@@ -134,6 +142,20 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
             return "As Many Reps As Possible - massime ripetizioni nel tempo"
         case .circuit:
             return "Circuito di esercizi da ripetere"
+        }
+    }
+
+    // Tipo di validazione da applicare alla progressione dei carichi
+    var loadProgressionValidation: LoadProgressionValidation {
+        switch self {
+        case .dropset, .pyramidDescending:
+            return .descending
+        case .pyramidAscending:
+            return .ascending
+        case .rest_pause, .cluster:
+            return .constant
+        default:
+            return .none
         }
     }
 }

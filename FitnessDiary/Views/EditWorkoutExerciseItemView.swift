@@ -7,6 +7,7 @@ struct EditWorkoutExerciseItemView: View {
     @Binding var exerciseItemData: WorkoutExerciseItemData
     let exercises: [Exercise]
     let isInMethod: Bool // se true, nasconde il tempo di recupero (gestito dal blocco)
+    var methodValidation: LoadProgressionValidation? // validazione da applicare se in un metodo
 
     @State private var notes: String
     @State private var restMinutes: Int
@@ -21,10 +22,16 @@ struct EditWorkoutExerciseItemView: View {
         return profile.getOneRepMax(for: big5)
     }
 
-    init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false) {
+    private var validationError: String? {
+        guard let validation = methodValidation else { return nil }
+        return exerciseItemData.validateLoadProgression(for: validation)
+    }
+
+    init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false, methodValidation: LoadProgressionValidation? = nil) {
         self._exerciseItemData = exerciseItemData
         self.exercises = exercises
         self.isInMethod = isInMethod
+        self.methodValidation = methodValidation
         _notes = State(initialValue: exerciseItemData.wrappedValue.notes ?? "")
 
         let restTime = exerciseItemData.wrappedValue.restTime ?? 60
@@ -77,23 +84,43 @@ struct EditWorkoutExerciseItemView: View {
                     .lineLimit(2...4)
             }
 
+            // Warning di validazione
+            if let error = validationError {
+                Section {
+                    HStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text(error)
+                            .font(.subheadline)
+                            .foregroundStyle(.orange)
+                    }
+                }
+            }
+
             Section {
                 ForEach($exerciseItemData.sets) { $set in
                     SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax)
                 }
-                .onMove(perform: moveSets)
-                .onDelete(perform: deleteSets)
+                // Permetti modifica ordine e cancellazione solo se NON in un metodo
+                .onMove(perform: isInMethod ? nil : moveSets)
+                .onDelete(perform: isInMethod ? nil : deleteSets)
 
-                Button {
-                    addSet()
-                } label: {
-                    Label("Aggiungi Serie", systemImage: "plus.circle.fill")
+                // Mostra pulsante aggiungi solo se NON in un metodo
+                if !isInMethod {
+                    Button {
+                        addSet()
+                    } label: {
+                        Label("Aggiungi Serie", systemImage: "plus.circle.fill")
+                    }
                 }
             } header: {
                 HStack {
                     Text(isInMethod ? "Ripetizioni per Serie" : "Serie")
                     Spacer()
-                    EditButton()
+                    // EditButton solo se NON in un metodo
+                    if !isInMethod {
+                        EditButton()
+                    }
                 }
             } footer: {
                 if isInMethod {

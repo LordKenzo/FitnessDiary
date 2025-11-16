@@ -321,7 +321,7 @@ struct WorkoutCardRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text(card.createdDate, style: .date)
+                Label("~\(card.estimatedDurationMinutes) min", systemImage: "clock")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
