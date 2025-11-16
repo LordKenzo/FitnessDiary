@@ -399,6 +399,20 @@ struct EditClientView: View {
                     }
                 }
 
+                Section("Schede Assegnate") {
+                    NavigationLink {
+                        ClientWorkoutCardsView(client: client)
+                    } label: {
+                        HStack {
+                            Label("Vedi Schede", systemImage: "list.bullet.clipboard")
+                            Spacer()
+                            Text("\(client.assignedCards.count)")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    }
+                }
+
                 Section {
                     Button("Elimina Cliente", role: .destructive) {
                         deleteClient()

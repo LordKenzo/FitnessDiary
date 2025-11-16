@@ -44,35 +44,40 @@ struct EditWorkoutBlockView: View {
                 }
             }
 
-            // Global parameters section
-            Section("Parametri Blocco") {
-                Stepper("Serie: \(globalSets)", value: $globalSets, in: 1...20)
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Recupero tra serie")
-                        .font(.subheadline)
-
-                    HStack(spacing: 16) {
-                        Picker("Minuti", selection: $globalRestMinutes) {
-                            ForEach(0..<10, id: \.self) { min in
-                                Text("\(min)m").tag(min)
-                            }
+            // Global parameters section - solo per metodi
+            if blockData.blockType == .method {
+                Section("Parametri Blocco") {
+                    Stepper("Serie: \(globalSets)", value: $globalSets, in: 1...20)
+                        .onChange(of: globalSets) { _, _ in
+                            syncExerciseSetsInRealTime()
                         }
-                        .pickerStyle(.wheel)
-                        .frame(width: 80)
 
-                        Picker("Secondi", selection: $globalRestSeconds) {
-                            ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
-                                Text("\(sec)s").tag(sec)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Recupero tra serie")
+                            .font(.subheadline)
+
+                        HStack(spacing: 16) {
+                            Picker("Minuti", selection: $globalRestMinutes) {
+                                ForEach(0..<10, id: \.self) { min in
+                                    Text("\(min)m").tag(min)
+                                }
                             }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
+
+                            Picker("Secondi", selection: $globalRestSeconds) {
+                                ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
+                                    Text("\(sec)s").tag(sec)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
                         }
-                        .pickerStyle(.wheel)
-                        .frame(width: 80)
                     }
-                }
 
-                TextField("Note (opzionale)", text: $notes, axis: .vertical)
-                    .lineLimit(2...4)
+                    TextField("Note (opzionale)", text: $notes, axis: .vertical)
+                        .lineLimit(2...4)
+                }
             }
 
             // Exercises section
@@ -204,14 +209,24 @@ struct EditWorkoutBlockView: View {
         }
     }
 
-    /// Sincronizza il numero di serie di tutti gli esercizi con globalSets
+    /// Sincronizza il numero di serie di tutti gli esercizi con globalSets (per onSave)
     private func syncExerciseSets() {
+        syncSetsForCount(globalSets)
+    }
+
+    /// Sincronizza in tempo reale quando l'utente cambia globalSets
+    private func syncExerciseSetsInRealTime() {
+        syncSetsForCount(globalSets)
+    }
+
+    /// Logica comune di sincronizzazione
+    private func syncSetsForCount(_ targetSetsCount: Int) {
         for index in blockData.exerciseItems.indices {
             let currentSetsCount = blockData.exerciseItems[index].sets.count
 
-            if currentSetsCount < globalSets {
+            if currentSetsCount < targetSetsCount {
                 // Aggiungi serie mancanti
-                for setOrder in currentSetsCount..<globalSets {
+                for setOrder in currentSetsCount..<targetSetsCount {
                     let newSet = WorkoutSetData(
                         order: setOrder,
                         setType: .reps,
@@ -222,9 +237,9 @@ struct EditWorkoutBlockView: View {
                     )
                     blockData.exerciseItems[index].sets.append(newSet)
                 }
-            } else if currentSetsCount > globalSets {
+            } else if currentSetsCount > targetSetsCount {
                 // Rimuovi serie in eccesso
-                blockData.exerciseItems[index].sets = Array(blockData.exerciseItems[index].sets.prefix(globalSets))
+                blockData.exerciseItems[index].sets = Array(blockData.exerciseItems[index].sets.prefix(targetSetsCount))
             }
 
             // Riordina gli indici
