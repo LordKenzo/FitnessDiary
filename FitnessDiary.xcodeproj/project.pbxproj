@@ -10,9 +10,22 @@
 		3EFEE4E12EC9C5A90045A07A /* FitnessDiary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitnessDiary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3EFEE5202EC9D07E0045A07A /* Exceptions for "FitnessDiary" folder in "FitnessDiary" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3EFEE4E02EC9C5A90045A07A /* FitnessDiary */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3EFEE4E32EC9C5A90045A07A /* FitnessDiary */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3EFEE5202EC9D07E0045A07A /* Exceptions for "FitnessDiary" folder in "FitnessDiary" target */,
+			);
 			path = FitnessDiary;
 			sourceTree = "<group>";
 		};
@@ -256,9 +269,14 @@
 				DEVELOPMENT_TEAM = FQ8ACGV9YM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FitnessDiary/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Per connettersi al tuo heart rate monitor e monitorare il battito cardiaco durante gli allenamenti";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Per connettersi al tuo dispositivo heart rate";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Per scattare foto del profilo";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Per importare i tuoi dati di salute come peso e altezza";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Per salvare i tuoi progressi fitness";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location access";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Per aggiungere foto al tuo profilo";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -290,9 +308,14 @@
 				DEVELOPMENT_TEAM = FQ8ACGV9YM;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FitnessDiary/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Per connettersi al tuo heart rate monitor e monitorare il battito cardiaco durante gli allenamenti";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Per connettersi al tuo dispositivo heart rate";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Per scattare foto del profilo";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Per importare i tuoi dati di salute come peso e altezza";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Per salvare i tuoi progressi fitness";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location access";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Per aggiungere foto al tuo profilo";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
