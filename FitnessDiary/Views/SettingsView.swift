@@ -37,6 +37,12 @@ struct SettingsView: View {
                     } label: {
                         Label("Heart Rate", systemImage: "heart.circle")
                     }
+
+                    NavigationLink {
+                        StrengthExpressionsView()
+                    } label: {
+                        Label("Espressioni Forza", systemImage: "bolt.fill")
+                    }
                 }
                 
                 Section("Libreria") {
@@ -66,5 +72,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
-        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self], inMemory: true)
+        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self, StrengthExpressionParameters.self], inMemory: true)
 }
