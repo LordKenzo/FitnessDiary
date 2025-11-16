@@ -9,6 +9,16 @@ struct ContentView: View {
                     Label("Profilo", systemImage: "person.circle")
                 }
             
+            HeartRateMonitorView()
+                .tabItem {
+                    Label("Heart Rate", systemImage: "heart.circle")
+                }
+            
+            Text("Muscoli")
+                .tabItem {
+                    Label("Muscoli", systemImage: "figure.arms.open")
+                }
+            
             Text("Esercizi")
                 .tabItem {
                     Label("Esercizi", systemImage: "figure.strengthtraining.traditional")
