@@ -186,7 +186,8 @@ struct ClientWorkoutExerciseDetailView: View {
     let client: Client
 
     var oneRepMax: Double? {
-        guard let big5 = exerciseItem.exercise.big5Exercise else { return nil }
+        guard let exercise = exerciseItem.exercise,
+              let big5 = exercise.big5Exercise else { return nil }
         return client.getOneRepMax(for: big5)
     }
 
@@ -199,7 +200,9 @@ struct ClientWorkoutExerciseDetailView: View {
                 }
             }
 
-            if let oneRM = oneRepMax, let big5 = exerciseItem.exercise.big5Exercise {
+            if let oneRM = oneRepMax,
+               let exercise = exerciseItem.exercise,
+               let big5 = exercise.big5Exercise {
                 Section("Massimale Cliente") {
                     HStack {
                         Text(big5.rawValue)
