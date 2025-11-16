@@ -11,7 +11,7 @@ struct ContentView: View {
                 }
             
             // Tab 2 - Schede
-            Text("Schede")
+            WorkoutCardListView()
                 .tabItem {
                     Label("Schede", systemImage: "list.bullet.clipboard")
                 }
