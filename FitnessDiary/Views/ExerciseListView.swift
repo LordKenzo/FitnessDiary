@@ -104,7 +104,14 @@ struct ExerciseListView: View {
 
     private func deleteExercises(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(filteredExercises[index])
+            let exerciseToDelete = filteredExercises[index]
+
+            // Rimuovi questo esercizio da tutte le varianti degli altri esercizi
+            for variant in exerciseToDelete.variants {
+                variant.variants.removeAll { $0.id == exerciseToDelete.id }
+            }
+
+            modelContext.delete(exerciseToDelete)
         }
     }
 }
@@ -672,6 +679,11 @@ struct EditExerciseView: View {
     }
 
     private func deleteExercise() {
+        // Rimuovi questo esercizio da tutte le varianti degli altri esercizi
+        for variant in exercise.variants {
+            variant.variants.removeAll { $0.id == exercise.id }
+        }
+
         modelContext.delete(exercise)
         dismiss()
     }
