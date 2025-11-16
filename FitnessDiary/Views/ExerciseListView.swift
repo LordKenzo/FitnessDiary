@@ -211,26 +211,29 @@ struct ExerciseRow: View {
     }
 }
 
-// MARK: - Muscle Group Selector Component
-struct MuscleGroupSelector: View {
+// MARK: - Muscle Selection View (Full Screen)
+struct MuscleSelectionView: View {
+    @Environment(\.dismiss) private var dismiss
     let muscles: [Muscle]
     @Binding var selectedMuscles: Set<Muscle>
     let title: String
-    let icon: String
 
     private var musclesByCategory: [MuscleCategory: [Muscle]] {
         Dictionary(grouping: muscles, by: { $0.category })
     }
 
     var body: some View {
-        Section {
+        List {
             if muscles.isEmpty {
-                Text("Nessun muscolo disponibile")
-                    .foregroundStyle(.secondary)
+                ContentUnavailableView {
+                    Label("Nessun muscolo disponibile", systemImage: "figure.arms.open")
+                } description: {
+                    Text("Inizializza prima la libreria muscoli")
+                }
             } else {
                 ForEach(MuscleCategory.allCases, id: \.self) { category in
                     if let musclesInCategory = musclesByCategory[category], !musclesInCategory.isEmpty {
-                        DisclosureGroup {
+                        Section {
                             ForEach(musclesInCategory) { muscle in
                                 Button {
                                     toggleMuscle(muscle)
@@ -240,22 +243,30 @@ struct MuscleGroupSelector: View {
                                             .foregroundStyle(.primary)
                                         Spacer()
                                         if selectedMuscles.contains(muscle) {
-                                            Image(systemName: "checkmark")
+                                            Image(systemName: "checkmark.circle.fill")
                                                 .foregroundStyle(.blue)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundStyle(.gray.opacity(0.3))
                                         }
                                     }
                                 }
                             }
-                        } label: {
+                        } header: {
                             Label(category.rawValue, systemImage: category.icon)
-                                .font(.subheadline)
-                                .foregroundStyle(.primary)
                         }
                     }
                 }
             }
-        } header: {
-            Label(title, systemImage: icon)
+        }
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Fatto") {
+                    dismiss()
+                }
+            }
         }
     }
 
@@ -328,19 +339,61 @@ struct AddExerciseView: View {
                     }
                 }
 
-                MuscleGroupSelector(
-                    muscles: muscles,
-                    selectedMuscles: $selectedPrimaryMuscles,
-                    title: "Muscoli Primari",
-                    icon: "star.fill"
-                )
+                Section {
+                    NavigationLink {
+                        MuscleSelectionView(
+                            muscles: muscles,
+                            selectedMuscles: $selectedPrimaryMuscles,
+                            title: "Muscoli Primari"
+                        )
+                    } label: {
+                        HStack {
+                            Label("Muscoli Primari", systemImage: "star.fill")
+                            Spacer()
+                            if selectedPrimaryMuscles.isEmpty {
+                                Text("Nessuno")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("\(selectedPrimaryMuscles.count)")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
 
-                MuscleGroupSelector(
-                    muscles: muscles,
-                    selectedMuscles: $selectedSecondaryMuscles,
-                    title: "Muscoli Secondari",
-                    icon: "star.leadinghalf.filled"
-                )
+                    if !selectedPrimaryMuscles.isEmpty {
+                        Text(selectedPrimaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section {
+                    NavigationLink {
+                        MuscleSelectionView(
+                            muscles: muscles,
+                            selectedMuscles: $selectedSecondaryMuscles,
+                            title: "Muscoli Secondari"
+                        )
+                    } label: {
+                        HStack {
+                            Label("Muscoli Secondari", systemImage: "star.leadinghalf.filled")
+                            Spacer()
+                            if selectedSecondaryMuscles.isEmpty {
+                                Text("Nessuno")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("\(selectedSecondaryMuscles.count)")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+
+                    if !selectedSecondaryMuscles.isEmpty {
+                        Text(selectedSecondaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
                 Section("Foto (Max 3)") {
                     PhotoPickerRow(title: "Foto 1", item: $photoItem1, photoData: $photoData1)
@@ -447,22 +500,64 @@ struct EditExerciseView: View {
                     }
                 }
 
-                MuscleGroupSelector(
-                    muscles: muscles,
-                    selectedMuscles: $selectedPrimaryMuscles,
-                    title: "Muscoli Primari",
-                    icon: "star.fill"
-                )
+                Section {
+                    NavigationLink {
+                        MuscleSelectionView(
+                            muscles: muscles,
+                            selectedMuscles: $selectedPrimaryMuscles,
+                            title: "Muscoli Primari"
+                        )
+                    } label: {
+                        HStack {
+                            Label("Muscoli Primari", systemImage: "star.fill")
+                            Spacer()
+                            if selectedPrimaryMuscles.isEmpty {
+                                Text("Nessuno")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("\(selectedPrimaryMuscles.count)")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+
+                    if !selectedPrimaryMuscles.isEmpty {
+                        Text(selectedPrimaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 .onChange(of: selectedPrimaryMuscles) { _, newValue in
                     exercise.primaryMuscles = Array(newValue)
                 }
 
-                MuscleGroupSelector(
-                    muscles: muscles,
-                    selectedMuscles: $selectedSecondaryMuscles,
-                    title: "Muscoli Secondari",
-                    icon: "star.leadinghalf.filled"
-                )
+                Section {
+                    NavigationLink {
+                        MuscleSelectionView(
+                            muscles: muscles,
+                            selectedMuscles: $selectedSecondaryMuscles,
+                            title: "Muscoli Secondari"
+                        )
+                    } label: {
+                        HStack {
+                            Label("Muscoli Secondari", systemImage: "star.leadinghalf.filled")
+                            Spacer()
+                            if selectedSecondaryMuscles.isEmpty {
+                                Text("Nessuno")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("\(selectedSecondaryMuscles.count)")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+
+                    if !selectedSecondaryMuscles.isEmpty {
+                        Text(selectedSecondaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 .onChange(of: selectedSecondaryMuscles) { _, newValue in
                     exercise.secondaryMuscles = Array(newValue)
                 }
