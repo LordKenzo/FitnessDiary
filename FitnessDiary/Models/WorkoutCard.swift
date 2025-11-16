@@ -97,6 +97,39 @@ final class WorkoutCard: Identifiable {
     var estimatedDurationMinutes: Int {
         Int(estimatedDurationSeconds / 60)
     }
+
+    // Verifica se la scheda è valida o è ancora in bozza
+    var isDraft: Bool {
+        // Scheda vuota = bozza
+        if blocks.isEmpty {
+            return true
+        }
+
+        // Verifica ogni blocco
+        for block in blocks {
+            // Blocco senza esercizi = bozza
+            if block.exerciseItems.isEmpty {
+                return true
+            }
+
+            // Se è un metodo, verifica i vincoli min/max esercizi
+            if block.blockType == .method, let method = block.methodType {
+                let exerciseCount = block.exerciseItems.count
+
+                // Verifica minimo
+                if exerciseCount < method.minExercises {
+                    return true
+                }
+
+                // Verifica massimo se presente
+                if let max = method.maxExercises, exerciseCount > max {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
 }
 
 // MARK: - WorkoutBlock Duration Estimation

@@ -290,8 +290,21 @@ struct WorkoutCardRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(card.name)
-                .font(.headline)
+            HStack(spacing: 8) {
+                Text(card.name)
+                    .font(.headline)
+
+                if card.isDraft {
+                    Text("BOZZA")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.orange)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.orange.opacity(0.2))
+                        .clipShape(Capsule())
+                }
+            }
 
             if let description = card.cardDescription, !description.isEmpty {
                 Text(description)
