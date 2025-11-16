@@ -33,13 +33,19 @@ struct SettingsView: View {
                 
                 Section("Libreria") {
                     NavigationLink {
-                        Text("Muscoli") // MusclesView in futuro
+                        MuscleListView()
                     } label: {
                         Label("Muscoli", systemImage: "figure.arms.open")
                     }
-                    
+
                     NavigationLink {
-                        Text("Esercizi") // ExercisesView in futuro
+                        EquipmentListView()
+                    } label: {
+                        Label("Attrezzi", systemImage: "dumbbell")
+                    }
+
+                    NavigationLink {
+                        ExerciseListView()
                     } label: {
                         Label("Esercizi", systemImage: "figure.strengthtraining.traditional")
                     }
@@ -52,5 +58,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
-        .modelContainer(for: UserProfile.self, inMemory: true)
+        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self], inMemory: true)
 }
