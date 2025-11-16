@@ -85,45 +85,43 @@ extension WorkoutExerciseItemData {
         // Se non ci sono abbastanza serie per validare, è ok
         guard sets.count > 1 else { return nil }
 
-        // Estrai i pesi dalle serie (solo se setType == .reps e loadType == .absolute)
-        let weights = sets.compactMap { set -> Double? in
-            guard set.setType == .reps, set.loadType == .absolute, let weight = set.weight else {
-                return nil
-            }
-            return weight
+        // Estrai i carichi dalle serie (supporta sia kg assoluti che % 1RM)
+        let loads = sets.compactMap { set -> Double? in
+            guard set.setType == .reps else { return nil }
+            return set.loadType == .absolute ? set.weight : set.percentageOfMax
         }
 
-        // Se non ci sono abbastanza pesi da validare, è ok
-        guard weights.count > 1 else { return nil }
+        // Se non ci sono abbastanza carichi da validare, è ok
+        guard loads.count > 1 else { return nil }
 
         switch validation {
         case .none:
             return nil
 
         case .ascending:
-            // Verifica che ogni peso sia >= del precedente
-            for i in 1..<weights.count {
-                if weights[i] < weights[i-1] {
-                    return "Serie \(i+1): il peso deve essere maggiore o uguale alla serie precedente"
+            // Verifica che ogni carico sia >= del precedente
+            for i in 1..<loads.count {
+                if loads[i] < loads[i-1] {
+                    return "Serie \(i+1): il carico deve essere maggiore o uguale alla serie precedente"
                 }
             }
             return nil
 
         case .descending:
-            // Verifica che ogni peso sia <= del precedente
-            for i in 1..<weights.count {
-                if weights[i] > weights[i-1] {
-                    return "Serie \(i+1): il peso deve essere minore o uguale alla serie precedente"
+            // Verifica che ogni carico sia <= del precedente
+            for i in 1..<loads.count {
+                if loads[i] > loads[i-1] {
+                    return "Serie \(i+1): il carico deve essere minore o uguale alla serie precedente"
                 }
             }
             return nil
 
         case .constant:
-            // Verifica che tutti i pesi siano uguali
-            let firstWeight = weights[0]
-            for i in 1..<weights.count {
-                if weights[i] != firstWeight {
-                    return "Tutte le serie devono avere lo stesso peso (\(String(format: "%.1f", firstWeight)) kg)"
+            // Verifica che tutti i carichi siano uguali
+            let firstLoad = loads[0]
+            for i in 1..<loads.count {
+                if loads[i] != firstLoad {
+                    return "Tutte le serie devono avere lo stesso carico (\(String(format: "%.1f", firstLoad)))"
                 }
             }
             return nil
