@@ -56,7 +56,7 @@ struct EditWorkoutCardView: View {
                                 weight: set.weight,
                                 duration: set.duration,
                                 notes: set.notes,
-                                loadType: set.loadType,
+                                loadType: set.loadType ?? .absolute,
                                 percentageOfMax: set.percentageOfMax
                             )
                         },
