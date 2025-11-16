@@ -104,7 +104,7 @@ struct EditWorkoutBlockView: View {
 
             // Tabata parameters section - solo per Tabata
             if blockData.methodType == .tabata {
-                Section("Parametri Tabata") {
+                Section {
                     // Tempo di lavoro
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Tempo Lavoro")
@@ -163,6 +163,8 @@ struct EditWorkoutBlockView: View {
                             .frame(width: 80)
                         }
                     }
+                } header: {
+                    Text("Parametri Tabata")
                 } footer: {
                     let totalTime = calculateTabataTotalDuration()
                     let minutes = totalTime / 60
