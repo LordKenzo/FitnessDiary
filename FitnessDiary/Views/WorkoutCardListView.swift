@@ -300,20 +300,26 @@ struct WorkoutCardRow: View {
                     .lineLimit(2)
             }
 
-            HStack(spacing: 16) {
-                Label("\(card.totalBlocks) blocchi", systemImage: "square.stack.3d.up")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Label("\(card.totalExercises) es.", systemImage: "figure.strengthtraining.traditional")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Label("\(card.totalSets) serie", systemImage: "number")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Label("~\(card.estimatedDurationMinutes) min", systemImage: "clock")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 16) {
+                    Label("\(card.totalBlocks) blocchi", systemImage: "square.stack.3d.up")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Label("~\(card.estimatedDurationMinutes) min", systemImage: "clock")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack(spacing: 16) {
+                    Label("\(card.totalExercises) esercizi", systemImage: "figure.strengthtraining.traditional")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Label("\(card.totalSets) serie", systemImage: "number")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             // Mostra folder se la scheda è in più folder
