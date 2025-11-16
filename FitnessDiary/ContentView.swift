@@ -4,34 +4,22 @@ import SwiftData
 struct ContentView: View {
     var body: some View {
         TabView {
-            ProfileView()
+            // Tab 1 - Allenamento
+            Text("Allenamento")
                 .tabItem {
-                    Label("Profilo", systemImage: "person.circle")
+                    Label("Allenamento", systemImage: "stopwatch")
                 }
             
-            HeartRateMonitorView()
-                .tabItem {
-                    Label("Heart Rate", systemImage: "heart.circle")
-                }
-            
-            Text("Muscoli")
-                .tabItem {
-                    Label("Muscoli", systemImage: "figure.arms.open")
-                }
-            
-            Text("Esercizi")
-                .tabItem {
-                    Label("Esercizi", systemImage: "figure.strengthtraining.traditional")
-                }
-            
+            // Tab 2 - Schede
             Text("Schede")
                 .tabItem {
                     Label("Schede", systemImage: "list.bullet.clipboard")
                 }
             
-            Text("Allenamento")
+            // Tab 3 - Settings
+            SettingsView()
                 .tabItem {
-                    Label("Allenamento", systemImage: "stopwatch")
+                    Label("Impostazioni", systemImage: "gearshape")
                 }
         }
     }
