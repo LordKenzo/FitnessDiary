@@ -8,10 +8,10 @@ final class WorkoutCard: Identifiable {
     var cardDescription: String?
     var createdDate: Date
     var folder: WorkoutFolder?
-    var assignedTo: Client? // nil = scheda del trainer, altrimenti assegnata al cliente
+    var assignedTo: [Client] // array di clienti assegnati (vuoto = scheda del trainer)
     var exercises: [WorkoutExercise]
 
-    init(name: String, description: String? = nil, folder: WorkoutFolder? = nil, assignedTo: Client? = nil, exercises: [WorkoutExercise] = []) {
+    init(name: String, description: String? = nil, folder: WorkoutFolder? = nil, assignedTo: [Client] = [], exercises: [WorkoutExercise] = []) {
         self.id = UUID()
         self.name = name
         self.cardDescription = description
@@ -23,12 +23,23 @@ final class WorkoutCard: Identifiable {
 
     // Helper per sapere se la scheda è assegnata
     var isAssigned: Bool {
-        assignedTo != nil
+        !assignedTo.isEmpty
     }
 
-    // Helper per il nome del proprietario
-    var ownerName: String {
-        assignedTo?.fullName ?? "Mio"
+    // Helper per il numero di clienti assegnati
+    var assignedCount: Int {
+        assignedTo.count
+    }
+
+    // Helper per il testo di assegnazione
+    var assignmentText: String {
+        if assignedTo.isEmpty {
+            return "Mio"
+        } else if assignedTo.count == 1 {
+            return assignedTo[0].fullName
+        } else {
+            return "Assegnata a (\(assignedTo.count))"
+        }
     }
 
     // Helper per il numero totale di esercizi

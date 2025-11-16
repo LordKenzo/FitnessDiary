@@ -109,6 +109,7 @@ struct EditWorkoutExerciseView: View {
     private func addSet() {
         let newSet = WorkoutSetData(
             order: exerciseData.sets.count,
+            setType: .reps,
             reps: 10,
             weight: nil
         )
@@ -134,32 +135,97 @@ struct SetRow: View {
     @Binding var set: WorkoutSetData
 
     var body: some View {
-        HStack(spacing: 16) {
-            Text("Serie \(set.order + 1)")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .frame(width: 60, alignment: .leading)
-
-            HStack(spacing: 4) {
-                TextField("Rip", value: $set.reps, format: .number)
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 50)
-                    .textFieldStyle(.roundedBorder)
-                Text("rip")
-                    .font(.caption)
+        VStack(spacing: 8) {
+            HStack(spacing: 16) {
+                Text("Serie \(set.order + 1)")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .frame(width: 60, alignment: .leading)
+
+                Picker("Tipo", selection: $set.setType) {
+                    ForEach([SetType.reps, SetType.duration], id: \.self) { type in
+                        Text(type.rawValue).tag(type)
+                    }
+                }
+                .pickerStyle(.segmented)
             }
 
-            HStack(spacing: 4) {
-                TextField("Kg", value: $set.weight, format: .number)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 60)
-                    .textFieldStyle(.roundedBorder)
-                Text("kg")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            if set.setType == .reps {
+                HStack(spacing: 16) {
+                    Spacer()
+                        .frame(width: 60)
+
+                    HStack(spacing: 4) {
+                        TextField("Rip", value: $set.reps, format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 50)
+                            .textFieldStyle(.roundedBorder)
+                        Text("rip")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack(spacing: 4) {
+                        TextField("Kg", value: $set.weight, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 60)
+                            .textFieldStyle(.roundedBorder)
+                        Text("kg")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else {
+                HStack(spacing: 16) {
+                    Spacer()
+                        .frame(width: 60)
+
+                    HStack(spacing: 4) {
+                        TextField("Minuti", value: Binding(
+                            get: {
+                                if let duration = set.duration {
+                                    return Int(duration) / 60
+                                }
+                                return 0
+                            },
+                            set: { newMinutes in
+                                let seconds = set.duration.map { Int($0) % 60 } ?? 0
+                                set.duration = TimeInterval(newMinutes * 60 + seconds)
+                            }
+                        ), format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 50)
+                            .textFieldStyle(.roundedBorder)
+                        Text("min")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack(spacing: 4) {
+                        TextField("Secondi", value: Binding(
+                            get: {
+                                if let duration = set.duration {
+                                    return Int(duration) % 60
+                                }
+                                return 0
+                            },
+                            set: { newSeconds in
+                                let minutes = set.duration.map { Int($0) / 60 } ?? 0
+                                set.duration = TimeInterval(minutes * 60 + newSeconds)
+                            }
+                        ), format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 50)
+                            .textFieldStyle(.roundedBorder)
+                        Text("sec")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
         }
     }

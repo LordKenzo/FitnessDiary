@@ -28,12 +28,12 @@ struct WorkoutCardListView: View {
             case .all:
                 matchesOwner = true
             case .mine:
-                matchesOwner = card.assignedTo == nil
+                matchesOwner = card.assignedTo.isEmpty
             case .client:
                 if let selectedClient = selectedClient {
-                    matchesOwner = card.assignedTo?.id == selectedClient.id
+                    matchesOwner = card.assignedTo.contains(where: { $0.id == selectedClient.id })
                 } else {
-                    matchesOwner = card.assignedTo != nil
+                    matchesOwner = !card.assignedTo.isEmpty
                 }
             }
             return matchesSearch && matchesOwner
@@ -251,23 +251,13 @@ struct WorkoutCardRow: View {
                 Text(card.name)
                     .font(.headline)
                 Spacer()
-                if let assignedTo = card.assignedTo {
-                    HStack(spacing: 4) {
-                        Image(systemName: "person.circle.fill")
-                            .font(.caption)
-                        Text(assignedTo.fullName)
-                            .font(.caption)
-                    }
-                    .foregroundStyle(.blue)
-                } else {
-                    HStack(spacing: 4) {
-                        Image(systemName: "person.fill")
-                            .font(.caption)
-                        Text("Mio")
-                            .font(.caption)
-                    }
-                    .foregroundStyle(.green)
+                HStack(spacing: 4) {
+                    Image(systemName: card.assignedTo.isEmpty ? "person.fill" : "person.circle.fill")
+                        .font(.caption)
+                    Text(card.assignmentText)
+                        .font(.caption)
                 }
+                .foregroundStyle(card.assignedTo.isEmpty ? .green : .blue)
             }
 
             if let description = card.cardDescription, !description.isEmpty {

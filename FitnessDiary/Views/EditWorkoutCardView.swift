@@ -13,7 +13,7 @@ struct EditWorkoutCardView: View {
     @State private var name: String
     @State private var description: String
     @State private var selectedFolder: WorkoutFolder?
-    @State private var selectedClient: Client?
+    @State private var selectedClients: [Client]
     @State private var workoutExercises: [WorkoutExerciseData] = []
     @State private var showingExercisePicker = false
 
@@ -24,7 +24,7 @@ struct EditWorkoutCardView: View {
         _name = State(initialValue: card.name)
         _description = State(initialValue: card.cardDescription ?? "")
         _selectedFolder = State(initialValue: card.folder)
-        _selectedClient = State(initialValue: card.assignedTo)
+        _selectedClients = State(initialValue: card.assignedTo)
 
         // Converti gli esercizi esistenti in WorkoutExerciseData
         _workoutExercises = State(initialValue: card.exercises.sorted(by: { $0.order < $1.order }).map { workoutExercise in
@@ -40,6 +40,7 @@ struct EditWorkoutCardView: View {
                 sets: workoutExercise.sets.sorted(by: { $0.order < $1.order }).map { set in
                     WorkoutSetData(
                         order: set.order,
+                        setType: set.setType,
                         reps: set.reps,
                         weight: set.weight,
                         duration: set.duration,
@@ -75,10 +76,22 @@ struct EditWorkoutCardView: View {
                         }
                     }
 
-                    Picker("Assegnata a", selection: $selectedClient) {
-                        Text("Mio").tag(nil as Client?)
-                        ForEach(clients) { client in
-                            Text(client.fullName).tag(client as Client?)
+                    NavigationLink {
+                        ClientSelectionView(
+                            selectedClients: $selectedClients,
+                            clients: clients
+                        )
+                    } label: {
+                        HStack {
+                            Text("Assegnata a")
+                            Spacer()
+                            if selectedClients.isEmpty {
+                                Text("Mio")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("(\(selectedClients.count))")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
@@ -157,7 +170,7 @@ struct EditWorkoutCardView: View {
         let newExercise = WorkoutExerciseData(
             exercise: exercise,
             order: workoutExercises.count,
-            sets: [WorkoutSetData(order: 0, reps: 10, weight: nil)]
+            sets: [WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: nil)]
         )
         workoutExercises.append(newExercise)
     }
@@ -180,7 +193,7 @@ struct EditWorkoutCardView: View {
         card.name = name
         card.cardDescription = description.isEmpty ? nil : description
         card.folder = selectedFolder
-        card.assignedTo = selectedClient
+        card.assignedTo = selectedClients
 
         // Rimuovi tutti gli esercizi esistenti
         card.exercises.removeAll()
@@ -197,6 +210,7 @@ struct EditWorkoutCardView: View {
             for setData in exerciseData.sets {
                 let workoutSet = WorkoutSet(
                     order: setData.order,
+                    setType: setData.setType,
                     reps: setData.reps,
                     weight: setData.weight,
                     duration: setData.duration,

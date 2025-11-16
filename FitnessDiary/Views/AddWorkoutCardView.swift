@@ -12,9 +12,10 @@ struct AddWorkoutCardView: View {
     @State private var name = ""
     @State private var description = ""
     @State private var selectedFolder: WorkoutFolder?
-    @State private var selectedClient: Client?
+    @State private var selectedClients: [Client] = []
     @State private var workoutExercises: [WorkoutExerciseData] = []
     @State private var showingExercisePicker = false
+    @State private var showingClientSelection = false
 
     var body: some View {
         NavigationStack {
@@ -39,10 +40,22 @@ struct AddWorkoutCardView: View {
                         }
                     }
 
-                    Picker("Assegnata a", selection: $selectedClient) {
-                        Text("Mio").tag(nil as Client?)
-                        ForEach(clients) { client in
-                            Text(client.fullName).tag(client as Client?)
+                    NavigationLink {
+                        ClientSelectionView(
+                            selectedClients: $selectedClients,
+                            clients: clients
+                        )
+                    } label: {
+                        HStack {
+                            Text("Assegnata a")
+                            Spacer()
+                            if selectedClients.isEmpty {
+                                Text("Mio")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("(\(selectedClients.count))")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
@@ -109,7 +122,7 @@ struct AddWorkoutCardView: View {
         let newExercise = WorkoutExerciseData(
             exercise: exercise,
             order: workoutExercises.count,
-            sets: [WorkoutSetData(order: 0, reps: 10, weight: nil)]
+            sets: [WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: nil)]
         )
         workoutExercises.append(newExercise)
     }
@@ -135,7 +148,7 @@ struct AddWorkoutCardView: View {
             name: name,
             description: description.isEmpty ? nil : description,
             folder: selectedFolder,
-            assignedTo: selectedClient
+            assignedTo: selectedClients
         )
 
         // Crea gli esercizi
@@ -151,6 +164,7 @@ struct AddWorkoutCardView: View {
             for setData in exerciseData.sets {
                 let workoutSet = WorkoutSet(
                     order: setData.order,
+                    setType: setData.setType,
                     reps: setData.reps,
                     weight: setData.weight,
                     duration: setData.duration,
@@ -180,6 +194,7 @@ struct WorkoutExerciseData: Identifiable {
 struct WorkoutSetData: Identifiable {
     let id = UUID()
     var order: Int
+    var setType: SetType
     var reps: Int?
     var weight: Double?
     var duration: TimeInterval?
