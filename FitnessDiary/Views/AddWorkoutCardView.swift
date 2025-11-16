@@ -13,9 +13,9 @@ struct AddWorkoutCardView: View {
     @State private var description = ""
     @State private var selectedFolder: WorkoutFolder?
     @State private var selectedClients: [Client] = []
-    @State private var workoutExercises: [WorkoutExerciseData] = []
+    @State private var workoutBlocks: [WorkoutBlockData] = []
     @State private var showingExercisePicker = false
-    @State private var showingClientSelection = false
+    @State private var showingMethodSelection = false
 
     var body: some View {
         NavigationStack {
@@ -61,32 +61,43 @@ struct AddWorkoutCardView: View {
                 }
 
                 Section {
-                    ForEach(workoutExercises.indices, id: \.self) { index in
+                    ForEach(workoutBlocks.indices, id: \.self) { index in
                         NavigationLink {
-                            EditWorkoutExerciseView(
-                                exerciseData: $workoutExercises[index],
-                                exercises: exercises
+                            EditWorkoutBlockView(
+                                blockData: $workoutBlocks[index]
                             )
                         } label: {
-                            WorkoutExerciseRow(
-                                exerciseData: workoutExercises[index],
+                            WorkoutBlockRow(
+                                block: workoutBlockToModel(workoutBlocks[index]),
                                 order: index + 1
                             )
                         }
                     }
-                    .onMove(perform: moveExercise)
-                    .onDelete(perform: deleteExercise)
+                    .onMove(perform: moveBlock)
+                    .onDelete(perform: deleteBlock)
 
-                    Button {
-                        showingExercisePicker = true
+                    Menu {
+                        Button {
+                            showingExercisePicker = true
+                        } label: {
+                            Label("Esercizio Singolo", systemImage: "figure.strengthtraining.traditional")
+                        }
+
+                        Button {
+                            showingMethodSelection = true
+                        } label: {
+                            Label("Con Metodo", systemImage: "bolt.horizontal.fill")
+                        }
                     } label: {
-                        Label("Aggiungi Esercizio", systemImage: "plus.circle.fill")
+                        Label("Aggiungi Blocco", systemImage: "plus.circle.fill")
+                    } primaryAction: {
+                        showingExercisePicker = true
                     }
                 } header: {
                     HStack {
-                        Text("Esercizi")
+                        Text("Blocchi (\(workoutBlocks.count))")
                         Spacer()
-                        if !workoutExercises.isEmpty {
+                        if !workoutBlocks.isEmpty {
                             EditButton()
                         }
                     }
@@ -111,36 +122,100 @@ struct AddWorkoutCardView: View {
                 ExercisePickerView(
                     exercises: exercises,
                     onSelect: { exercise in
-                        addExercise(exercise)
+                        addSimpleBlock(exercise)
                     }
                 )
+            }
+            .sheet(isPresented: $showingMethodSelection) {
+                MethodSelectionView { method in
+                    addMethodBlock(method)
+                }
             }
         }
     }
 
-    private func addExercise(_ exercise: Exercise) {
-        let newExercise = WorkoutExerciseData(
+    private func addSimpleBlock(_ exercise: Exercise) {
+        let exerciseItem = WorkoutExerciseItemData(
             exercise: exercise,
-            order: workoutExercises.count,
+            order: 0,
             sets: [WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: nil)]
         )
-        workoutExercises.append(newExercise)
+
+        let newBlock = WorkoutBlockData(
+            blockType: .simple,
+            methodType: nil,
+            order: workoutBlocks.count,
+            globalSets: 3,
+            globalRestTime: 90,
+            notes: nil,
+            exerciseItems: [exerciseItem]
+        )
+        workoutBlocks.append(newBlock)
     }
 
-    private func moveExercise(from source: IndexSet, to destination: Int) {
-        workoutExercises.move(fromOffsets: source, toOffset: destination)
-        // Riordina gli esercizi
-        for (index, _) in workoutExercises.enumerated() {
-            workoutExercises[index].order = index
+    private func addMethodBlock(_ method: MethodType) {
+        let newBlock = WorkoutBlockData(
+            blockType: .method,
+            methodType: method,
+            order: workoutBlocks.count,
+            globalSets: 3,
+            globalRestTime: 120,
+            notes: nil,
+            exerciseItems: []
+        )
+        workoutBlocks.append(newBlock)
+    }
+
+    private func moveBlock(from source: IndexSet, to destination: Int) {
+        workoutBlocks.move(fromOffsets: source, toOffset: destination)
+        for (index, _) in workoutBlocks.enumerated() {
+            workoutBlocks[index].order = index
         }
     }
 
-    private func deleteExercise(at offsets: IndexSet) {
-        workoutExercises.remove(atOffsets: offsets)
-        // Riordina gli esercizi
-        for (index, _) in workoutExercises.enumerated() {
-            workoutExercises[index].order = index
+    private func deleteBlock(at offsets: IndexSet) {
+        workoutBlocks.remove(atOffsets: offsets)
+        for (index, _) in workoutBlocks.enumerated() {
+            workoutBlocks[index].order = index
         }
+    }
+
+    // Helper to convert WorkoutBlockData to WorkoutBlock for preview
+    private func workoutBlockToModel(_ blockData: WorkoutBlockData) -> WorkoutBlock {
+        let block = WorkoutBlock(
+            order: blockData.order,
+            blockType: blockData.blockType,
+            methodType: blockData.methodType,
+            globalSets: blockData.globalSets,
+            globalRestTime: blockData.globalRestTime,
+            notes: blockData.notes,
+            exerciseItems: []
+        )
+
+        for itemData in blockData.exerciseItems {
+            let exerciseItem = WorkoutExerciseItem(
+                order: itemData.order,
+                exercise: itemData.exercise,
+                notes: itemData.notes,
+                restTime: itemData.restTime
+            )
+
+            for setData in itemData.sets {
+                let workoutSet = WorkoutSet(
+                    order: setData.order,
+                    setType: setData.setType,
+                    reps: setData.reps,
+                    weight: setData.weight,
+                    duration: setData.duration,
+                    notes: setData.notes
+                )
+                exerciseItem.sets.append(workoutSet)
+            }
+
+            block.exerciseItems.append(exerciseItem)
+        }
+
+        return block
     }
 
     private func saveCard() {
@@ -151,29 +226,43 @@ struct AddWorkoutCardView: View {
             assignedTo: selectedClients
         )
 
-        // Crea gli esercizi
-        for exerciseData in workoutExercises {
-            let workoutExercise = WorkoutExercise(
-                order: exerciseData.order,
-                exercise: exerciseData.exercise,
-                notes: exerciseData.notes,
-                restTime: exerciseData.restTime
+        // Crea i blocchi
+        for blockData in workoutBlocks {
+            let block = WorkoutBlock(
+                order: blockData.order,
+                blockType: blockData.blockType,
+                methodType: blockData.methodType,
+                globalSets: blockData.globalSets,
+                globalRestTime: blockData.globalRestTime,
+                notes: blockData.notes
             )
 
-            // Crea le serie
-            for setData in exerciseData.sets {
-                let workoutSet = WorkoutSet(
-                    order: setData.order,
-                    setType: setData.setType,
-                    reps: setData.reps,
-                    weight: setData.weight,
-                    duration: setData.duration,
-                    notes: setData.notes
+            // Crea gli esercizi del blocco
+            for exerciseItemData in blockData.exerciseItems {
+                let exerciseItem = WorkoutExerciseItem(
+                    order: exerciseItemData.order,
+                    exercise: exerciseItemData.exercise,
+                    notes: exerciseItemData.notes,
+                    restTime: exerciseItemData.restTime
                 )
-                workoutExercise.sets.append(workoutSet)
+
+                // Crea le serie
+                for setData in exerciseItemData.sets {
+                    let workoutSet = WorkoutSet(
+                        order: setData.order,
+                        setType: setData.setType,
+                        reps: setData.reps,
+                        weight: setData.weight,
+                        duration: setData.duration,
+                        notes: setData.notes
+                    )
+                    exerciseItem.sets.append(workoutSet)
+                }
+
+                block.exerciseItems.append(exerciseItem)
             }
 
-            newCard.exercises.append(workoutExercise)
+            newCard.blocks.append(block)
         }
 
         modelContext.insert(newCard)
@@ -181,26 +270,7 @@ struct AddWorkoutCardView: View {
     }
 }
 
-// Struttura temporanea per gestire i dati prima del salvataggio
-struct WorkoutExerciseData: Identifiable {
-    let id = UUID()
-    var exercise: Exercise
-    var order: Int
-    var sets: [WorkoutSetData]
-    var notes: String?
-    var restTime: TimeInterval?
-}
-
-struct WorkoutSetData: Identifiable {
-    let id = UUID()
-    var order: Int
-    var setType: SetType
-    var reps: Int?
-    var weight: Double?
-    var duration: TimeInterval?
-    var notes: String?
-}
-
+// Row component for legacy exercise display (still used by EditWorkoutExerciseView)
 struct WorkoutExerciseRow: View {
     let exerciseData: WorkoutExerciseData
     let order: Int

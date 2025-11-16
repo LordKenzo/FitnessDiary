@@ -14,8 +14,9 @@ struct EditWorkoutCardView: View {
     @State private var description: String
     @State private var selectedFolder: WorkoutFolder?
     @State private var selectedClients: [Client]
-    @State private var workoutExercises: [WorkoutExerciseData] = []
+    @State private var workoutBlocks: [WorkoutBlockData] = []
     @State private var showingExercisePicker = false
+    @State private var showingMethodSelection = false
 
     init(card: WorkoutCard, folders: [WorkoutFolder], clients: [Client]) {
         self.card = card
@@ -26,29 +27,39 @@ struct EditWorkoutCardView: View {
         _selectedFolder = State(initialValue: card.folder)
         _selectedClients = State(initialValue: card.assignedTo)
 
-        // Converti gli esercizi esistenti in WorkoutExerciseData
-        _workoutExercises = State(initialValue: card.exercises.sorted(by: { $0.order < $1.order }).map { workoutExercise in
-            WorkoutExerciseData(
-                exercise: workoutExercise.exercise ?? Exercise(
-                    name: "Esercizio Eliminato",
-                    biomechanicalStructure: .multiJoint,
-                    trainingRole: .base,
-                    primaryMetabolism: .mixed,
-                    category: .training
-                ),
-                order: workoutExercise.order,
-                sets: workoutExercise.sets.sorted(by: { $0.order < $1.order }).map { set in
-                    WorkoutSetData(
-                        order: set.order,
-                        setType: set.setType,
-                        reps: set.reps,
-                        weight: set.weight,
-                        duration: set.duration,
-                        notes: set.notes
+        // Converti i blocchi esistenti in WorkoutBlockData
+        _workoutBlocks = State(initialValue: card.blocks.sorted(by: { $0.order < $1.order }).map { block in
+            WorkoutBlockData(
+                blockType: block.blockType,
+                methodType: block.methodType,
+                order: block.order,
+                globalSets: block.globalSets,
+                globalRestTime: block.globalRestTime,
+                notes: block.notes,
+                exerciseItems: block.exerciseItems.sorted(by: { $0.order < $1.order }).map { exerciseItem in
+                    WorkoutExerciseItemData(
+                        exercise: exerciseItem.exercise ?? Exercise(
+                            name: "Esercizio Eliminato",
+                            biomechanicalStructure: .multiJoint,
+                            trainingRole: .base,
+                            primaryMetabolism: .mixed,
+                            category: .training
+                        ),
+                        order: exerciseItem.order,
+                        sets: exerciseItem.sets.sorted(by: { $0.order < $1.order }).map { set in
+                            WorkoutSetData(
+                                order: set.order,
+                                setType: set.setType,
+                                reps: set.reps,
+                                weight: set.weight,
+                                duration: set.duration,
+                                notes: set.notes
+                            )
+                        },
+                        notes: exerciseItem.notes,
+                        restTime: exerciseItem.restTime
                     )
-                },
-                notes: workoutExercise.notes,
-                restTime: workoutExercise.restTime
+                }
             )
         })
     }
@@ -97,32 +108,43 @@ struct EditWorkoutCardView: View {
                 }
 
                 Section {
-                    ForEach(workoutExercises.indices, id: \.self) { index in
+                    ForEach(workoutBlocks.indices, id: \.self) { index in
                         NavigationLink {
-                            EditWorkoutExerciseView(
-                                exerciseData: $workoutExercises[index],
-                                exercises: exercises
+                            EditWorkoutBlockView(
+                                blockData: $workoutBlocks[index]
                             )
                         } label: {
-                            WorkoutExerciseRow(
-                                exerciseData: workoutExercises[index],
+                            WorkoutBlockRow(
+                                block: workoutBlockToModel(workoutBlocks[index]),
                                 order: index + 1
                             )
                         }
                     }
-                    .onMove(perform: moveExercise)
-                    .onDelete(perform: deleteExercise)
+                    .onMove(perform: moveBlock)
+                    .onDelete(perform: deleteBlock)
 
-                    Button {
-                        showingExercisePicker = true
+                    Menu {
+                        Button {
+                            showingExercisePicker = true
+                        } label: {
+                            Label("Esercizio Singolo", systemImage: "figure.strengthtraining.traditional")
+                        }
+
+                        Button {
+                            showingMethodSelection = true
+                        } label: {
+                            Label("Con Metodo", systemImage: "bolt.horizontal.fill")
+                        }
                     } label: {
-                        Label("Aggiungi Esercizio", systemImage: "plus.circle.fill")
+                        Label("Aggiungi Blocco", systemImage: "plus.circle.fill")
+                    } primaryAction: {
+                        showingExercisePicker = true
                     }
                 } header: {
                     HStack {
-                        Text("Esercizi")
+                        Text("Blocchi (\(workoutBlocks.count))")
                         Spacer()
-                        if !workoutExercises.isEmpty {
+                        if !workoutBlocks.isEmpty {
                             EditButton()
                         }
                     }
@@ -159,59 +181,85 @@ struct EditWorkoutCardView: View {
                 ExercisePickerView(
                     exercises: exercises,
                     onSelect: { exercise in
-                        addExercise(exercise)
+                        addSimpleBlock(exercise)
                     }
                 )
+            }
+            .sheet(isPresented: $showingMethodSelection) {
+                MethodSelectionView { method in
+                    addMethodBlock(method)
+                }
             }
         }
     }
 
-    private func addExercise(_ exercise: Exercise) {
-        let newExercise = WorkoutExerciseData(
+    private func addSimpleBlock(_ exercise: Exercise) {
+        let exerciseItem = WorkoutExerciseItemData(
             exercise: exercise,
-            order: workoutExercises.count,
+            order: 0,
             sets: [WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: nil)]
         )
-        workoutExercises.append(newExercise)
+
+        let newBlock = WorkoutBlockData(
+            blockType: .simple,
+            methodType: nil,
+            order: workoutBlocks.count,
+            globalSets: 3,
+            globalRestTime: 90,
+            notes: nil,
+            exerciseItems: [exerciseItem]
+        )
+        workoutBlocks.append(newBlock)
     }
 
-    private func moveExercise(from source: IndexSet, to destination: Int) {
-        workoutExercises.move(fromOffsets: source, toOffset: destination)
-        for (index, _) in workoutExercises.enumerated() {
-            workoutExercises[index].order = index
+    private func addMethodBlock(_ method: MethodType) {
+        let newBlock = WorkoutBlockData(
+            blockType: .method,
+            methodType: method,
+            order: workoutBlocks.count,
+            globalSets: 3,
+            globalRestTime: 120,
+            notes: nil,
+            exerciseItems: []
+        )
+        workoutBlocks.append(newBlock)
+    }
+
+    private func moveBlock(from source: IndexSet, to destination: Int) {
+        workoutBlocks.move(fromOffsets: source, toOffset: destination)
+        for (index, _) in workoutBlocks.enumerated() {
+            workoutBlocks[index].order = index
         }
     }
 
-    private func deleteExercise(at offsets: IndexSet) {
-        workoutExercises.remove(atOffsets: offsets)
-        for (index, _) in workoutExercises.enumerated() {
-            workoutExercises[index].order = index
+    private func deleteBlock(at offsets: IndexSet) {
+        workoutBlocks.remove(atOffsets: offsets)
+        for (index, _) in workoutBlocks.enumerated() {
+            workoutBlocks[index].order = index
         }
     }
 
-    private func saveChanges() {
-        card.name = name
-        card.cardDescription = description.isEmpty ? nil : description
-        card.folder = selectedFolder
-        card.assignedTo = selectedClients
+    // Helper to convert WorkoutBlockData to WorkoutBlock for preview
+    private func workoutBlockToModel(_ blockData: WorkoutBlockData) -> WorkoutBlock {
+        let block = WorkoutBlock(
+            order: blockData.order,
+            blockType: blockData.blockType,
+            methodType: blockData.methodType,
+            globalSets: blockData.globalSets,
+            globalRestTime: blockData.globalRestTime,
+            notes: blockData.notes,
+            exerciseItems: []
+        )
 
-        // Elimina esplicitamente tutti gli esercizi esistenti dal database
-        // (anche se @Relationship(deleteRule: .cascade) dovrebbe gestirlo automaticamente)
-        for exercise in card.exercises {
-            modelContext.delete(exercise)
-        }
-        card.exercises.removeAll()
-
-        // Ricrea gli esercizi dalla lista modificata
-        for exerciseData in workoutExercises {
-            let workoutExercise = WorkoutExercise(
-                order: exerciseData.order,
-                exercise: exerciseData.exercise,
-                notes: exerciseData.notes,
-                restTime: exerciseData.restTime
+        for itemData in blockData.exerciseItems {
+            let exerciseItem = WorkoutExerciseItem(
+                order: itemData.order,
+                exercise: itemData.exercise,
+                notes: itemData.notes,
+                restTime: itemData.restTime
             )
 
-            for setData in exerciseData.sets {
+            for setData in itemData.sets {
                 let workoutSet = WorkoutSet(
                     order: setData.order,
                     setType: setData.setType,
@@ -220,10 +268,65 @@ struct EditWorkoutCardView: View {
                     duration: setData.duration,
                     notes: setData.notes
                 )
-                workoutExercise.sets.append(workoutSet)
+                exerciseItem.sets.append(workoutSet)
             }
 
-            card.exercises.append(workoutExercise)
+            block.exerciseItems.append(exerciseItem)
+        }
+
+        return block
+    }
+
+    private func saveChanges() {
+        card.name = name
+        card.cardDescription = description.isEmpty ? nil : description
+        card.folder = selectedFolder
+        card.assignedTo = selectedClients
+
+        // Elimina esplicitamente tutti i blocchi esistenti dal database
+        // (anche se @Relationship(deleteRule: .cascade) dovrebbe gestirlo automaticamente)
+        for block in card.blocks {
+            modelContext.delete(block)
+        }
+        card.blocks.removeAll()
+
+        // Ricrea i blocchi dalla lista modificata
+        for blockData in workoutBlocks {
+            let block = WorkoutBlock(
+                order: blockData.order,
+                blockType: blockData.blockType,
+                methodType: blockData.methodType,
+                globalSets: blockData.globalSets,
+                globalRestTime: blockData.globalRestTime,
+                notes: blockData.notes
+            )
+
+            // Crea gli esercizi del blocco
+            for exerciseItemData in blockData.exerciseItems {
+                let exerciseItem = WorkoutExerciseItem(
+                    order: exerciseItemData.order,
+                    exercise: exerciseItemData.exercise,
+                    notes: exerciseItemData.notes,
+                    restTime: exerciseItemData.restTime
+                )
+
+                // Crea le serie
+                for setData in exerciseItemData.sets {
+                    let workoutSet = WorkoutSet(
+                        order: setData.order,
+                        setType: setData.setType,
+                        reps: setData.reps,
+                        weight: setData.weight,
+                        duration: setData.duration,
+                        notes: setData.notes
+                    )
+                    exerciseItem.sets.append(workoutSet)
+                }
+
+                block.exerciseItems.append(exerciseItem)
+            }
+
+            card.blocks.append(block)
         }
 
         dismiss()
