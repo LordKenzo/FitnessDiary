@@ -122,7 +122,9 @@ struct EditWorkoutExerciseItemView: View {
             order: exerciseItemData.sets.count,
             setType: .reps,
             reps: 10,
-            weight: nil
+            weight: nil,
+            loadType: .absolute,
+            percentageOfMax: nil
         )
         exerciseItemData.sets.append(newSet)
     }
@@ -153,8 +155,8 @@ struct EditWorkoutExerciseItemView: View {
         ),
         order: 0,
         sets: [
-            WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: 60),
-            WorkoutSetData(order: 1, setType: .reps, reps: 8, weight: 70)
+            WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: 60, loadType: .absolute, percentageOfMax: nil),
+            WorkoutSetData(order: 1, setType: .reps, reps: 8, weight: 70, loadType: .absolute, percentageOfMax: nil)
         ]
     )
 

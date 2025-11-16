@@ -145,7 +145,7 @@ struct AddWorkoutCardView: View {
         let exerciseItem = WorkoutExerciseItemData(
             exercise: exercise,
             order: 0,
-            sets: [WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: nil)]
+            sets: [WorkoutSetData(order: 0, setType: .reps, reps: 10, weight: nil, loadType: .absolute, percentageOfMax: nil)]
         )
 
         let newBlock = WorkoutBlockData(
@@ -214,7 +214,9 @@ struct AddWorkoutCardView: View {
                     reps: setData.reps,
                     weight: setData.weight,
                     duration: setData.duration,
-                    notes: setData.notes
+                    notes: setData.notes,
+                    loadType: setData.loadType,
+                    percentageOfMax: setData.percentageOfMax
                 )
                 exerciseItem.sets.append(workoutSet)
             }
@@ -262,7 +264,9 @@ struct AddWorkoutCardView: View {
                         reps: setData.reps,
                         weight: setData.weight,
                         duration: setData.duration,
-                        notes: setData.notes
+                        notes: setData.notes,
+                        loadType: setData.loadType,
+                        percentageOfMax: setData.percentageOfMax
                     )
                     exerciseItem.sets.append(workoutSet)
                 }

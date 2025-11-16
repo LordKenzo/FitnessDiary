@@ -20,7 +20,9 @@ final class UserProfile {
     var zone5Max: Int // VO2 Max: 90-100%
     
     var maxHeartRate: Int // Calcolata o personalizzata
-    
+    @Relationship(deleteRule: .cascade)
+    var oneRepMaxRecords: [OneRepMax] // Record di 1RM per i Big 5
+
     init(
         id: UUID = UUID(),
         name: String = "",
@@ -49,6 +51,7 @@ final class UserProfile {
         self.zone3Max = Int(Double(calculatedMaxHR) * 0.80)
         self.zone4Max = Int(Double(calculatedMaxHR) * 0.90)
         self.zone5Max = calculatedMaxHR
+        self.oneRepMaxRecords = []
     }
     
     var profileImage: UIImage? {
@@ -70,6 +73,11 @@ final class UserProfile {
         self.zone3Max = Int(Double(maxHR) * 0.80)
         self.zone4Max = Int(Double(maxHR) * 0.90)
         self.zone5Max = maxHR
+    }
+
+    /// Get the 1RM for a specific Big 5 exercise
+    func getOneRepMax(for exercise: Big5Exercise) -> Double? {
+        return oneRepMaxRecords.first(where: { $0.exercise == exercise })?.weight
     }
 }
 

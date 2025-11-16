@@ -34,6 +34,8 @@ struct WorkoutSetData: Identifiable {
     var weight: Double?
     var duration: TimeInterval?
     var notes: String?
+    var loadType: LoadType
+    var percentageOfMax: Double?
 }
 
 /// Legacy structure for backward compatibility with old editing views

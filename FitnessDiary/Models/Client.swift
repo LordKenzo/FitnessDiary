@@ -26,6 +26,9 @@ final class Client: Identifiable {
     var medicalHistory: String?  // Anamnesi
     var gym: String?  // Palestra
 
+    @Relationship(deleteRule: .cascade)
+    var oneRepMaxRecords: [OneRepMax] // Record di 1RM per i Big 5
+
     // Computed property per nome completo
     var fullName: String {
         "\(firstName) \(lastName)"
@@ -68,5 +71,11 @@ final class Client: Identifiable {
         self.height = height
         self.medicalHistory = medicalHistory
         self.gym = gym
+        self.oneRepMaxRecords = []
+    }
+
+    /// Get the 1RM for a specific Big 5 exercise
+    func getOneRepMax(for exercise: Big5Exercise) -> Double? {
+        return oneRepMaxRecords.first(where: { $0.exercise == exercise })?.weight
     }
 }
