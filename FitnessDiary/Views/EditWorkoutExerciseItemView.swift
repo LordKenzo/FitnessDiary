@@ -130,34 +130,59 @@ struct EditWorkoutExerciseItemView: View {
         }
     }
 
+    @ViewBuilder
     private var setsSection: some View {
         Section {
+            setsList
+            addSetButton
+        } header: {
+            setsHeader
+        } footer: {
+            setsFooter
+        }
+    }
+
+    @ViewBuilder
+    private var setsList: some View {
+        if isInMethod {
             ForEach($exerciseItemData.sets) { $set in
                 SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax)
             }
-            .onMove(perform: isInMethod ? nil : moveSets)
-            .onDelete(perform: isInMethod ? nil : deleteSets)
+        } else {
+            ForEach($exerciseItemData.sets) { $set in
+                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax)
+            }
+            .onMove(perform: moveSets)
+            .onDelete(perform: deleteSets)
+        }
+    }
 
+    @ViewBuilder
+    private var addSetButton: some View {
+        if !isInMethod {
+            Button {
+                addSet()
+            } label: {
+                Label("Aggiungi Serie", systemImage: "plus.circle.fill")
+            }
+        }
+    }
+
+    private var setsHeader: some View {
+        HStack {
+            Text(isInMethod ? "Ripetizioni per Serie" : "Serie")
+            Spacer()
             if !isInMethod {
-                Button {
-                    addSet()
-                } label: {
-                    Label("Aggiungi Serie", systemImage: "plus.circle.fill")
-                }
+                EditButton()
             }
-        } header: {
-            HStack {
-                Text(isInMethod ? "Ripetizioni per Serie" : "Serie")
-                Spacer()
-                if !isInMethod {
-                    EditButton()
-                }
-            }
-        } footer: {
-            if isInMethod {
-                Text("Il numero di serie è gestito dal blocco metodologia")
-                    .font(.caption)
-            }
+        }
+    }
+
+    @ViewBuilder
+    private var setsFooter: some View {
+        if isInMethod {
+            Text("Il numero di serie è gestito dal blocco metodologia")
+                .font(.caption)
         }
     }
 
