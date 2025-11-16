@@ -176,7 +176,7 @@ struct AddClientView: View {
                 }
 
                 Section("Foto Profilo") {
-                    PhotoPickerRow(
+                    ClientPhotoPickerRow(
                         title: "Foto",
                         item: $photoItem,
                         photoData: $photoData
@@ -292,7 +292,7 @@ struct EditClientView: View {
                 }
 
                 Section("Foto Profilo") {
-                    PhotoPickerRow(
+                    ClientPhotoPickerRow(
                         title: "Foto",
                         item: $photoItem,
                         photoData: $client.profileImageData
@@ -384,8 +384,8 @@ struct EditClientView: View {
     }
 }
 
-// PhotoPickerRow component (riutilizzato dal pattern esistente)
-struct PhotoPickerRow: View {
+// ClientPhotoPickerRow component (versione semplificata per singola foto)
+struct ClientPhotoPickerRow: View {
     let title: String
     @Binding var item: PhotosPickerItem?
     @Binding var photoData: Data?
