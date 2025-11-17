@@ -37,6 +37,7 @@ final class WorkoutTimerManager {
 
     var timerState: TimerState = .idle
     var timerType: TimerType = .rest
+    var tickCount: Int = 0  // Incrementato ad ogni tick per triggherare Observable
 
     private var startTime: Date?
     private var pauseTime: Date?
@@ -155,6 +156,7 @@ final class WorkoutTimerManager {
         pauseTime = nil
         totalPausedDuration = 0
         targetDuration = 0
+        tickCount = 0
     }
 
     /// Reset completo del timer
@@ -185,6 +187,9 @@ final class WorkoutTimerManager {
             guard let self = self else { return }
 
             Task { @MainActor in
+                // Incrementa tickCount per triggherare Observable
+                self.tickCount += 1
+
                 // Check se completato
                 if self.targetDuration > 0 && self.elapsedTime >= self.targetDuration {
                     self.handleTimerCompletion()

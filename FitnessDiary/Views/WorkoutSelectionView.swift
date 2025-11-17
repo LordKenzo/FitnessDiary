@@ -221,6 +221,9 @@ struct WorkoutSelectionView: View {
     }
 
     private func abandonWorkout(_ session: WorkoutSession) {
+        // Ensure session is marked as incomplete (do NOT call session.complete())
+        // session.isCompleted should remain false for abandoned workouts
+
         // Salva come CompletedWorkout (incompleto)
         let completedWorkout = CompletedWorkout.fromSession(session)
         modelContext.insert(completedWorkout)

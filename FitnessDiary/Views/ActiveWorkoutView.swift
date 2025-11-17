@@ -621,7 +621,7 @@ struct ActiveWorkoutView: View {
         // Get 1RM for calculation if using percentage
         var oneRM: Double? = nil
         if let exercise = exerciseItem.exercise,
-           let big5 = Big5Exercise.fromExerciseName(exercise.name) {
+           let big5 = Big5Exercise.from(exerciseName: exercise.name) {
             oneRM = session.client?.getOneRepMax(for: big5)
         }
 
@@ -650,6 +650,13 @@ struct ActiveWorkoutView: View {
 
         if let weight = getTargetWeight(set) {
             inputWeight = String(format: "%.1f", weight)
+        }
+
+        // Pre-fill duration for duration-based sets
+        if set.setType == .duration, let duration = set.duration {
+            inputDuration = duration
+        } else {
+            inputDuration = 0
         }
 
         inputRPE = 5.0
@@ -740,6 +747,9 @@ struct ActiveWorkoutView: View {
     }
 
     private func completeWorkout() {
+        // Mark session as completed
+        session.complete()
+
         // Create CompletedWorkout
         let completed = CompletedWorkout.fromSession(session)
         modelContext.insert(completed)
@@ -787,24 +797,6 @@ extension TimerState {
         case .paused: return "In pausa"
         case .completed: return "Completato"
         }
-    }
-}
-
-extension Big5Exercise {
-    static func fromExerciseName(_ name: String) -> Big5Exercise? {
-        let lowercasedName = name.lowercased()
-        if lowercasedName.contains("bench") || lowercasedName.contains("panca") {
-            return .benchPress
-        } else if lowercasedName.contains("deadlift") || lowercasedName.contains("stacco") {
-            return .deadlift
-        } else if lowercasedName.contains("military") || lowercasedName.contains("lento") {
-            return .militaryPress
-        } else if lowercasedName.contains("hip thrust") || lowercasedName.contains("ponte") {
-            return .hipThrust
-        } else if lowercasedName.contains("squat") {
-            return .squat
-        }
-        return nil
     }
 }
 

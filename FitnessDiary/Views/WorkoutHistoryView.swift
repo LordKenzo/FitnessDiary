@@ -181,9 +181,9 @@ struct WorkoutHistoryView: View {
         return workouts
     }
 
-    private var groupedWorkouts: [String: [CompletedWorkout]] {
+    private var groupedWorkouts: [Date: [CompletedWorkout]] {
         Dictionary(grouping: filteredWorkouts) { workout in
-            Calendar.current.startOfDay(for: workout.completedDate).description
+            Calendar.current.startOfDay(for: workout.completedDate)
         }
     }
 
@@ -235,11 +235,7 @@ struct WorkoutHistoryView: View {
         }
     }
 
-    private func formatSectionDate(_ dateString: String) -> String {
-        guard let date = ISO8601DateFormatter().date(from: dateString) else {
-            return dateString
-        }
-
+    private func formatSectionDate(_ date: Date) -> String {
         let calendar = Calendar.current
         if calendar.isDateInToday(date) {
             return "Oggi"
