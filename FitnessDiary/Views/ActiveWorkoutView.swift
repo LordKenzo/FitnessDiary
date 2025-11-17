@@ -945,13 +945,17 @@ struct ActiveWorkoutView: View {
 
     // MARK: - Countdown Functions
 
+    @MainActor
     private func startCountdown() {
         guard countdownSeconds > 0 else {
             workoutState = .active
+            checkAndStartRestBlockIfNeeded()
             return
         }
 
-        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+        // Schedule timer on main run loop explicitly
+        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             Task { @MainActor in
                 if self.countdownSeconds > 1 {
                     self.countdownSeconds -= 1
@@ -962,14 +966,18 @@ struct ActiveWorkoutView: View {
                 }
             }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        countdownTimer = timer
     }
 
+    @MainActor
     private func skipCountdown() {
         stopCountdown()
         workoutState = .active
         checkAndStartRestBlockIfNeeded()
     }
 
+    @MainActor
     private func checkAndStartRestBlockIfNeeded() {
         // Se il blocco corrente è un REST, avvia automaticamente il timer
         if session.currentBlock?.blockType == .rest {
@@ -982,6 +990,7 @@ struct ActiveWorkoutView: View {
         }
     }
 
+    @MainActor
     private func stopCountdown() {
         countdownTimer?.invalidate()
         countdownTimer = nil
@@ -1112,6 +1121,7 @@ struct ActiveWorkoutView: View {
 
     // MARK: - REST Block Functions
 
+    @MainActor
     private func startRestBlockTimer() {
         guard let block = session.currentBlock,
               block.blockType == .rest,
