@@ -206,88 +206,7 @@ struct WorkoutSessionView: View {
             set: { viewModel.setResults[set.id] = $0 }
         )
 
-        return VStack(alignment: .leading, spacing: 16) {
-            Text("Dettagli Serie")
-                .font(.headline)
-            VStack(spacing: 12) {
-                if let reps = set.reps {
-                    LabeledContent("Ripetizioni") {
-                        Text("\(reps)")
-                    }
-                }
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Kg")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        TextField("0", value: Binding(
-                            get: { binding.wrappedValue.confirmedWeight ?? set.weight ?? 0 },
-                            set: { value in
-                                var updated = binding.wrappedValue
-                                updated.confirmedWeight = value
-                                updated.confirmedPercentage = nil
-                                binding.wrappedValue = updated
-                            }
-                        ), format: .number)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                    }
-                    VStack(alignment: .leading) {
-                        Text("% 1RM")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        TextField("0", value: Binding(
-                            get: { binding.wrappedValue.confirmedPercentage ?? set.percentageOfMax ?? 0 },
-                            set: { value in
-                                var updated = binding.wrappedValue
-                                updated.confirmedPercentage = value
-                                updated.confirmedWeight = nil
-                                binding.wrappedValue = updated
-                            }
-                        ), format: .number)
-                        .keyboardType(.decimalPad)
-                        .textFieldStyle(.roundedBorder)
-                    }
-                }
-
-                VStack(alignment: .leading) {
-                    Text("RPE Serie (1-10)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Slider(value: Binding(
-                        get: { Double(binding.wrappedValue.perceivedEffort) },
-                        set: { newValue in
-                            var updated = binding.wrappedValue
-                            updated.perceivedEffort = Int(newValue.rounded())
-                            binding.wrappedValue = updated
-                        }
-                    ), in: 1...10, step: 1)
-                    Text("\(binding.wrappedValue.perceivedEffort)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Feedback carico")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Picker("Feedback", selection: Binding(
-                        get: { binding.wrappedValue.feedback },
-                        set: { binding.wrappedValue.feedback = $0 }
-                    )) {
-                        ForEach(WorkoutSessionViewModel.SetExecutionResult.LoadFeedback.allCases) { feedback in
-                            Label(feedback.rawValue, systemImage: feedback.symbol)
-                                .tag(feedback)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
-            }
-            .padding()
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 3)
-        }
+        return RepsSetEditor(set: set, result: binding)
     }
 
     private func durationEditor(for set: WorkoutSet) -> some View {
@@ -445,6 +364,107 @@ private struct ExerciseSummaryCard: View {
                 .background(Color(.secondarySystemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
         }
+    }
+}
+
+private struct RepsSetEditor: View {
+    let set: WorkoutSet
+    @Binding var result: WorkoutSessionViewModel.SetExecutionResult
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Dettagli Serie")
+                .font(.headline)
+            VStack(spacing: 12) {
+                if let reps = set.reps {
+                    LabeledContent("Ripetizioni") {
+                        Text("\(reps)")
+                    }
+                }
+                loadInputs
+                rpeSlider
+                feedbackPicker
+            }
+            .padding()
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 3)
+        }
+    }
+
+    private var loadInputs: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text("Kg")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("0", value: weightBinding, format: .number)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+            }
+            VStack(alignment: .leading) {
+                Text("% 1RM")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("0", value: percentageBinding, format: .number)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+            }
+        }
+    }
+
+    private var rpeSlider: some View {
+        VStack(alignment: .leading) {
+            Text("RPE Serie (1-10)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Slider(value: rpeBinding, in: 1...10, step: 1)
+            Text("\(result.perceivedEffort)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var feedbackPicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Feedback carico")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Picker("Feedback", selection: $result.feedback) {
+                ForEach(WorkoutSessionViewModel.SetExecutionResult.LoadFeedback.allCases) { feedback in
+                    Label(feedback.rawValue, systemImage: feedback.symbol)
+                        .tag(feedback)
+                }
+            }
+            .pickerStyle(.segmented)
+        }
+    }
+
+    private var weightBinding: Binding<Double> {
+        Binding(
+            get: { result.confirmedWeight ?? set.weight ?? 0 },
+            set: { newValue in
+                result.confirmedWeight = newValue
+                result.confirmedPercentage = nil
+            }
+        )
+    }
+
+    private var percentageBinding: Binding<Double> {
+        Binding(
+            get: { result.confirmedPercentage ?? set.percentageOfMax ?? 0 },
+            set: { newValue in
+                result.confirmedPercentage = newValue
+                result.confirmedWeight = nil
+            }
+        )
+    }
+
+    private var rpeBinding: Binding<Double> {
+        Binding(
+            get: { Double(result.perceivedEffort) },
+            set: { result.perceivedEffort = Int($0.rounded()) }
+        )
     }
 }
 
