@@ -11,10 +11,17 @@ import SwiftData
 
 struct SettingsView: View {
     @Query private var profiles: [UserProfile]
-    
     var body: some View {
         NavigationStack {
             List {
+                Section("Generale") {
+                    NavigationLink {
+                        GeneralPreferencesView()
+                    } label: {
+                        Label("Preferenze Generali", systemImage: "slider.horizontal.3")
+                    }
+                }
+
                 Section("Account") {
                     NavigationLink {
                         ProfileView()

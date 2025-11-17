@@ -5,6 +5,7 @@ struct AddWorkoutCardView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
+    @AppStorage("debugWorkoutLogEnabled") private var debugWorkoutLogEnabled = false
 
     let folders: [WorkoutFolder]
     let clients: [Client]
@@ -112,6 +113,16 @@ struct AddWorkoutCardView: View {
                         Spacer()
                         if !workoutBlocks.isEmpty {
                             EditButton()
+                        }
+                    }
+                }
+
+                if debugWorkoutLogEnabled && !workoutBlocks.isEmpty {
+                    Section("Debug") {
+                        NavigationLink {
+                            WorkoutDebugLogView(blockData: workoutBlocks)
+                        } label: {
+                            Label("Anteprima sequenza esercizi", systemImage: "list.bullet.rectangle")
                         }
                     }
                 }
