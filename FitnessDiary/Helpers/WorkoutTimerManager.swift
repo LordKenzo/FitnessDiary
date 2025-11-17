@@ -30,7 +30,7 @@ enum TimerState: Equatable {
 /// Manager centralizzato per la gestione di timer durante l'allenamento
 /// Usa Date-based tracking per supportare background mode
 @Observable
-final class WorkoutTimerManager {
+final class WorkoutTimerManager: @unchecked Sendable {
 
     // MARK: - Properties
 
