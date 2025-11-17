@@ -170,30 +170,38 @@ private extension WorkoutDebugLogBuilder {
             return technicalSimpleEntries(for: block)
         }
 
+        let blockName = methodBlockName(for: block)
+        let content: [String]
+
         switch method {
         case .superset:
-            return complexSetEntries(for: block, labelPrefix: "A")
+            content = complexSetEntries(for: block, labelPrefix: "A")
         case .triset:
-            return complexSetEntries(for: block, labelPrefix: "A")
+            content = complexSetEntries(for: block, labelPrefix: "A")
         case .giantSet:
-            return complexSetEntries(for: block, labelPrefix: "A")
+            content = complexSetEntries(for: block, labelPrefix: "A")
         case .dropset:
-            return dropsetEntries(for: block)
+            content = dropsetEntries(for: block)
         case .rest_pause:
-            return restPauseEntries(for: block)
+            content = restPauseEntries(for: block)
         case .cluster:
-            return clusterNotationEntries(for: block)
+            content = clusterNotationEntries(for: block)
         case .emom:
-            return emomEntries(for: block)
+            content = emomEntries(for: block)
         case .amrap:
-            return amrapEntries(for: block)
+            content = amrapEntries(for: block)
         case .circuit:
-            return circuitEntries(for: block)
+            content = circuitEntries(for: block)
         case .tabata:
-            return tabataTechnicalEntries(for: block)
+            content = tabataTechnicalEntries(for: block)
         default:
-            return technicalSimpleEntries(for: block)
+            content = technicalSimpleEntries(for: block)
         }
+
+        var lines = ["Inizio \(blockName)"]
+        lines.append(contentsOf: content)
+        lines.append("Fine \(blockName)")
+        return lines
     }
 
     static func complexSetEntries(for block: WorkoutBlock, labelPrefix: String) -> [String] {
