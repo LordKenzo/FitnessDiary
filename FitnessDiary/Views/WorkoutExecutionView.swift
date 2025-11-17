@@ -952,12 +952,49 @@ struct WorkoutExecutionView: View {
         }
     }
 
+    @ViewBuilder
+    private var countdownOverlay: some View {
+        if viewModel.isCountdownActive {
+            ZStack {
+                Color.black.opacity(0.55)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 16) {
+                    Text("Countdown")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Text("\(viewModel.countdownRemainingSeconds)")
+                        .font(.system(size: 72, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.white)
+                    Text("Preparati a iniziare l'allenamento")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.8))
+
+                    Button(action: viewModel.skipCountdown) {
+                        Text("Salta countdown")
+                            .fontWeight(.semibold)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.white)
+                    .foregroundStyle(.black)
+                }
+                .padding(32)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            }
+            .transition(.opacity)
+        }
+    }
+
     private func format(seconds: TimeInterval) -> String {
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute, .second]
         formatter.zeroFormattingBehavior = [.pad]
         return formatter.string(from: seconds) ?? "00:00"
     }
+
+}
 
 // MARK: - Histogram Component
 
