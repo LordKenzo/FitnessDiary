@@ -92,9 +92,12 @@ final class WorkoutTimerManager {
 
     // MARK: - Initialization
 
-    init() {
+    nonisolated init() {
         // Request notification authorization on init
-        requestNotificationAuthorization()
+        // Note: This is called from a nonisolated context, so we schedule the authorization request
+        Task {
+            await requestNotificationAuthorization()
+        }
     }
 
     // MARK: - Timer Control
@@ -225,11 +228,11 @@ final class WorkoutTimerManager {
 
     // MARK: - Notifications
 
-    private func requestNotificationAuthorization() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error = error {
-                print("⚠️ Notification authorization error: \(error.localizedDescription)")
-            }
+    nonisolated private func requestNotificationAuthorization() async {
+        do {
+            _ = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+        } catch {
+            print("⚠️ Notification authorization error: \(error.localizedDescription)")
         }
     }
 
