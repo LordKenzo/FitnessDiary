@@ -8,7 +8,7 @@ struct GeneralPreferencesView: View {
     var body: some View {
         Form {
             Section("Preferenze Generali") {
-                Toggle("Debug Sequenza Allenamento", isOn: $debugWorkoutLogEnabled)
+                Toggle("Genera Sequenza Allenamento", isOn: $debugWorkoutLogEnabled)
 
                 Toggle("Clona automaticamente il carico", isOn: $cloneLoadEnabled)
                     .tint(.blue)
