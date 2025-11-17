@@ -5,7 +5,6 @@ struct RepsAndLoadFields: View {
     @Binding var set: WorkoutSetData
     let oneRepMax: Double?
     let targetParameters: StrengthExpressionParameters?
-    var onLoadChange: ((WorkoutSetData) -> Void)? = nil
 
     // Validazione del carico rispetto all'obiettivo
     private var loadPercentage: Double? {
@@ -76,9 +75,6 @@ struct RepsAndLoadFields: View {
                                 get: { set.weight },
                                 set: { newValue in
                                     set.weight = newValue
-                                    if newValue != nil {
-                                        onLoadChange?(set)
-                                    }
                                 }
                             ),
                             format: .number
@@ -115,9 +111,6 @@ struct RepsAndLoadFields: View {
                                 get: { set.percentageOfMax },
                                 set: { newValue in
                                     set.percentageOfMax = newValue
-                                    if newValue != nil {
-                                        onLoadChange?(set)
-                                    }
                                 }
                             ),
                             format: .number

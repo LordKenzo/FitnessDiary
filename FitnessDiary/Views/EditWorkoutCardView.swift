@@ -174,7 +174,7 @@ struct EditWorkoutCardView: View {
                         Text("Blocchi (\(workoutBlocks.count))")
                         Spacer()
                         if !workoutBlocks.isEmpty {
-                            EditButton()
+                            TitleCaseEditButton()
                         }
                     }
                 }

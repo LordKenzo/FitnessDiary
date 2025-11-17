@@ -80,8 +80,7 @@ struct EditWorkoutExerciseView: View {
                     SetRow(
                         set: $set,
                         exercise: exerciseData.exercise,
-                        oneRepMax: oneRepMax,
-                        onLoadChange: handleSetLoadChange
+                        oneRepMax: oneRepMax
                     )
                 }
                 .onMove(perform: moveSets)
@@ -96,7 +95,7 @@ struct EditWorkoutExerciseView: View {
                 HStack {
                     Text("Serie")
                     Spacer()
-                    EditButton()
+                    TitleCaseEditButton()
                 }
             }
         }
@@ -121,16 +120,24 @@ struct EditWorkoutExerciseView: View {
     @ToolbarContentBuilder
     private func toolbarContent() -> some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
-            Button("Fatto") {
+            Button("Conferma") {
                 saveChanges()
             }
         }
     }
 
     private func saveChanges() {
+        applyCloneLoadIfNeeded()
         exerciseData.notes = notes.isEmpty ? nil : notes
         exerciseData.restTime = TimeInterval(restMinutes * 60 + restSeconds)
         dismiss()
+    }
+
+    private func applyCloneLoadIfNeeded() {
+        guard cloneLoadEnabled else { return }
+        for set in exerciseData.sets where set.weight != nil || set.percentageOfMax != nil {
+            exerciseData.sets.cloneLoadIfNeeded(from: set)
+        }
     }
 
     private func addSet() {
@@ -158,11 +165,6 @@ struct EditWorkoutExerciseView: View {
             exerciseData.sets[index].order = index
         }
     }
-
-    private func handleSetLoadChange(_ updatedSet: WorkoutSetData) {
-        guard cloneLoadEnabled else { return }
-        exerciseData.sets.cloneLoadIfNeeded(from: updatedSet)
-    }
 }
 
 struct SetRow: View {
@@ -173,7 +175,6 @@ struct SetRow: View {
     var isRestPauseSet: Bool = false
     var setTypeSupport: SetTypeSupport = .repsOnly
     var targetParameters: StrengthExpressionParameters? = nil
-    var onLoadChange: ((WorkoutSetData) -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 8) {
@@ -194,8 +195,7 @@ struct SetRow: View {
                 RepsAndLoadFields(
                     set: $set,
                     oneRepMax: oneRepMax,
-                    targetParameters: targetParameters,
-                    onLoadChange: onLoadChange
+                    targetParameters: targetParameters
                 )
 
                 // Campi Cluster Set

@@ -112,7 +112,7 @@ struct AddWorkoutCardView: View {
                         Text("Blocchi (\(workoutBlocks.count))")
                         Spacer()
                         if !workoutBlocks.isEmpty {
-                            EditButton()
+                            TitleCaseEditButton()
                         }
                     }
                 }

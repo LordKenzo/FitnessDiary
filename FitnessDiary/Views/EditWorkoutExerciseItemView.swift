@@ -210,8 +210,7 @@ struct EditWorkoutExerciseItemView: View {
                     isClusterSet: isCluster,
                     isRestPauseSet: isRestPause,
                     setTypeSupport: setTypeSupport,
-                    targetParameters: targetParameters,
-                    onLoadChange: handleSetLoadChange
+                    targetParameters: targetParameters
                 )
             }
         } else {
@@ -223,8 +222,7 @@ struct EditWorkoutExerciseItemView: View {
                     isClusterSet: isCluster,
                     isRestPauseSet: isRestPause,
                     setTypeSupport: setTypeSupport,
-                    targetParameters: targetParameters,
-                    onLoadChange: handleSetLoadChange
+                    targetParameters: targetParameters
                 )
             }
             .onMove(perform: moveSets)
@@ -248,7 +246,7 @@ struct EditWorkoutExerciseItemView: View {
             Text(isInMethod ? "Ripetizioni per Serie" : "Serie")
             Spacer()
             if !isInMethod {
-                EditButton()
+                TitleCaseEditButton()
             }
         }
     }
@@ -269,13 +267,14 @@ struct EditWorkoutExerciseItemView: View {
     @ToolbarContentBuilder
     private func toolbarContent() -> some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
-            Button("Fatto") {
+            Button("Conferma") {
                 saveChanges()
             }
         }
     }
 
     private func saveChanges() {
+        applyCloneLoadIfNeeded()
         exerciseItemData.notes = notes.isEmpty ? nil : notes
         if !isInMethod {
             exerciseItemData.restTime = TimeInterval(restMinutes * 60 + restSeconds)
@@ -309,9 +308,11 @@ struct EditWorkoutExerciseItemView: View {
         }
     }
 
-    private func handleSetLoadChange(_ updatedSet: WorkoutSetData) {
+    private func applyCloneLoadIfNeeded() {
         guard cloneLoadEnabled else { return }
-        exerciseItemData.sets.cloneLoadIfNeeded(from: updatedSet)
+        for set in exerciseItemData.sets where set.weight != nil || set.percentageOfMax != nil {
+            exerciseItemData.sets.cloneLoadIfNeeded(from: set)
+        }
     }
 }
 
