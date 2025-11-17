@@ -166,22 +166,29 @@ struct ActiveWorkoutView: View {
                     // Blocco corrente
                     currentBlockCard
 
-                    // Esercizio corrente
-                    currentExerciseCard
+                    // Contenuto blocco - diverso per REST vs esercizi
+                    if session.currentBlock?.blockType == .rest {
+                        // Blocco REST: mostra solo timer e pulsante skip
+                        restBlockContent
+                    } else {
+                        // Blocco esercizi normale
+                        // Esercizio corrente
+                        currentExerciseCard
 
-                    // Serie corrente
-                    currentSetCard
+                        // Serie corrente
+                        currentSetCard
 
-                    // Timer (se attivo)
-                    if timerManager.timerState != .idle {
-                        timerCard
+                        // Timer (se attivo)
+                        if timerManager.timerState != .idle {
+                            timerCard
+                        }
+
+                        // Performance input
+                        performanceInputCard
+
+                        // Actions
+                        actionButtons
                     }
-
-                    // Performance input
-                    performanceInputCard
-
-                    // Actions
-                    actionButtons
                 }
                 .padding()
             }
@@ -677,6 +684,59 @@ struct ActiveWorkoutView: View {
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 
+    // MARK: - REST Block Content
+
+    private var restBlockContent: some View {
+        VStack(spacing: 24) {
+            // REST icon and title
+            VStack(spacing: 16) {
+                Image(systemName: "pause.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.orange)
+
+                Text("Recupero in corso")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+            }
+            .padding(.top, 40)
+
+            // Timer display
+            if timerManager.timerState != .idle {
+                VStack(spacing: 8) {
+                    Text(timerManager.formatTime(timerManager.remainingTime))
+                        .font(.system(size: 72, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+
+                    Text("rimanenti")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            // Skip button
+            Button {
+                skipRestBlock()
+            } label: {
+                Text("Salta Recupero")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.orange)
+                    .cornerRadius(12)
+            }
+            .padding(.top, 20)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .onAppear {
+            startRestBlockTimer()
+        }
+    }
+
     // MARK: - Action Buttons
 
     private var actionButtons: some View {
@@ -848,14 +908,14 @@ struct ActiveWorkoutView: View {
             return
         }
 
-        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             Task { @MainActor in
-                guard let self = self else { return }
                 if self.countdownSeconds > 1 {
                     self.countdownSeconds -= 1
                 } else {
                     self.stopCountdown()
                     self.workoutState = .active
+                    self.checkAndStartRestBlockIfNeeded()
                 }
             }
         }
@@ -864,6 +924,14 @@ struct ActiveWorkoutView: View {
     private func skipCountdown() {
         stopCountdown()
         workoutState = .active
+        checkAndStartRestBlockIfNeeded()
+    }
+
+    private func checkAndStartRestBlockIfNeeded() {
+        // Se il blocco corrente è un REST, avvia automaticamente il timer
+        if session.currentBlock?.blockType == .rest {
+            startRestBlockTimer()
+        }
     }
 
     private func stopCountdown() {
@@ -899,13 +967,19 @@ struct ActiveWorkoutView: View {
         // Move to next set
         session.moveToNextSet()
 
-        // Auto-start rest timer based on workout structure
-        if willChangeBlock, let block = previousBlock, let recoveryTime = block.recoveryAfterBlock, recoveryTime > 0 {
-            // Rest tra blocchi (priorità massima)
-            timerManager.startRestTimer(restDuration: recoveryTime)
+        // Check se siamo arrivati a un blocco REST
+        if session.currentBlock?.blockType == .rest {
+            // Avvia automaticamente il timer del blocco REST
+            startRestBlockTimer()
         } else {
-            // Rest normale tra serie
-            startRestTimerIfNeeded()
+            // Auto-start rest timer based on workout structure
+            if willChangeBlock, let block = previousBlock, let recoveryTime = block.recoveryAfterBlock, recoveryTime > 0 {
+                // Rest tra blocchi (priorità massima)
+                timerManager.startRestTimer(restDuration: recoveryTime)
+            } else {
+                // Rest normale tra serie
+                startRestTimerIfNeeded()
+            }
         }
 
         // Reset input fields
@@ -971,6 +1045,48 @@ struct ActiveWorkoutView: View {
 
         if session.isCompleted {
             showingCompleteAlert = true
+        }
+    }
+
+    // MARK: - REST Block Functions
+
+    private func startRestBlockTimer() {
+        guard let block = session.currentBlock,
+              block.blockType == .rest,
+              let restDuration = block.globalRestTime else {
+            return
+        }
+
+        // Avvia timer per il blocco REST
+        timerManager.startRestTimer(restDuration: restDuration)
+
+        // Quando il timer finisce, passa al blocco successivo
+        timerManager.onTimerComplete = {
+            Task { @MainActor in
+                self.completeRestBlock()
+            }
+        }
+    }
+
+    private func skipRestBlock() {
+        timerManager.stop()
+        completeRestBlock()
+    }
+
+    private func completeRestBlock() {
+        // Passa al blocco successivo
+        session.moveToNextBlock()
+        prepareCurrentSet()
+        saveSession()
+
+        // Check se nuovo blocco è REST (per avviare automaticamente il timer)
+        if session.currentBlock?.blockType == .rest {
+            startRestBlockTimer()
+        }
+
+        // Check if workout is completed
+        if session.isCompleted {
+            completeWorkout()
         }
     }
 
