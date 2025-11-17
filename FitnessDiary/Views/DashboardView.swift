@@ -1,12 +1,9 @@
 import SwiftUI
+import SwiftData
 
 struct DashboardView: View {
-    private let metricCards: [MetricCard] = [
-        .init(title: "Sessioni", value: "12", subtitle: "Ultimi 30 giorni", icon: "calendar.circle"),
-        .init(title: "Esercizi", value: "96", subtitle: "Ultimo mese", icon: "dumbbell"),
-        .init(title: "Volume", value: "42k kg", subtitle: "Stimato", icon: "chart.bar.fill"),
-        .init(title: "Durata", value: "18 h", subtitle: "Tempo totale", icon: "clock.fill")
-    ]
+    @Environment(\.calendar) private var calendar
+    @Query(sortDescriptors: [SortDescriptor(\.date, order: .reverse)]) private var sessionLogs: [WorkoutSessionLog]
 
     private let focusMuscles = ["Petto", "Dorso", "Gambe e Glutei", "Core", "Spalle"]
     private let quickActions = [
@@ -14,7 +11,20 @@ struct DashboardView: View {
         QuickAction(title: "Registra Manualmente", icon: "square.and.pencil", tint: .orange),
         QuickAction(title: "Imposta Obiettivo", icon: "target", tint: .purple)
     ]
-    private let weeklyTrend: [CGFloat] = [4, 3, 5, 2, 4, 5, 6]
+
+    private let durationFormatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute]
+        formatter.unitsStyle = .abbreviated
+        return formatter
+    }()
+
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "it_IT")
+        formatter.dateStyle = .medium
+        return formatter
+    }()
 
     var body: some View {
         NavigationStack {
@@ -35,26 +45,71 @@ struct DashboardView: View {
                 .padding(20)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Dashboard")
+            .navigationTitle("FittyPal")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 
     private var heroHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Bentornato!")
-                .font(.largeTitle.bold())
-            Text("Qui troverai un riepilogo rapido dei tuoi allenamenti e suggerimenti personalizzati.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-            Divider()
-            HStack(alignment: .bottom, spacing: 16) {
-                VStack(alignment: .leading) {
-                    Text("Prossimo obiettivo")
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Ciao da FittyPal")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Text(heroHeadline)
+                    .font(.largeTitle.bold())
+            }
+
+            if let latest = sessionLogs.first {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Ultima sessione")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("4 sessioni questa settimana")
+                    HStack(alignment: .center, spacing: 12) {
+                        Text(latest.mood.emoji)
+                            .font(.largeTitle)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(latest.cardName)
+                                .font(.headline)
+                            Text(dateFormatter.string(from: latest.date))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(latest.notes.isEmpty ? "Nessuna nota" : "\"\(latest.notes)\"")
+                                .font(.footnote.italic())
+                                .lineLimit(2)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if let rpe = latest.rpe {
+                            VStack(spacing: 2) {
+                                Text("RPE")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                Text("\(rpe)")
+                                    .font(.headline)
+                            }
+                            .padding(8)
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        }
+                    }
+                }
+                Divider()
+            } else {
+                Text("Quando registri i tuoi allenamenti troverai qui l'anteprima dell'ultima sessione.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                Divider()
+            }
+
+            HStack(alignment: .bottom, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Obiettivo settimanale")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("\(sessionsThisWeek)/\(weeklyGoal) sessioni")
                         .font(.headline)
-                    ProgressView(value: 0.5)
+                    ProgressView(value: min(weeklyProgress, 1))
                         .tint(.blue)
                 }
                 Spacer()
@@ -62,7 +117,7 @@ struct DashboardView: View {
                     Text("Streak")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("3 giorni")
+                    Text("\(currentStreak) giorni")
                         .font(.title2.bold())
                 }
             }
@@ -187,6 +242,117 @@ struct DashboardView: View {
                 .foregroundStyle(.secondary)
         }
     }
+
+    private var metricCards: [MetricCard] {
+        [
+            MetricCard(
+                title: "Sessioni",
+                value: "\(sessionsLast30Days.count)",
+                subtitle: "Ultimi 30 giorni",
+                icon: "calendar.circle"
+            ),
+            MetricCard(
+                title: "Durata",
+                value: durationFormatter.string(from: totalDurationLast30Days) ?? "0h",
+                subtitle: "Tempo totale",
+                icon: "clock.fill"
+            ),
+            MetricCard(
+                title: "RPE medio",
+                value: averageRPEString,
+                subtitle: "Ultime sessioni",
+                icon: "waveform.path.ecg"
+            ),
+            MetricCard(
+                title: "Umore più frequente",
+                value: dominantMood?.emoji ?? "🙂",
+                subtitle: dominantMood?.title ?? "In attesa dei dati",
+                icon: "face.smiling"
+            )
+        ]
+    }
+
+    private var sessionsLast30Days: [WorkoutSessionLog] {
+        guard let threshold = calendar.date(byAdding: .day, value: -30, to: .now) else { return [] }
+        return sessionLogs.filter { $0.date >= threshold }
+    }
+
+    private var totalDurationLast30Days: TimeInterval {
+        sessionsLast30Days.reduce(0) { $0 + $1.durationSeconds }
+    }
+
+    private var averageRPEString: String {
+        let recentRPE = sessionsLast30Days.compactMap(\.rpe)
+        guard !recentRPE.isEmpty else { return "—" }
+        let average = Double(recentRPE.reduce(0, +)) / Double(recentRPE.count)
+        return String(format: "%.1f", average)
+    }
+
+    private var dominantMood: WorkoutMood? {
+        let counts = sessionsLast30Days.reduce(into: [:]) { partialResult, log in
+            partialResult[log.mood, default: 0] += 1
+        }
+        return counts.max(by: { $0.value < $1.value })?.key
+    }
+
+    private var weeklyTrend: [CGFloat] {
+        var trend: [CGFloat] = []
+        for offset in stride(from: 6, through: 0, by: -1) {
+            guard let day = calendar.date(byAdding: .day, value: -offset, to: calendar.startOfDay(for: .now)) else { continue }
+            let count = sessionLogs.filter { calendar.isDate($0.date, inSameDayAs: day) }.count
+            trend.append(CGFloat(count))
+        }
+        return trend
+    }
+
+    private var sessionsThisWeek: Int {
+        guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: .now)) else {
+            return 0
+        }
+        return sessionLogs.filter { $0.date >= startOfWeek }.count
+    }
+
+    private var weeklyGoal: Int { 4 }
+
+    private var weeklyProgress: Double {
+        guard weeklyGoal > 0 else { return 0 }
+        return Double(sessionsThisWeek) / Double(weeklyGoal)
+    }
+
+    private var heroHeadline: String {
+        switch sessionsLast30Days.count {
+        case 0:
+            return "Pronto a cominciare?"
+        case 1:
+            return "1 sessione questo mese"
+        default:
+            return "\(sessionsLast30Days.count) sessioni questo mese"
+        }
+    }
+
+    private var currentStreak: Int {
+        guard !sessionLogs.isEmpty else { return 0 }
+        var streak = 0
+        var currentDay = calendar.startOfDay(for: .now)
+        var sessionDays: Set<Date> = []
+        sessionLogs.forEach { log in
+            sessionDays.insert(calendar.startOfDay(for: log.date))
+        }
+
+        if !sessionDays.contains(currentDay) {
+            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: currentDay), sessionDays.contains(yesterday) else {
+                return 0
+            }
+            currentDay = yesterday
+        }
+
+        while sessionDays.contains(currentDay) {
+            streak += 1
+            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: currentDay) else { break }
+            currentDay = previousDay
+        }
+        return streak
+    }
 }
 
 private struct MetricCard: Identifiable {
@@ -273,4 +439,5 @@ private struct FlowLayout: View {
 
 #Preview {
     DashboardView()
+        .modelContainer(for: WorkoutSessionLog.self, inMemory: true)
 }
