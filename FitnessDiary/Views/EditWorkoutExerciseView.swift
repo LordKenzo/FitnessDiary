@@ -172,9 +172,20 @@ struct SetRow: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 60, alignment: .leading)
 
-                Text(set.setType.rawValue)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                // Se l'esercizio supporta entrambi i tipi, mostra un picker
+                if setTypeSupport == .both {
+                    Picker("Tipo", selection: $set.setType) {
+                        Text(SetType.reps.rawValue).tag(SetType.reps)
+                        Text(SetType.duration.rawValue).tag(SetType.duration)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 200)
+                } else {
+                    // Altrimenti mostra solo il tipo (non modificabile)
+                    Text(set.setType.rawValue)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             // Campi principali in base al tipo di serie

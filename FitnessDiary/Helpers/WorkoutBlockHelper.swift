@@ -17,6 +17,7 @@ class WorkoutBlockHelper {
             order: blocks.count,
             globalSets: 3,
             globalRestTime: 90,
+            recoveryAfterBlock: nil,  // Opzionale, default nessun rest
             notes: nil,
             exerciseItems: [exerciseItem]
         )
@@ -31,8 +32,24 @@ class WorkoutBlockHelper {
             order: blocks.count,
             globalSets: 3,
             globalRestTime: 120,
+            recoveryAfterBlock: nil,  // Opzionale, default nessun rest
             notes: nil,
             exerciseItems: []
+        )
+        blocks.append(newBlock)
+    }
+
+    /// Adds a rest block to the blocks array
+    static func addRestBlock(to blocks: inout [WorkoutBlockData], duration: TimeInterval = 120) {
+        let newBlock = WorkoutBlockData(
+            blockType: .rest,
+            methodType: nil,
+            order: blocks.count,
+            globalSets: 1,  // Non usato per blocchi REST
+            globalRestTime: duration,  // Durata del blocco REST
+            recoveryAfterBlock: nil,
+            notes: nil,
+            exerciseItems: []  // Blocco REST non ha esercizi
         )
         blocks.append(newBlock)
     }
@@ -61,6 +78,7 @@ class WorkoutBlockHelper {
             methodType: blockData.methodType,
             globalSets: blockData.globalSets,
             globalRestTime: blockData.globalRestTime,
+            recoveryAfterBlock: blockData.recoveryAfterBlock,
             notes: blockData.notes,
             tabataWorkDuration: blockData.tabataWorkDuration,
             tabataRestDuration: blockData.tabataRestDuration,

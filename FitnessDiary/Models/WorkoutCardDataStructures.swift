@@ -11,6 +11,7 @@ struct WorkoutBlockData: Identifiable {
     var order: Int
     var globalSets: Int
     var globalRestTime: TimeInterval?
+    var recoveryAfterBlock: TimeInterval?  // Recupero dopo il blocco (prima del prossimo blocco)
     var notes: String?
 
     // Parametri Tabata (solo per methodType == .tabata)

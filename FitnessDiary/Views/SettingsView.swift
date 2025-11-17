@@ -15,6 +15,14 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("Generali") {
+                    NavigationLink {
+                        GeneralSettingsView()
+                    } label: {
+                        Label("Impostazioni Generali", systemImage: "gearshape")
+                    }
+                }
+
                 Section("Account") {
                     NavigationLink {
                         ProfileView()

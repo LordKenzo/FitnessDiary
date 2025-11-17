@@ -4,6 +4,7 @@ import SwiftUI
 enum BlockType: String, Codable, CaseIterable {
     case simple = "Esercizio Singolo"
     case method = "Con Metodo"
+    case rest = "Blocco REST"
 }
 
 /// Tipo di validazione da applicare alla progressione dei carichi
@@ -228,4 +229,5 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
 enum SetTypeSupport {
     case repsOnly       // Solo ripetizioni (Superset, Cluster, ecc.)
     case durationOnly   // Solo durata (EMOM, AMRAP, Circuit, Tabata)
+    case both           // Entrambi (esercizi singoli: camminata, plank, ecc.)
 }

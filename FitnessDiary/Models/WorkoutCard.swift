@@ -80,8 +80,9 @@ final class WorkoutCard: Identifiable {
                 // Per metodologie, conta le serie globali del blocco
                 return total + block.globalSets
             } else {
-                // Per esercizi singoli, conta le serie dell'esercizio
-                return total + (block.exerciseItems.first?.sets.count ?? 0)
+                // Per blocchi standard (circuit, superset, etc), conta le serie di TUTTI gli esercizi
+                let blockSets = block.exerciseItems.reduce(0) { $0 + $1.sets.count }
+                return total + blockSets
             }
         }
     }
