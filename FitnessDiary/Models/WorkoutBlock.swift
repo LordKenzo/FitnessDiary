@@ -41,7 +41,9 @@ final class WorkoutBlock: Identifiable {
 
     // Helper per il titolo del blocco
     var title: String {
-        if blockType == .method, let method = methodType {
+        if blockType == .rest {
+            return "Blocco REST"
+        } else if blockType == .method, let method = methodType {
             return method.rawValue
         } else {
             if let firstExercise = exerciseItems.first?.exercise {
@@ -53,7 +55,17 @@ final class WorkoutBlock: Identifiable {
 
     // Helper per il sottotitolo
     var subtitle: String {
-        if blockType == .method {
+        if blockType == .rest {
+            // Mostra la durata del REST
+            guard let restTime = globalRestTime else { return "Recupero" }
+            let minutes = Int(restTime) / 60
+            let seconds = Int(restTime) % 60
+            if minutes > 0 {
+                return "Recupero \(minutes)m \(seconds)s"
+            } else {
+                return "Recupero \(seconds)s"
+            }
+        } else if blockType == .method {
             return "\(exerciseItems.count) esercizi • \(globalSets) serie"
         } else {
             let totalSets = exerciseItems.first?.sets.count ?? 0

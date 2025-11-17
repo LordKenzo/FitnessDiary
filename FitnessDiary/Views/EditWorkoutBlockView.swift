@@ -47,20 +47,60 @@ struct EditWorkoutBlockView: View {
             // Block info section
             Section {
                 HStack {
-                    Image(systemName: blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.icon : "figure.strengthtraining.traditional")
+                    Image(systemName: blockData.blockType == .rest ? "pause.circle.fill" : (blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.icon : "figure.strengthtraining.traditional"))
                         .font(.title2)
-                        .foregroundStyle(blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.color : .blue)
+                        .foregroundStyle(blockData.blockType == .rest ? .orange : (blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.color : .blue))
                         .frame(width: 40)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.rawValue : "Esercizio Singolo")
+                        Text(blockData.blockType == .rest ? "Blocco REST" : (blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.rawValue : "Esercizio Singolo"))
                             .font(.headline)
                         if blockData.blockType == .method, let method = blockData.methodType {
                             Text(method.description)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                        } else if blockData.blockType == .rest {
+                            Text("Pausa programmata tra blocchi di esercizi")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
+                }
+            }
+
+            // REST block parameters - solo per blocchi REST
+            if blockData.blockType == .rest {
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Durata Recupero")
+                            .font(.subheadline)
+
+                        HStack(spacing: 16) {
+                            Picker("Minuti", selection: $globalRestMinutes) {
+                                ForEach(0..<10, id: \.self) { min in
+                                    Text("\(min)m").tag(min)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
+
+                            Picker("Secondi", selection: $globalRestSeconds) {
+                                ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
+                                    Text("\(sec)s").tag(sec)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
+                        }
+                    }
+
+                    TextField("Note (opzionale)", text: $notes, axis: .vertical)
+                        .lineLimit(2...4)
+                } header: {
+                    Text("Parametri Recupero")
+                } footer: {
+                    Text("Il blocco REST inserisce una pausa programmata tra un blocco di esercizi e il successivo")
+                        .font(.caption)
                 }
             }
 
@@ -179,39 +219,42 @@ struct EditWorkoutBlockView: View {
                 }
             }
 
-            // Recovery after block section - disponibile per tutti i tipi di blocco
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Recupero dopo Blocco")
-                        .font(.subheadline)
+            // Recovery after block section - disponibile solo per blocchi di esercizi (non per REST)
+            if blockData.blockType != .rest {
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Recupero dopo Blocco")
+                            .font(.subheadline)
 
-                    HStack(spacing: 16) {
-                        Picker("Minuti", selection: $recoveryAfterBlockMinutes) {
-                            ForEach(0..<10, id: \.self) { min in
-                                Text("\(min)m").tag(min)
+                        HStack(spacing: 16) {
+                            Picker("Minuti", selection: $recoveryAfterBlockMinutes) {
+                                ForEach(0..<10, id: \.self) { min in
+                                    Text("\(min)m").tag(min)
+                                }
                             }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(width: 80)
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
 
-                        Picker("Secondi", selection: $recoveryAfterBlockSeconds) {
-                            ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
-                                Text("\(sec)s").tag(sec)
+                            Picker("Secondi", selection: $recoveryAfterBlockSeconds) {
+                                ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
+                                    Text("\(sec)s").tag(sec)
+                                }
                             }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
                         }
-                        .pickerStyle(.wheel)
-                        .frame(width: 80)
                     }
+                    .onChange(of: recoveryAfterBlockMinutes) { _, _ in updateRecoveryAfterBlock() }
+                    .onChange(of: recoveryAfterBlockSeconds) { _, _ in updateRecoveryAfterBlock() }
+                } footer: {
+                    Text("Tempo di recupero automatico dopo il completamento di questo blocco, prima di iniziare il prossimo")
+                        .font(.caption)
                 }
-                .onChange(of: recoveryAfterBlockMinutes) { _, _ in updateRecoveryAfterBlock() }
-                .onChange(of: recoveryAfterBlockSeconds) { _, _ in updateRecoveryAfterBlock() }
-            } footer: {
-                Text("Tempo di recupero automatico dopo il completamento di questo blocco, prima di iniziare il prossimo")
-                    .font(.caption)
             }
 
-            // Exercises section
-            Section {
+            // Exercises section - solo per blocchi di esercizi (non per REST)
+            if blockData.blockType != .rest {
+                Section {
                 ForEach(blockData.exerciseItems.indices, id: \.self) { index in
                     NavigationLink {
                         EditWorkoutExerciseItemView(
@@ -257,22 +300,23 @@ struct EditWorkoutBlockView: View {
                         EditButton()
                     }
                 }
-            } footer: {
-                if blockData.blockType == .simple && !blockData.exerciseItems.isEmpty {
-                    Text("Un blocco semplice può contenere solo un esercizio")
-                        .font(.caption)
-                } else if blockData.blockType == .method, let method = blockData.methodType {
-                    if method.maxExercises != nil {
-                        Text("Questo metodo richiede esattamente \(method.minExercises) esercizi")
+                } footer: {
+                    if blockData.blockType == .simple && !blockData.exerciseItems.isEmpty {
+                        Text("Un blocco semplice può contenere solo un esercizio")
                             .font(.caption)
-                    } else {
-                        Text("Questo metodo richiede almeno \(method.minExercises) esercizi")
-                            .font(.caption)
+                    } else if blockData.blockType == .method, let method = blockData.methodType {
+                        if method.maxExercises != nil {
+                            Text("Questo metodo richiede esattamente \(method.minExercises) esercizi")
+                                .font(.caption)
+                        } else {
+                            Text("Questo metodo richiede almeno \(method.minExercises) esercizi")
+                                .font(.caption)
+                        }
                     }
                 }
             }
         }
-        .navigationTitle(blockData.blockType == .method ? "Modifica Metodo" : "Modifica Esercizio")
+        .navigationTitle(blockData.blockType == .rest ? "Blocco REST" : (blockData.blockType == .method ? "Modifica Metodo" : "Modifica Esercizio"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
@@ -294,9 +338,17 @@ struct EditWorkoutBlockView: View {
     }
 
     private var isValid: Bool {
+        // Blocchi REST sono sempre validi (non hanno esercizi)
+        if blockData.blockType == .rest {
+            return true
+        }
+
+        // Altri blocchi richiedono almeno un esercizio
         if blockData.exerciseItems.isEmpty {
             return false
         }
+
+        // Validazione per metodi
         if blockData.blockType == .method, let method = blockData.methodType {
             let count = blockData.exerciseItems.count
             // Controlla il minimo

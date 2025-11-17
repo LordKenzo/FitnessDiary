@@ -12,13 +12,13 @@ struct WorkoutBlockRow: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.white)
                 .frame(width: 28, height: 28)
-                .background(block.blockType == .method && block.methodType != nil ? block.methodType!.color : .blue)
+                .background(blockBadgeColor)
                 .clipShape(Circle())
 
             // Icon
-            Image(systemName: block.blockType == .method && block.methodType != nil ? block.methodType!.icon : "figure.strengthtraining.traditional")
+            Image(systemName: blockIcon)
                 .font(.title3)
-                .foregroundStyle(block.blockType == .method && block.methodType != nil ? block.methodType!.color : .blue)
+                .foregroundStyle(blockIconColor)
                 .frame(width: 32)
 
             // Content
@@ -60,6 +60,38 @@ struct WorkoutBlockRow: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(.vertical, 8)
+    }
+
+    // MARK: - Helpers
+
+    private var blockBadgeColor: Color {
+        if block.blockType == .rest {
+            return .orange
+        } else if block.blockType == .method, let method = block.methodType {
+            return method.color
+        } else {
+            return .blue
+        }
+    }
+
+    private var blockIcon: String {
+        if block.blockType == .rest {
+            return "pause.circle.fill"
+        } else if block.blockType == .method, let method = block.methodType {
+            return method.icon
+        } else {
+            return "figure.strengthtraining.traditional"
+        }
+    }
+
+    private var blockIconColor: Color {
+        if block.blockType == .rest {
+            return .orange
+        } else if block.blockType == .method, let method = block.methodType {
+            return method.color
+        } else {
+            return .blue
+        }
     }
 }
 

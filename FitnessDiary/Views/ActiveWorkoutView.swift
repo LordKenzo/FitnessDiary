@@ -848,12 +848,15 @@ struct ActiveWorkoutView: View {
             return
         }
 
-        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] _ in
-            if countdownSeconds > 1 {
-                countdownSeconds -= 1
-            } else {
-                stopCountdown()
-                workoutState = .active
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self = self else { return }
+                if self.countdownSeconds > 1 {
+                    self.countdownSeconds -= 1
+                } else {
+                    self.stopCountdown()
+                    self.workoutState = .active
+                }
             }
         }
     }
