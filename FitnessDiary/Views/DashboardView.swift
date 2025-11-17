@@ -52,7 +52,7 @@ struct DashboardView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("FittyPal")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
         }
     }
 
