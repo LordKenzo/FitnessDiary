@@ -184,13 +184,15 @@ final class WorkoutTimerManager {
         displayTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
 
-            // Check se completato
-            if self.targetDuration > 0 && self.elapsedTime >= self.targetDuration {
-                self.handleTimerCompletion()
-            }
+            Task { @MainActor in
+                // Check se completato
+                if self.targetDuration > 0 && self.elapsedTime >= self.targetDuration {
+                    self.handleTimerCompletion()
+                }
 
-            // Callback per aggiornamento UI
-            self.onTimerTick?(self.remainingTime)
+                // Callback per aggiornamento UI
+                self.onTimerTick?(self.remainingTime)
+            }
         }
     }
 
