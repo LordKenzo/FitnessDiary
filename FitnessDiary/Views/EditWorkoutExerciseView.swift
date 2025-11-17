@@ -6,6 +6,7 @@ struct EditWorkoutExerciseView: View {
     @Environment(\.modelContext) private var modelContext
     @Binding var exerciseData: WorkoutExerciseItemData
     let exercises: [Exercise]
+    @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
 
     @State private var notes: String
     @State private var restMinutes: Int
@@ -76,7 +77,12 @@ struct EditWorkoutExerciseView: View {
 
             Section {
                 ForEach($exerciseData.sets) { $set in
-                    SetRow(set: $set, exercise: exerciseData.exercise, oneRepMax: oneRepMax)
+                    SetRow(
+                        set: $set,
+                        exercise: exerciseData.exercise,
+                        oneRepMax: oneRepMax,
+                        onLoadChange: handleSetLoadChange
+                    )
                 }
                 .onMove(perform: moveSets)
                 .onDelete(perform: deleteSets)
@@ -152,6 +158,11 @@ struct EditWorkoutExerciseView: View {
             exerciseData.sets[index].order = index
         }
     }
+
+    private func handleSetLoadChange(_ updatedSet: WorkoutSetData) {
+        guard cloneLoadEnabled else { return }
+        exerciseData.sets.cloneLoadIfNeeded(from: updatedSet)
+    }
 }
 
 struct SetRow: View {
@@ -162,6 +173,7 @@ struct SetRow: View {
     var isRestPauseSet: Bool = false
     var setTypeSupport: SetTypeSupport = .repsOnly
     var targetParameters: StrengthExpressionParameters? = nil
+    var onLoadChange: ((WorkoutSetData) -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 8) {
@@ -179,7 +191,12 @@ struct SetRow: View {
 
             // Campi principali in base al tipo di serie
             if set.setType == .reps {
-                RepsAndLoadFields(set: $set, oneRepMax: oneRepMax, targetParameters: targetParameters)
+                RepsAndLoadFields(
+                    set: $set,
+                    oneRepMax: oneRepMax,
+                    targetParameters: targetParameters,
+                    onLoadChange: onLoadChange
+                )
 
                 // Campi Cluster Set
                 if isClusterSet {

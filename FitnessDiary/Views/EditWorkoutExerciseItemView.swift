@@ -16,6 +16,7 @@ struct EditWorkoutExerciseItemView: View {
     @State private var restSeconds: Int
     @State private var showingExercisePicker = false
     @State private var userProfile: UserProfile?
+    @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
 
     private var oneRepMax: Double? {
         guard let profile = userProfile,
@@ -202,11 +203,29 @@ struct EditWorkoutExerciseItemView: View {
         let setTypeSupport = methodType?.supportedSetType ?? .repsOnly
         if isInMethod {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
+                SetRow(
+                    set: $set,
+                    exercise: exerciseItemData.exercise,
+                    oneRepMax: oneRepMax,
+                    isClusterSet: isCluster,
+                    isRestPauseSet: isRestPause,
+                    setTypeSupport: setTypeSupport,
+                    targetParameters: targetParameters,
+                    onLoadChange: handleSetLoadChange
+                )
             }
         } else {
             ForEach($exerciseItemData.sets) { $set in
-                SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
+                SetRow(
+                    set: $set,
+                    exercise: exerciseItemData.exercise,
+                    oneRepMax: oneRepMax,
+                    isClusterSet: isCluster,
+                    isRestPauseSet: isRestPause,
+                    setTypeSupport: setTypeSupport,
+                    targetParameters: targetParameters,
+                    onLoadChange: handleSetLoadChange
+                )
             }
             .onMove(perform: moveSets)
             .onDelete(perform: deleteSets)
@@ -288,6 +307,11 @@ struct EditWorkoutExerciseItemView: View {
         for (index, _) in exerciseItemData.sets.enumerated() {
             exerciseItemData.sets[index].order = index
         }
+    }
+
+    private func handleSetLoadChange(_ updatedSet: WorkoutSetData) {
+        guard cloneLoadEnabled else { return }
+        exerciseItemData.sets.cloneLoadIfNeeded(from: updatedSet)
     }
 }
 
