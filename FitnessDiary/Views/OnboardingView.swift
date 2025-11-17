@@ -40,11 +40,11 @@ struct OnboardingView: View {
                 Spacer()
 
                 // Indicatore dei cerchi
-                HStack(spacing: 8) {
+                HStack(spacing: 12) {
                     ForEach(0..<onboardingImages.count, id: \.self) { index in
                         Capsule()
-                            .fill(currentIndex == index ? Color.blue : Color.gray)
-                            .frame(width: currentIndex == index ? 20 : 8, height: 8)
+                            .fill(Color.white.opacity(currentIndex == index ? 1 : 0.45))
+                            .frame(width: currentIndex == index ? 28 : 12, height: 10)
                     }
                 }
 
@@ -53,10 +53,10 @@ struct OnboardingView: View {
                     isPresented = false
                 }) {
                     Text("Skip")
-                        .font(.headline)
-                        .foregroundColor(.blue)
-                        .padding(.top, 16)
-                        .padding(.bottom, 32)
+                        .font(.title3.weight(.semibold))
+                        .foregroundColor(.white)
+                        .padding(.top, 20)
+                        .padding(.bottom, 40)
                 }
             }
             .frame(maxWidth: .infinity)
