@@ -62,14 +62,23 @@ private extension WorkoutDebugLogBuilder {
             return simpleEntries(for: block)
         }
 
+        var lines: [String] = []
+        let blockName = methodBlockName(for: block)
+        lines.append("Inizio Blocco \(blockName)")
+
+        let content: [String]
         switch method {
         case .cluster:
-            return clusterEntries(for: block)
+            content = clusterEntries(for: block)
         case .tabata:
-            return tabataEntries(for: block)
+            content = tabataEntries(for: block)
         default:
-            return multiExerciseEntries(for: block, allowsRest: method.allowsRestBetweenSets)
+            content = multiExerciseEntries(for: block, allowsRest: method.allowsRestBetweenSets)
         }
+
+        lines.append(contentsOf: content)
+        lines.append("Fine Blocco \(blockName)")
+        return lines
     }
 
     static func clusterEntries(for block: WorkoutBlock) -> [String] {
@@ -250,4 +259,8 @@ private extension WorkoutDebugLogBuilder {
 
     static let countdownSecondsKey = "workoutCountdownSeconds"
     static let defaultCountdownSeconds = 10
+
+    static func methodBlockName(for block: WorkoutBlock) -> String {
+        block.methodType?.rawValue ?? block.title
+    }
 }
