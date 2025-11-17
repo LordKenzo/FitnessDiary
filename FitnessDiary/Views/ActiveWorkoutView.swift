@@ -954,8 +954,9 @@ struct ActiveWorkoutView: View {
         }
 
         // Schedule timer on main run loop explicitly
-        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
+        // Note: No [weak self] needed - ActiveWorkoutView is a struct (value type)
+        // Structs don't have retain cycles
+        let timer = Timer(timeInterval: 1.0, repeats: true) { _ in
             Task { @MainActor in
                 if self.countdownSeconds > 1 {
                     self.countdownSeconds -= 1
