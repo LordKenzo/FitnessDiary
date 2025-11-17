@@ -2,7 +2,8 @@ import SwiftUI
 
 struct WorkoutDebugLogView: View {
     private let blocks: [WorkoutBlock]
-    private var logEntries: [String] { WorkoutDebugLogBuilder.buildLog(for: blocks) }
+    @State private var selectedFormat: WorkoutSheetFormat = .verbose
+    private var logEntries: [String] { WorkoutDebugLogBuilder.buildLog(for: blocks, format: selectedFormat) }
     private var logText: String { logEntries.joined(separator: "\n") }
 
     init(blocks: [WorkoutBlock]) {
@@ -16,6 +17,15 @@ struct WorkoutDebugLogView: View {
 
     var body: some View {
         List {
+            Section {
+                Picker("Formato", selection: $selectedFormat) {
+                    ForEach(WorkoutSheetFormat.allCases) { format in
+                        Text(format.title).tag(format)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
             if logEntries.isEmpty {
                 ContentUnavailableView {
                     Label("Nessun blocco", systemImage: "list.bullet.rectangle")
