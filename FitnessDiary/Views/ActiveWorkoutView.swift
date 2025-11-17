@@ -255,24 +255,28 @@ struct ActiveWorkoutView: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        HStack(spacing: 6) {
+                        VStack(alignment: .center, spacing: 2) {
                             Text("\(heartRateManager.currentHeartRate)")
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundStyle(currentHeartRateColor)
                                 .contentTransition(.numericText())
 
-                            // Zona cardio badge
-                            if let zoneText = currentHeartRateZone {
-                                Text(zoneText)
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(currentHeartRateColor)
-                                    .cornerRadius(4)
-                            }
+                            // Zona cardio badge - sempre visibile quando connesso
+                            let zoneText = currentHeartRateZone ?? "--"
+                            let zoneColor = heartRateManager.currentHeartRate > 0 ? currentHeartRateColor : Color.gray
+
+                            Text(zoneText)
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(zoneColor)
+                                )
+                                .shadow(color: zoneColor.opacity(0.4), radius: 2, x: 0, y: 1)
                         }
                     }
                 }
