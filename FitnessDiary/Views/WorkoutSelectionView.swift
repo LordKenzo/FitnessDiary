@@ -68,7 +68,7 @@ struct WorkoutSelectionView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Allenamento per:")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
 
             Button {
                 showingClientPicker = true
@@ -76,7 +76,7 @@ struct WorkoutSelectionView: View {
                 HStack {
                     Image(systemName: selectedClient == nil ? "person.circle" : "person.circle.fill")
                         .font(.title3)
-                        .foregroundStyle(selectedClient == nil ? .secondary : .blue)
+                        .foregroundColor(selectedClient == nil ? .secondary : .blue)
 
                     Text(selectedClient?.fullName ?? "Me Stesso")
                         .font(.headline)
@@ -85,7 +85,7 @@ struct WorkoutSelectionView: View {
 
                     Image(systemName: "chevron.down")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
                 }
                 .padding()
                 .background(Color(.systemGray6))
@@ -106,7 +106,7 @@ struct WorkoutSelectionView: View {
             HStack {
                 Image(systemName: "exclamationmark.circle.fill")
                     .font(.title2)
-                    .foregroundStyle(.orange)
+                    .foregroundColor(.orange)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Allenamento in corso")
@@ -114,11 +114,11 @@ struct WorkoutSelectionView: View {
 
                     Text("\(session.workoutCard.name)")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
 
                     Text("Iniziato \(formatRelativeTime(session.startDate))")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
                 }
 
                 Spacer()
@@ -156,7 +156,7 @@ struct WorkoutSelectionView: View {
     private var workoutCardsList: some View {
         List {
             ForEach(filteredCards) { card in
-                WorkoutCardRow(card: card) {
+                StartWorkoutRow(card: card) {
                     startWorkout(card: card)
                 }
             }
@@ -247,9 +247,9 @@ struct WorkoutSelectionView: View {
     }
 }
 
-// MARK: - Workout Card Row
+// MARK: - Start Workout Row
 
-struct WorkoutCardRow: View {
+struct StartWorkoutRow: View {
     let card: WorkoutCard
     let onTap: () -> Void
 
@@ -263,14 +263,14 @@ struct WorkoutCardRow: View {
 
                         Text(card.assignmentText)
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundColor(.secondary)
                     }
 
                     Spacer()
 
                     Image(systemName: "play.circle.fill")
                         .font(.title)
-                        .foregroundStyle(.blue)
+                        .foregroundColor(.blue)
                 }
 
                 // Statistiche scheda
@@ -281,13 +281,13 @@ struct WorkoutCardRow: View {
                     Label("\(card.estimatedDurationMinutes)min", systemImage: "clock")
                 }
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
 
                 // Descrizione se presente
                 if let description = card.cardDescription, !description.isEmpty {
                     Text(description)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.secondary)
                         .lineLimit(2)
                 }
             }
@@ -315,7 +315,7 @@ struct ClientPickerSheet: View {
                     HStack {
                         Image(systemName: "person.circle")
                             .font(.title2)
-                            .foregroundStyle(.blue)
+                            .foregroundColor(.blue)
 
                         Text("Me Stesso")
                             .font(.headline)
@@ -324,7 +324,7 @@ struct ClientPickerSheet: View {
 
                         if selectedClient == nil {
                             Image(systemName: "checkmark")
-                                .foregroundStyle(.blue)
+                                .foregroundColor(.blue)
                         }
                     }
                 }
@@ -340,7 +340,7 @@ struct ClientPickerSheet: View {
                             HStack {
                                 Image(systemName: "person.circle.fill")
                                     .font(.title2)
-                                    .foregroundStyle(.green)
+                                    .foregroundColor(.green)
 
                                 Text(client.fullName)
                                     .font(.headline)
@@ -349,7 +349,7 @@ struct ClientPickerSheet: View {
 
                                 if selectedClient?.id == client.id {
                                     Image(systemName: "checkmark")
-                                        .foregroundStyle(.blue)
+                                        .foregroundColor(.blue)
                                 }
                             }
                         }
