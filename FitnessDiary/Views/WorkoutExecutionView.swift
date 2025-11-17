@@ -140,21 +140,14 @@ final class WorkoutExecutionViewModel: ObservableObject {
     }
 
     func confirmSet() {
-        guard let step = currentStep else { return }
-        if case let .reps(totalSets, _) = step.type {
-            if completedSets < totalSets {
-                completedSets += 1
-            }
-
-            if completedSets >= totalSets {
-                skipToNextStep()
-            } else {
-                prepareForNextSet()
-            }
-        }
+        advanceSet()
     }
 
     func skipCurrentSet() {
+        advanceSet()
+    }
+
+    private func advanceSet() {
         guard let step = currentStep else { return }
         if case let .reps(totalSets, _) = step.type {
             if completedSets < totalSets {
@@ -224,13 +217,12 @@ final class WorkoutExecutionViewModel: ObservableObject {
     private func completeWorkout() {
         isWorkoutCompleted = true
         isPaused = true
+        timerCancellable?.cancel()
     }
 
     private func resetStepState(resetCounters: Bool = false) {
         stepElapsedTime = 0
         if resetCounters {
-            completedSets = 0
-        } else {
             completedSets = 0
         }
         loadText = ""
@@ -515,7 +507,7 @@ struct WorkoutExecutionView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(!viewModel.isSessionActive || viewModel.isCountdownActive)
+            .disabled(!viewModel.isSessionActive || viewModel.isCountdownActive || viewModel.isWorkoutCompleted)
         }
         .padding()
         .background(.thinMaterial)
@@ -611,7 +603,7 @@ struct WorkoutExecutionView: View {
     private func repsStepView(step: WorkoutExecutionViewModel.Step, totalSets: Int, repsPerSet: Int) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Serie \(viewModel.completedSets) di \(totalSets)")
+                Text("Serie \(min(viewModel.completedSets + 1, totalSets)) di \(totalSets)")
                     .font(.title3)
                     .bold()
                 Text("Ripetizioni suggerite: \(repsPerSet)")
