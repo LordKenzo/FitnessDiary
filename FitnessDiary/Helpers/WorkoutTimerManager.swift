@@ -54,6 +54,9 @@ final class WorkoutTimerManager {
 
     /// Tempo trascorso dall'inizio (escluse pause)
     var elapsedTime: TimeInterval {
+        // Reference tickCount to trigger SwiftUI updates when timer ticks
+        _ = tickCount
+
         guard let start = startTime else { return 0 }
 
         let totalElapsed = Date().timeIntervalSince(start)
@@ -68,11 +71,15 @@ final class WorkoutTimerManager {
 
     /// Tempo rimanente (per countdown)
     var remainingTime: TimeInterval {
+        // Reference tickCount to trigger SwiftUI updates when timer ticks
+        _ = tickCount
         return max(0, targetDuration - elapsedTime)
     }
 
     /// Percentuale completamento (0.0 - 1.0)
     var progress: Double {
+        // Reference tickCount to trigger SwiftUI updates when timer ticks
+        _ = tickCount
         guard targetDuration > 0 else { return 0 }
         return min(1.0, elapsedTime / targetDuration)
     }

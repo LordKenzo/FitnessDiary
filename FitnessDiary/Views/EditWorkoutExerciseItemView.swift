@@ -199,7 +199,8 @@ struct EditWorkoutExerciseItemView: View {
     private var setsList: some View {
         let isCluster = methodType?.requiresClusterManagement ?? false
         let isRestPause = methodType?.requiresRestPauseManagement ?? false
-        let setTypeSupport = methodType?.supportedSetType ?? .repsOnly
+        // Allow both reps and duration for single exercises (e.g., walking, plank)
+        let setTypeSupport = methodType?.supportedSetType ?? .both
         if isInMethod {
             ForEach($exerciseItemData.sets) { $set in
                 SetRow(set: $set, exercise: exerciseItemData.exercise, oneRepMax: oneRepMax, isClusterSet: isCluster, isRestPauseSet: isRestPause, setTypeSupport: setTypeSupport, targetParameters: targetParameters)
