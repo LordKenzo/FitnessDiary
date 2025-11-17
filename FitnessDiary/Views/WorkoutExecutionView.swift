@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import Combine
+import Observation
 
 // MARK: - View Model
 
@@ -26,7 +27,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
     @Published private(set) var stepElapsedTime: TimeInterval = 0
     @Published private(set) var isPaused: Bool = false
     @Published private(set) var isWorkoutCompleted: Bool = false
-    @Published private(set) var currentZone: HeartRateZone
+    @Published private(set) var currentHeartRateZone: HeartRateZone?
     @Published private var zoneDurations: [HeartRateZone: TimeInterval] = [:]
     @Published private(set) var isCountdownActive: Bool = false
     @Published private(set) var countdownRemainingSeconds: Int = 0
@@ -44,7 +45,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
     init(steps: [Step] = []) {
         self.steps = steps
         self.currentStepIndex = 0
-        self.currentZone = steps.first?.zone ?? .zone1
+        self.currentHeartRateZone = nil
         if !steps.isEmpty {
             isSessionActive = true
             sessionTitle = "Allenamento Demo"
@@ -174,7 +175,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
         perceivedExertion = 7
         isWorkoutCompleted = false
         isPaused = false
-        currentZone = steps.first?.zone ?? .zone1
+        currentHeartRateZone = nil
         sessionTitle = card.name
         isSessionActive = true
         countdownRemainingSeconds = countdownSeconds
@@ -200,7 +201,6 @@ final class WorkoutExecutionViewModel: ObservableObject {
         countdownRemainingSeconds = 0
         isSessionActive = false
         sessionTitle = "Allenamento"
-        currentZone = .zone1
         zoneDurations = [:]
     }
 
@@ -210,8 +210,8 @@ final class WorkoutExecutionViewModel: ObservableObject {
         resetStepState()
     }
 
-    func changeZone(to zone: HeartRateZone) {
-        currentZone = zone
+    func updateHeartRateZone(_ zone: HeartRateZone?) {
+        currentHeartRateZone = zone
     }
 
     private func completeWorkout() {
@@ -225,9 +225,6 @@ final class WorkoutExecutionViewModel: ObservableObject {
         loadText = ""
         perceivedExertion = 7
         actualRepsText = repsTextForCurrentStep()
-        if let currentStep {
-            currentZone = currentStep.zone
-        }
     }
 
     private func prepareForNextSet() {
@@ -257,8 +254,8 @@ final class WorkoutExecutionViewModel: ObservableObject {
         guard isSessionActive, !isPaused, !isWorkoutCompleted, currentStep != nil else { return }
         generalElapsedTime += 1
 
-        if let currentStep {
-            zoneDurations[currentStep.zone, default: 0] += 1
+        if let currentHeartRateZone {
+            zoneDurations[currentHeartRateZone, default: 0] += 1
         }
 
         switch currentStep?.type {
@@ -325,11 +322,17 @@ extension WorkoutExecutionViewModel {
 
 struct WorkoutExecutionView: View {
     @StateObject private var viewModel: WorkoutExecutionViewModel
+    @Bindable private var bluetoothManager: BluetoothHeartRateManager
     @Query(sort: \WorkoutCard.name) private var workoutCards: [WorkoutCard]
+    @Query private var profiles: [UserProfile]
     @AppStorage("workoutCountdownSeconds") private var defaultCountdownSeconds = 10
 
-    init(viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel()) {
+    init(
+        viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel(),
+        bluetoothManager: BluetoothHeartRateManager = BluetoothHeartRateManager()
+    ) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.bluetoothManager = bluetoothManager
     }
 
     var body: some View {
@@ -357,6 +360,13 @@ struct WorkoutExecutionView: View {
             .navigationTitle(viewModel.sessionTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
+        }
+        .onAppear(perform: refreshHeartRateZone)
+        .onChange(of: bluetoothManager.currentHeartRate) { _, _ in
+            refreshHeartRateZone()
+        }
+        .onChange(of: profiles) { _, _ in
+            refreshHeartRateZone()
         }
     }
 
@@ -518,15 +528,16 @@ struct WorkoutExecutionView: View {
                     Image(systemName: "heart.fill")
                         .foregroundStyle(.red)
                         .scaleEffect(1.1)
-                    Text("Zone Cardio")
+                    Text(heartRateText)
                         .font(.headline)
+                        .contentTransition(.numericText())
                 }
                 Spacer()
-                Text(viewModel.currentZone.name)
+                Text(activeZoneLabel)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            HeartRateHistogram(currentZone: viewModel.currentZone, usagePercentages: viewModel.zoneUsagePercentages)
+            HeartRateHistogram(currentZone: activeHeartRateZone, usagePercentages: viewModel.zoneUsagePercentages)
                 .frame(height: 140)
         }
         .padding()
@@ -708,6 +719,60 @@ struct WorkoutExecutionView: View {
         max(viewModel.steps.count - (viewModel.currentStepIndex + 1), 0)
     }
 
+    private var userProfile: UserProfile? { profiles.first }
+
+    private var activeHeartRateZone: HeartRateZone? {
+        heartRateZone(for: bluetoothManager.currentHeartRate)
+    }
+
+    private var activeZoneLabel: String {
+        if let zone = activeHeartRateZone {
+            return zone.name
+        }
+
+        if let targetZone = viewModel.currentStep?.zone {
+            return "Target: \(targetZone.name)"
+        }
+
+        return "Zone cardio"
+    }
+
+    private var heartRateText: String {
+        if bluetoothManager.isConnected {
+            let bpm = bluetoothManager.currentHeartRate
+            return bpm > 0 ? "\(bpm) bpm" : "Segnale in arrivo"
+        } else {
+            return "Collega sensore"
+        }
+    }
+
+    private func heartRateZone(for bpm: Int) -> HeartRateZone? {
+        guard bpm > 0 else { return nil }
+
+        if let profile = userProfile {
+            if bpm <= profile.zone1Max { return .zone1 }
+            if bpm <= profile.zone2Max { return .zone2 }
+            if bpm <= profile.zone3Max { return .zone3 }
+            if bpm <= profile.zone4Max { return .zone4 }
+            return .zone5
+        }
+
+        let estimatedMaxHR = 190
+        let ratio = Double(bpm) / Double(estimatedMaxHR)
+
+        for zone in HeartRateZone.allCases {
+            if ratio <= zone.percentage.max {
+                return zone
+            }
+        }
+
+        return .zone5
+    }
+
+    private func refreshHeartRateZone() {
+        viewModel.updateHeartRateZone(activeHeartRateZone)
+    }
+
     private func format(seconds: TimeInterval) -> String {
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute, .second]
@@ -752,35 +817,56 @@ struct WorkoutExecutionView: View {
 // MARK: - Histogram Component
 
 private struct HeartRateHistogram: View {
-    let currentZone: HeartRateZone
+    let currentZone: HeartRateZone?
     let usagePercentages: [HeartRateZone: Double]
+    @State private var pulse = false
 
     var body: some View {
         GeometryReader { proxy in
             HStack(alignment: .bottom, spacing: 12) {
                 ForEach(HeartRateZone.allCases, id: \.self) { zone in
+                    let isActive = zone == currentZone
+
                     VStack(spacing: 8) {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(zone == currentZone ? zone.color.opacity(0.9) : zone.color.opacity(0.25))
+                            .fill(zone.color.opacity(isActive ? 0.9 : 0.25))
                             .frame(height: barHeight(for: zone, totalHeight: proxy.size.height - 20))
+                            .scaleEffect(isActive ? (pulse ? 1.05 : 0.95) : 1, anchor: .bottom)
+                            .shadow(color: isActive ? zone.color.opacity(0.35) : .clear, radius: isActive ? 12 : 0, y: isActive ? 6 : 0)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(zone.color, lineWidth: zone == currentZone ? 0 : 2)
+                                    .stroke(zone.color.opacity(isActive ? 0.9 : 0.5), lineWidth: isActive ? 3 : 1)
                             )
 
                         Text("Z\(zone.rawValue)")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(isActive ? zone.color : .secondary)
                     }
                     .frame(maxWidth: .infinity)
                 }
             }
+        }
+        .onAppear(perform: startPulseIfNeeded)
+        .onChange(of: currentZone?.rawValue ?? -1) { _, _ in
+            startPulseIfNeeded()
         }
     }
 
     private func barHeight(for zone: HeartRateZone, totalHeight: CGFloat) -> CGFloat {
         let percentage = usagePercentages[zone] ?? 0
         return max(totalHeight * CGFloat(percentage), 6)
+    }
+
+    private func startPulseIfNeeded() {
+        guard currentZone != nil else {
+            pulse = false
+            return
+        }
+
+        pulse = false
+        withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+            pulse = true
+        }
     }
 }
 
@@ -900,5 +986,6 @@ private enum WorkoutExecutionStepFactory {
 }
 
 #Preview {
-    WorkoutExecutionView(viewModel: .demo())
+    WorkoutExecutionView(viewModel: .demo(), bluetoothManager: BluetoothHeartRateManager())
+        .modelContainer(for: [WorkoutCard.self, UserProfile.self], inMemory: true)
 }

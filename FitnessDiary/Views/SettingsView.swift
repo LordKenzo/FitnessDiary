@@ -10,6 +10,7 @@ import SwiftUI
 import SwiftData
 
 struct SettingsView: View {
+    let bluetoothManager: BluetoothHeartRateManager
     @Query private var profiles: [UserProfile]
     var body: some View {
         NavigationStack {
@@ -40,7 +41,7 @@ struct SettingsView: View {
 
                 Section("Monitoraggio") {
                     NavigationLink {
-                        HeartRateMonitorView()
+                        HeartRateMonitorView(bluetoothManager: bluetoothManager)
                     } label: {
                         Label("Heart Rate", systemImage: "heart.circle")
                     }
@@ -78,6 +79,6 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    SettingsView(bluetoothManager: BluetoothHeartRateManager())
         .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self, StrengthExpressionParameters.self], inMemory: true)
 }

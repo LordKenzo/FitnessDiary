@@ -8,12 +8,15 @@
 
 import SwiftUI
 import SwiftData
+import Observation
 
 struct HeartRateMonitorView: View {
-    @State private var bluetoothManager = BluetoothHeartRateManager()
+    @Bindable var bluetoothManager: BluetoothHeartRateManager
     @Query private var profiles: [UserProfile]
-    
-    init() {}
+
+    init(bluetoothManager: BluetoothHeartRateManager) {
+        self.bluetoothManager = bluetoothManager
+    }
 
     
     private var userProfile: UserProfile? {
@@ -337,6 +340,6 @@ struct HeartRateMonitorView: View {
 }
 
 #Preview {
-    HeartRateMonitorView()
+    HeartRateMonitorView(bluetoothManager: BluetoothHeartRateManager())
         .modelContainer(for: UserProfile.self, inMemory: true)
 }
