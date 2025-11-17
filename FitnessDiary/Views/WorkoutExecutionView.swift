@@ -335,6 +335,8 @@ struct WorkoutExecutionView: View {
     @State private var selectedMood: WorkoutMood = .neutral
     @State private var includeRPE = false
     @State private var completionRPE: Double = 7
+    @State private var isSaveErrorAlertPresented = false
+    @State private var saveErrorMessage: String?
 
     init(
         viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel(),
@@ -384,6 +386,11 @@ struct WorkoutExecutionView: View {
         }
         .sheet(isPresented: $isCompletionSheetPresented) {
             completionSheet
+        }
+        .alert("Impossibile salvare l'allenamento", isPresented: $isSaveErrorAlertPresented) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage ?? "Si è verificato un errore inatteso. Riprova.")
         }
     }
 
@@ -812,10 +819,13 @@ struct WorkoutExecutionView: View {
         modelContext.insert(log)
         do {
             try modelContext.save()
+            dismissCompletionSheet()
         } catch {
+            modelContext.delete(log)
+            saveErrorMessage = error.localizedDescription
+            isSaveErrorAlertPresented = true
             print("Failed to save workout log", error)
         }
-        dismissCompletionSheet()
     }
 
     private func dismissCompletionSheet(resetSession: Bool = true) {
