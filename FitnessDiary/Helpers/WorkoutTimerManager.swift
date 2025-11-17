@@ -191,16 +191,19 @@ final class WorkoutTimerManager {
         displayTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
 
-            // Incrementa tickCount per triggherare Observable
-            self.tickCount += 1
+            // Il timer è schedulato su RunLoop.main, quindi siamo già sul main thread
+            MainActor.assumeIsolated {
+                // Incrementa tickCount per triggherare Observable
+                self.tickCount += 1
 
-            // Check se completato
-            if self.targetDuration > 0 && self.elapsedTime >= self.targetDuration {
-                self.handleTimerCompletion()
+                // Check se completato
+                if self.targetDuration > 0 && self.elapsedTime >= self.targetDuration {
+                    self.handleTimerCompletion()
+                }
+
+                // Callback per aggiornamento UI
+                self.onTimerTick?(self.remainingTime)
             }
-
-            // Callback per aggiornamento UI
-            self.onTimerTick?(self.remainingTime)
         }
 
         // Add timer to .common run loop mode to keep it alive during scrolling/gestures
