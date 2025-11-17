@@ -20,39 +20,47 @@ struct OnboardingView: View {
     @Binding var isPresented: Bool // Per chiudere lo splash screen
 
     var body: some View {
-        VStack {
+        ZStack {
             // TabView per lo swipe tra le immagini
             TabView(selection: $currentIndex) {
                 ForEach(0..<onboardingImages.count, id: \.self) { index in
                     Image(onboardingImages[index])
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .clipped()
                         .tag(index)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.easeInOut, value: currentIndex)
+            .ignoresSafeArea()
 
+            VStack {
+                Spacer()
 
-            // Indicatore dei cerchi
-            HStack(spacing: 8) {
-                ForEach(0..<onboardingImages.count, id: \.self) { index in
-                    Capsule()
-                        .fill(currentIndex == index ? Color.blue : Color.gray)
-                        .frame(width: currentIndex == index ? 20 : 8, height: 8)
+                // Indicatore dei cerchi
+                HStack(spacing: 8) {
+                    ForEach(0..<onboardingImages.count, id: \.self) { index in
+                        Capsule()
+                            .fill(currentIndex == index ? Color.blue : Color.gray)
+                            .frame(width: currentIndex == index ? 20 : 8, height: 8)
+                    }
+                }
+
+                // Pulsante Skip
+                Button(action: {
+                    isPresented = false
+                }) {
+                    Text("Skip")
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                        .padding(.top, 16)
+                        .padding(.bottom, 32)
                 }
             }
-            .padding(.bottom, 24)
-
-            // Pulsante Skip
-            Button(action: {
-                isPresented = false
-            }) {
-                Text("Skip")
-                    .font(.headline)
-                    .foregroundColor(.blue)
-                    .padding()
-            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 24)
         }
     }
 }
