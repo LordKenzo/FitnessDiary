@@ -184,36 +184,11 @@ struct WorkoutSessionView: View {
 
     private func exerciseSummary(_ exerciseItem: WorkoutExerciseItem) -> some View {
         let totalSets = max(exerciseItem.sets.count, viewModel.currentBlock?.globalSets ?? 1)
-
-        return VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(exerciseItem.exercise?.name ?? "Esercizio")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    if let muscleName = exerciseItem.exercise?.primaryMuscles.first?.name {
-                        Text(muscleName)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                Spacer()
-                Text("Serie \(viewModel.currentSetIndex + 1)/\(totalSets)")
-                    .font(.callout)
-                    .padding(8)
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-            }
-
-            if let notes = exerciseItem.notes, !notes.isEmpty {
-                Label(notes, systemImage: "note.text")
-                    .font(.callout)
-            }
-        }
-        .padding()
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+        return ExerciseSummaryCard(
+            exerciseItem: exerciseItem,
+            totalSets: totalSets,
+            currentSetIndex: viewModel.currentSetIndex
+        )
     }
 
     private func repsEditor(for set: WorkoutSet) -> some View {
@@ -423,6 +398,52 @@ struct WorkoutSessionView: View {
                 }
                 .buttonStyle(.bordered)
             }
+        }
+    }
+}
+
+private struct ExerciseSummaryCard: View {
+    let exerciseItem: WorkoutExerciseItem
+    let totalSets: Int
+    let currentSetIndex: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            header
+            notesSection
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+    }
+
+    @ViewBuilder
+    private var notesSection: some View {
+        if let notes = exerciseItem.notes, !notes.isEmpty {
+            Label(notes, systemImage: "note.text")
+                .font(.callout)
+        }
+    }
+
+    private var header: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(exerciseItem.exercise?.name ?? "Esercizio")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                if let muscleName = exerciseItem.exercise?.primaryMuscles.first?.name {
+                    Text(muscleName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            Text("Serie \(currentSetIndex + 1)/\(totalSets)")
+                .font(.callout)
+                .padding(8)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
         }
     }
 }
