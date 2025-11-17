@@ -228,4 +228,5 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
 enum SetTypeSupport {
     case repsOnly       // Solo ripetizioni (Superset, Cluster, ecc.)
     case durationOnly   // Solo durata (EMOM, AMRAP, Circuit, Tabata)
+    case both           // Entrambi (esercizi singoli: camminata, plank, ecc.)
 }

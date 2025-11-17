@@ -304,6 +304,8 @@ struct EditWorkoutBlockView: View {
                 defaultSetType = .reps
             case .durationOnly:
                 defaultSetType = .duration
+            case .both:
+                defaultSetType = .reps  // Default, ma l'utente può cambiare
             }
         } else {
             // Default per esercizi singoli
@@ -410,6 +412,8 @@ struct EditWorkoutBlockView: View {
                 defaultSetType = .reps
             case .durationOnly:
                 defaultSetType = .duration
+            case .both:
+                defaultSetType = .reps  // Default, ma l'utente può cambiare
             }
         } else {
             // Default per esercizi singoli
