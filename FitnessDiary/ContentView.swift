@@ -6,19 +6,25 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            // Tab 1 - Allenamento
+            // Tab 1 - Dashboard
+            DashboardView()
+                .tabItem {
+                    Label("Dashboard", systemImage: "house.fill")
+                }
+
+            // Tab 2 - Allenamento
             WorkoutExecutionView(bluetoothManager: bluetoothManager)
                 .tabItem {
                     Label("Allenamento", systemImage: "stopwatch")
                 }
 
-            // Tab 2 - Schede
+            // Tab 3 - Schede
             WorkoutCardListView()
                 .tabItem {
                     Label("Schede", systemImage: "list.bullet.clipboard")
                 }
 
-            // Tab 3 - Settings
+            // Tab 4 - Settings
             SettingsView(bluetoothManager: bluetoothManager)
                 .tabItem {
                     Label("Impostazioni", systemImage: "gearshape")
