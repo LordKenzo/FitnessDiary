@@ -157,6 +157,8 @@ struct ActiveWorkoutView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
+                    // Usa tickCount per far aggiornare la durata in tempo reale
+                    let _ = timerManager.tickCount
                     Text(timerManager.formatLongTime(session.activeDuration))
                         .font(.title2)
                         .fontWeight(.semibold)
@@ -664,6 +666,11 @@ struct ActiveWorkoutView: View {
         // Pre-fill duration for duration-based sets
         if set.setType == .duration, let duration = set.duration {
             inputDuration = duration
+
+            // Auto-start timer per esercizi a durata (corsa, camminata, plank, ecc.)
+            if autoStartRest {
+                timerManager.startCountdown(duration: duration, type: .custom)
+            }
         } else {
             inputDuration = 0
         }
@@ -725,13 +732,8 @@ struct ActiveWorkoutView: View {
         // Move to next set
         session.moveToNextSet()
 
-        // Start rest timer if applicable
-        if let block = session.currentBlock,
-           let restTime = block.globalRestTime,
-           autoStartRest,
-           !session.isCompleted {
-            timerManager.startRestTimer(restDuration: restTime)
-        }
+        // Auto-start rest timer based on workout structure
+        startRestTimerIfNeeded()
 
         // Reset input fields
         prepareCurrentSet()
@@ -742,6 +744,36 @@ struct ActiveWorkoutView: View {
         // Check if workout is completed
         if session.isCompleted {
             completeWorkout()
+        }
+    }
+
+    /// Avvia automaticamente il timer di rest in base alla struttura dell'allenamento
+    private func startRestTimerIfNeeded() {
+        guard autoStartRest, !session.isCompleted else { return }
+        guard let block = session.currentBlock else { return }
+
+        var restDuration: TimeInterval?
+
+        if block.blockType == .method {
+            // SUPERSET/TRISET/GIANT SET: Rest solo dopo l'ultimo esercizio
+            // Verifica se siamo all'ultimo esercizio del set
+            let isLastExerciseInSet = session.currentExerciseIndex == 0 && session.currentSetIndex > 0
+
+            if isLastExerciseInSet {
+                // Abbiamo completato un giro completo, avvia rest
+                restDuration = block.globalRestTime
+            }
+            // Altrimenti passa al prossimo esercizio senza rest
+        } else {
+            // ESERCIZIO SINGOLO: Rest dopo ogni serie
+            if let exerciseItem = session.currentExercise {
+                restDuration = exerciseItem.restTime
+            }
+        }
+
+        // Avvia timer se c'è un tempo di rest
+        if let duration = restDuration, duration > 0 {
+            timerManager.startRestTimer(restDuration: duration)
         }
     }
 
