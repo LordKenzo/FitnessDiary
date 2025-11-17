@@ -259,10 +259,14 @@ struct WorkoutHistoryRow: View {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(workout.workoutCard.name)
+                    Text(workout.workoutCardName)
                         .font(.headline)
 
-                    if let client = workout.client {
+                    if let clientName = workout.clientName {
+                        Text(clientName)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else if let client = workout.client {
                         Text(client.fullName)
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -431,7 +435,7 @@ struct WorkoutDetailView: View {
                 }
                 .padding()
             }
-            .navigationTitle(workout.workoutCard.name)
+            .navigationTitle(workout.workoutCardName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

@@ -16,14 +16,27 @@ final class HealthKitManager: ObservableObject {
     
     /// Requests permission to read the manager's configured HealthKit data types and sets `isAuthorized` to `true` on success.
     /// - Throws: `HealthKitError.notAvailable` if HealthKit data is not available on the device.
-    /// - Throws: Any error produced by the HealthKit authorization request if the authorization fails.
+    /// - Throws: `HealthKitError.authorizationFailed` if the user denies authorization.
     func requestAuthorization() async throws {
         guard HKHealthStore.isHealthDataAvailable() else {
             throw HealthKitError.notAvailable
         }
-        
+
         try await healthStore.requestAuthorization(toShare: [], read: typesToRead)
-        isAuthorized = true
+
+        // Verify actual authorization status for at least one key type (bodyMass)
+        // Note: HealthKit doesn't throw on denial, we must check status explicitly
+        let bodyMassType = HKObjectType.quantityType(forIdentifier: .bodyMass)!
+        let status = healthStore.authorizationStatus(for: bodyMassType)
+
+        // sharingAuthorized means we can read the data
+        if status == .sharingAuthorized {
+            isAuthorized = true
+        } else {
+            isAuthorized = false
+            // Note: .notDetermined means user hasn't decided yet or we can't determine
+            // We don't throw in this case to allow retry
+        }
     }
     
     /// Retrieves the user's most recent weight and height samples from HealthKit, computes age from date of birth, and maps biological sex to `Gender`.

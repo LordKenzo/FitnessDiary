@@ -265,33 +265,38 @@ struct TabataTimerView: View {
     }
 
     private func moveToNextExercise() {
-        currentExercise += 1
-        onExerciseChange?(currentExercise)
+        let nextExercise = currentExercise + 1
 
-        // Se abbiamo finito tutti gli 8 esercizi
-        if currentExercise > 8 {
-            // Check se ci sono altri round
-            if currentRound < totalRounds {
-                if let _ = recoveryBetweenRounds {
-                    // Inizia recovery tra round
-                    startRecoveryPhase()
-                } else {
-                    // Passa direttamente al prossimo round
-                    moveToNextRound()
-                }
+        // Se prossimo esercizio è valido (<=8), continua con esso
+        if nextExercise <= 8 {
+            currentExercise = nextExercise
+            onExerciseChange?(nextExercise)
+            startWorkPhase()
+            return
+        }
+
+        // Abbiamo finito tutti gli 8 esercizi
+        currentExercise = nextExercise
+
+        // Check se ci sono altri round
+        if currentRound < totalRounds {
+            if let _ = recoveryBetweenRounds {
+                // Inizia recovery tra round
+                startRecoveryPhase()
             } else {
-                // Tabata completato!
-                onComplete?()
+                // Passa direttamente al prossimo round
+                moveToNextRound()
             }
         } else {
-            // Prossimo esercizio dello stesso round
-            startWorkPhase()
+            // Tabata completato!
+            onComplete?()
         }
     }
 
     private func moveToNextRound() {
         currentRound += 1
         currentExercise = 1
+        onExerciseChange?(1)
         onRoundComplete?(currentRound)
 
         if currentRound <= totalRounds {

@@ -17,6 +17,10 @@ final class CompletedWorkout: Identifiable {
     var workoutCard: WorkoutCard  // Scheda allenamento utilizzata
     var client: Client?  // Cliente (se l'allenamento era per un cliente)
 
+    // Snapshot immutabile dei dati della scheda (per preservare storico anche se scheda viene modificata)
+    var workoutCardName: String  // Nome della scheda al momento del completamento
+    var clientName: String?  // Nome del cliente al momento del completamento (se presente)
+
     // Timing
     var completedDate: Date  // Data completamento (usata per ordinamento storico)
     var startTime: Date  // Orario inizio effettivo
@@ -43,6 +47,8 @@ final class CompletedWorkout: Identifiable {
         id: UUID = UUID(),
         workoutCard: WorkoutCard,
         client: Client? = nil,
+        workoutCardName: String,
+        clientName: String? = nil,
         completedDate: Date = Date(),
         startTime: Date,
         endTime: Date = Date(),
@@ -60,6 +66,8 @@ final class CompletedWorkout: Identifiable {
         self.id = id
         self.workoutCard = workoutCard
         self.client = client
+        self.workoutCardName = workoutCardName
+        self.clientName = clientName
         self.completedDate = completedDate
         self.startTime = startTime
         self.endTime = endTime
@@ -110,6 +118,8 @@ final class CompletedWorkout: Identifiable {
         return CompletedWorkout(
             workoutCard: session.workoutCard,
             client: session.client,
+            workoutCardName: session.workoutCard.name,
+            clientName: session.client?.firstName,
             completedDate: endTime,
             startTime: session.startDate,
             endTime: endTime,
