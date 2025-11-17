@@ -11,7 +11,7 @@ struct TitleCaseEditButton: View {
 
     var body: some View {
         Button(action: toggleEditMode) {
-            Text(isEditing ? "Fine" : "Edit")
+            Text(isEditing ? "Fine" : "Modifica")
         }
     }
 
