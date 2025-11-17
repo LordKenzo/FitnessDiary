@@ -137,43 +137,57 @@ struct ClientWorkoutCardDetailView: View {
 
     private var blocksSection: some View {
         ForEach(Array(card.blocks.enumerated()), id: \.element.id) { index, block in
-            Section {
-                ForEach(block.exerciseItems) { exerciseItem in
-                    NavigationLink {
-                        ClientWorkoutExerciseDetailView(
-                            exerciseItem: exerciseItem,
-                            client: client
-                        )
-                    } label: {
-                        VStack(alignment: .leading, spacing: 4) {
-                            if let exercise = exerciseItem.exercise {
-                                Text(exercise.name)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                            }
+            if block.blockType == .rest {
+                Section {
+                    HStack {
+                        Label("Durata", systemImage: "clock")
+                        Spacer()
+                        Text(block.formattedRestTime ?? "--")
+                            .fontWeight(.medium)
+                    }
+                } header: {
+                    Label("Riposo", systemImage: "moon.zzz.fill")
+                        .foregroundStyle(.orange)
+                }
+            } else {
+                Section {
+                    ForEach(block.exerciseItems) { exerciseItem in
+                        NavigationLink {
+                            ClientWorkoutExerciseDetailView(
+                                exerciseItem: exerciseItem,
+                                client: client
+                            )
+                        } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                if let exercise = exerciseItem.exercise {
+                                    Text(exercise.name)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                }
 
-                            if block.blockType == .simple {
-                                Text("\(exerciseItem.sets.count) serie")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                if block.blockType == .simple {
+                                    Text("\(exerciseItem.sets.count) serie")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                         }
                     }
-                }
-            } header: {
-                HStack {
-                    if block.blockType == .method, let method = block.methodType {
-                        Image(systemName: method.icon)
-                            .foregroundStyle(method.color)
-                        Text(method.rawValue)
-                    } else {
-                        Text("Blocco \(index + 1)")
-                    }
+                } header: {
+                    HStack {
+                        if block.blockType == .method, let method = block.methodType {
+                            Image(systemName: method.icon)
+                                .foregroundStyle(method.color)
+                            Text(method.rawValue)
+                        } else {
+                            Text("Blocco \(index + 1)")
+                        }
 
-                    if block.blockType == .method {
-                        Text("• \(block.globalSets) serie")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        if block.blockType == .method {
+                            Text("• \(block.globalSets) serie")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }

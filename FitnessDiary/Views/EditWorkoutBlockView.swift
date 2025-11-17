@@ -42,16 +42,16 @@ struct EditWorkoutBlockView: View {
             // Block info section
             Section {
                 HStack {
-                    Image(systemName: blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.icon : "figure.strengthtraining.traditional")
+                    Image(systemName: blockIconName)
                         .font(.title2)
-                        .foregroundStyle(blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.color : .blue)
+                        .foregroundStyle(blockAccentColor)
                         .frame(width: 40)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(blockData.blockType == .method && blockData.methodType != nil ? blockData.methodType!.rawValue : "Esercizio Singolo")
+                        Text(blockTitle)
                             .font(.headline)
-                        if blockData.blockType == .method, let method = blockData.methodType {
-                            Text(method.description)
+                        if let description = blockDescription {
+                            Text(description)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -99,6 +99,34 @@ struct EditWorkoutBlockView: View {
 
                     TextField("Note (opzionale)", text: $notes, axis: .vertical)
                         .lineLimit(2...4)
+                }
+            }
+
+            if blockData.blockType == .rest {
+                Section("Durata Riposo") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Imposta la durata della pausa tra i blocchi")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        HStack(spacing: 16) {
+                            Picker("Minuti", selection: $globalRestMinutes) {
+                                ForEach(0..<20, id: \.self) { min in
+                                    Text("\(min)m").tag(min)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
+
+                            Picker("Secondi", selection: $globalRestSeconds) {
+                                ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
+                                    Text("\(sec)s").tag(sec)
+                                }
+                            }
+                            .pickerStyle(.wheel)
+                            .frame(width: 80)
+                        }
+                    }
                 }
             }
 
@@ -175,68 +203,70 @@ struct EditWorkoutBlockView: View {
             }
 
             // Exercises section
-            Section {
-                ForEach(blockData.exerciseItems.indices, id: \.self) { index in
-                    NavigationLink {
-                        EditWorkoutExerciseItemView(
-                            exerciseItemData: $blockData.exerciseItems[index],
-                            exercises: exercises,
-                            isInMethod: blockData.blockType == .method,
-                            methodValidation: blockData.methodType?.loadProgressionValidation,
-                            methodType: blockData.methodType
-                        )
-                    } label: {
-                        WorkoutExerciseItemRow(
-                            exerciseItemData: blockData.exerciseItems[index],
-                            order: index + 1,
-                            showSets: blockData.blockType == .simple
-                        )
-                    }
-                }
-                .onMove(perform: moveExercise)
-                .onDelete(perform: deleteExercise)
-
-                Button {
-                    showingExercisePicker = true
-                } label: {
-                    Label("Aggiungi Esercizio", systemImage: "plus.circle.fill")
-                }
-                .disabled(cannotAddMoreExercises)
-            } header: {
-                HStack {
-                    Text("Esercizi (\(blockData.exerciseItems.count))")
-                    if blockData.blockType == .method, let method = blockData.methodType {
-                        if let max = method.maxExercises {
-                            Text("• \(method.minExercises)-\(max)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            Text("• min \(method.minExercises)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+            if blockData.blockType != .rest {
+                Section {
+                    ForEach(blockData.exerciseItems.indices, id: \.self) { index in
+                        NavigationLink {
+                            EditWorkoutExerciseItemView(
+                                exerciseItemData: $blockData.exerciseItems[index],
+                                exercises: exercises,
+                                isInMethod: blockData.blockType == .method,
+                                methodValidation: blockData.methodType?.loadProgressionValidation,
+                                methodType: blockData.methodType
+                            )
+                        } label: {
+                            WorkoutExerciseItemRow(
+                                exerciseItemData: blockData.exerciseItems[index],
+                                order: index + 1,
+                                showSets: blockData.blockType == .simple
+                            )
                         }
                     }
-                    Spacer()
-                    if !blockData.exerciseItems.isEmpty {
-                        EditButton()
+                    .onMove(perform: moveExercise)
+                    .onDelete(perform: deleteExercise)
+
+                    Button {
+                        showingExercisePicker = true
+                    } label: {
+                        Label("Aggiungi Esercizio", systemImage: "plus.circle.fill")
                     }
-                }
-            } footer: {
-                if blockData.blockType == .simple && !blockData.exerciseItems.isEmpty {
-                    Text("Un blocco semplice può contenere solo un esercizio")
-                        .font(.caption)
-                } else if blockData.blockType == .method, let method = blockData.methodType {
-                    if method.maxExercises != nil {
-                        Text("Questo metodo richiede esattamente \(method.minExercises) esercizi")
+                    .disabled(cannotAddMoreExercises)
+                } header: {
+                    HStack {
+                        Text("Esercizi (\(blockData.exerciseItems.count))")
+                        if blockData.blockType == .method, let method = blockData.methodType {
+                            if let max = method.maxExercises {
+                                Text("• \(method.minExercises)-\(max)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("• min \(method.minExercises)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        if !blockData.exerciseItems.isEmpty {
+                            EditButton()
+                        }
+                    }
+                } footer: {
+                    if blockData.blockType == .simple && !blockData.exerciseItems.isEmpty {
+                        Text("Un blocco semplice può contenere solo un esercizio")
                             .font(.caption)
-                    } else {
-                        Text("Questo metodo richiede almeno \(method.minExercises) esercizi")
-                            .font(.caption)
+                    } else if blockData.blockType == .method, let method = blockData.methodType {
+                        if method.maxExercises != nil {
+                            Text("Questo metodo richiede esattamente \(method.minExercises) esercizi")
+                                .font(.caption)
+                        } else {
+                            Text("Questo metodo richiede almeno \(method.minExercises) esercizi")
+                                .font(.caption)
+                        }
                     }
                 }
             }
         }
-        .navigationTitle(blockData.blockType == .method ? "Modifica Metodo" : "Modifica Esercizio")
+        .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
@@ -258,6 +288,9 @@ struct EditWorkoutBlockView: View {
     }
 
     private var isValid: Bool {
+        if blockData.blockType == .rest {
+            return restDurationInSeconds > 0
+        }
         if blockData.exerciseItems.isEmpty {
             return false
         }
@@ -276,6 +309,9 @@ struct EditWorkoutBlockView: View {
     }
 
     private var cannotAddMoreExercises: Bool {
+        if blockData.blockType == .rest {
+            return true
+        }
         // Blocco semplice può avere solo 1 esercizio
         if blockData.blockType == .simple && !blockData.exerciseItems.isEmpty {
             return true
@@ -355,11 +391,19 @@ struct EditWorkoutBlockView: View {
     private func saveChanges() {
         blockData.globalSets = globalSets
 
-        // Salva rest time solo se il metodo lo permette
-        if blockData.methodType?.allowsRestBetweenSets ?? true {
-            blockData.globalRestTime = TimeInterval(globalRestMinutes * 60 + globalRestSeconds)
-        } else {
-            blockData.globalRestTime = nil // Dropset non deve avere rest time
+        let restTimeValue = TimeInterval(restDurationInSeconds)
+
+        switch blockData.blockType {
+        case .method:
+            if blockData.methodType?.allowsRestBetweenSets ?? true {
+                blockData.globalRestTime = restTimeValue
+            } else {
+                blockData.globalRestTime = nil // Dropset non deve avere rest time
+            }
+        case .rest:
+            blockData.globalRestTime = restTimeValue
+        case .simple:
+            break
         }
 
         blockData.notes = notes.isEmpty ? nil : notes
@@ -450,6 +494,65 @@ struct EditWorkoutBlockView: View {
                 blockData.exerciseItems[index].sets[setIndex].order = setIndex
             }
         }
+    }
+
+    private var navigationTitle: String {
+        switch blockData.blockType {
+        case .method:
+            return "Modifica Metodo"
+        case .rest:
+            return "Modifica Riposo"
+        case .simple:
+            return "Modifica Esercizio"
+        }
+    }
+
+    private var blockIconName: String {
+        switch blockData.blockType {
+        case .method:
+            return blockData.methodType?.icon ?? "bolt.horizontal.fill"
+        case .rest:
+            return "moon.zzz.fill"
+        case .simple:
+            return "figure.strengthtraining.traditional"
+        }
+    }
+
+    private var blockAccentColor: Color {
+        switch blockData.blockType {
+        case .method:
+            return blockData.methodType?.color ?? .blue
+        case .rest:
+            return .orange
+        case .simple:
+            return .blue
+        }
+    }
+
+    private var blockTitle: String {
+        switch blockData.blockType {
+        case .method:
+            return blockData.methodType?.rawValue ?? BlockType.method.rawValue
+        case .rest:
+            return BlockType.rest.rawValue
+        case .simple:
+            return BlockType.simple.rawValue
+        }
+    }
+
+    private var blockDescription: String? {
+        switch blockData.blockType {
+        case .method:
+            return blockData.methodType?.description
+        case .rest:
+            return "Aggiungi una pausa temporizzata tra i blocchi"
+        case .simple:
+            return nil
+        }
+    }
+
+    private var restDurationInSeconds: Int {
+        globalRestMinutes * 60 + globalRestSeconds
     }
 }
 
