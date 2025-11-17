@@ -5,7 +5,7 @@ struct ContentView: View {
     var body: some View {
         TabView {
             // Tab 1 - Allenamento
-            Text("Allenamento")
+            WorkoutExecutionView()
                 .tabItem {
                     Label("Allenamento", systemImage: "stopwatch")
                 }
