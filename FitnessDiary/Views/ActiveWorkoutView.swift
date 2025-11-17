@@ -255,11 +255,25 @@ struct ActiveWorkoutView: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        Text("\(heartRateManager.currentHeartRate)")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundStyle(currentHeartRateColor)
-                            .contentTransition(.numericText())
+                        HStack(spacing: 6) {
+                            Text("\(heartRateManager.currentHeartRate)")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundStyle(currentHeartRateColor)
+                                .contentTransition(.numericText())
+
+                            // Zona cardio badge
+                            if let zoneText = currentHeartRateZone {
+                                Text(zoneText)
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(currentHeartRateColor)
+                                    .cornerRadius(4)
+                            }
+                        }
                     }
                 }
 
@@ -297,6 +311,25 @@ struct ActiveWorkoutView: View {
             return .orange
         } else {
             return .red
+        }
+    }
+
+    // Helper per determinare zona cardio testuale
+    private var currentHeartRateZone: String? {
+        guard let profile = userProfile else { return nil }
+        let hr = heartRateManager.currentHeartRate
+        guard hr > 0 else { return nil }
+
+        if hr <= profile.zone1Max {
+            return "Z1"
+        } else if hr <= profile.zone2Max {
+            return "Z2"
+        } else if hr <= profile.zone3Max {
+            return "Z3"
+        } else if hr <= profile.zone4Max {
+            return "Z4"
+        } else {
+            return "Z5"
         }
     }
 
@@ -841,8 +874,8 @@ struct ActiveWorkoutView: View {
         if set.setType == .duration, let duration = set.duration {
             inputDuration = duration
 
-            // Auto-start timer per esercizi a durata (corsa, camminata, plank, ecc.)
-            if autoStartRest {
+            // Auto-start timer per esercizi a durata SOLO se l'allenamento è attivo (non in countdown)
+            if autoStartRest && workoutState == .active {
                 timerManager.startCountdown(duration: duration, type: .custom)
             }
         } else {
@@ -934,6 +967,11 @@ struct ActiveWorkoutView: View {
         // Se il blocco corrente è un REST, avvia automaticamente il timer
         if session.currentBlock?.blockType == .rest {
             startRestBlockTimer()
+        } else if let set = session.currentSet, set.setType == .duration, let duration = set.duration {
+            // Se è un esercizio a durata, avvia il timer
+            if autoStartRest {
+                timerManager.startCountdown(duration: duration, type: .custom)
+            }
         }
     }
 
