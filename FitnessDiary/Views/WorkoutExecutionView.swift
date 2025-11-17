@@ -529,7 +529,6 @@ struct WorkoutExecutionView: View {
                     Image(systemName: "heart.fill")
                         .foregroundStyle(.red)
                         .scaleEffect(1.1)
-                        .symbolEffect(.pulse, options: .repeat, value: viewModel.generalElapsedTime)
                     Text("Zone Cardio")
                         .font(.headline)
                 }
@@ -538,7 +537,6 @@ struct WorkoutExecutionView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-
             HeartRateHistogram(currentZone: viewModel.currentZone, usagePercentages: viewModel.zoneUsagePercentages)
                 .frame(height: 140)
         }
