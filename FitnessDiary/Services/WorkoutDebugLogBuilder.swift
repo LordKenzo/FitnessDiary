@@ -3,6 +3,10 @@ import Foundation
 struct WorkoutDebugLogBuilder {
     static func buildLog(for blocks: [WorkoutBlock]) -> [String] {
         var lines: [String] = []
+
+        if let countdownEntry = initialCountdownEntry() {
+            lines.append(countdownEntry)
+        }
         let orderedBlocks = blocks.sorted { $0.order < $1.order }
 
         for block in orderedBlocks {
@@ -229,5 +233,18 @@ private extension WorkoutDebugLogBuilder {
             components.append("0 secondi")
         }
         return components.joined(separator: " ")
+    }
+
+    static func initialCountdownEntry() -> String? {
+        let countdown = storedCountdownSeconds()
+        guard countdown > 0 else { return nil }
+        return "Countdown iniziale \(formatDuration(TimeInterval(countdown)))"
+    }
+
+    static func storedCountdownSeconds() -> Int {
+        if let stored = UserDefaults.standard.object(forKey: "workoutCountdownSeconds") as? Int {
+            return stored
+        }
+        return 10
     }
 }
