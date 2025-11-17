@@ -3,11 +3,16 @@ import SwiftUI
 struct GeneralPreferencesView: View {
     @AppStorage("debugWorkoutLogEnabled") private var debugWorkoutLogEnabled = false
     @AppStorage("workoutCountdownSeconds") private var workoutCountdownSeconds = 10
+    @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
 
     var body: some View {
         Form {
             Section("Preferenze Generali") {
-                Toggle("Debug Sequenza Allenamento", isOn: $debugWorkoutLogEnabled)
+                Toggle("Genera Sequenza Allenamento", isOn: $debugWorkoutLogEnabled)
+
+                Toggle("Clona automaticamente il carico", isOn: $cloneLoadEnabled)
+                    .tint(.blue)
+                    .font(.subheadline)
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {

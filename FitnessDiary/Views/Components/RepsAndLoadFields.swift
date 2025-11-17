@@ -69,7 +69,16 @@ struct RepsAndLoadFields: View {
 
                 if set.loadType == .absolute {
                     HStack(spacing: 4) {
-                        TextField("Kg", value: $set.weight, format: .number)
+                        TextField(
+                            "Kg",
+                            value: Binding(
+                                get: { set.weight },
+                                set: { newValue in
+                                    set.weight = newValue
+                                }
+                            ),
+                            format: .number
+                        )
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.center)
                             .frame(width: 60)
@@ -96,7 +105,16 @@ struct RepsAndLoadFields: View {
                     }
                 } else {
                     HStack(spacing: 4) {
-                        TextField("%", value: $set.percentageOfMax, format: .number)
+                        TextField(
+                            "%",
+                            value: Binding(
+                                get: { set.percentageOfMax },
+                                set: { newValue in
+                                    set.percentageOfMax = newValue
+                                }
+                            ),
+                            format: .number
+                        )
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.center)
                             .frame(width: 60)

@@ -174,13 +174,13 @@ struct EditWorkoutCardView: View {
                         Text("Blocchi (\(workoutBlocks.count))")
                         Spacer()
                         if !workoutBlocks.isEmpty {
-                            EditButton()
+                            TitleCaseEditButton()
                         }
                     }
                 }
 
                 if debugWorkoutLogEnabled && !workoutBlocks.isEmpty {
-                    Section("Debug") {
+                    Section("Testo Scheda") {
                         NavigationLink {
                             WorkoutDebugLogView(blockData: workoutBlocks)
                         } label: {

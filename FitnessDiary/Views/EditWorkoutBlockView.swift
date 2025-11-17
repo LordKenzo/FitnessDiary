@@ -247,7 +247,7 @@ struct EditWorkoutBlockView: View {
                         }
                         Spacer()
                         if !blockData.exerciseItems.isEmpty {
-                            EditButton()
+                            TitleCaseEditButton()
                         }
                     }
                 } footer: {

@@ -128,3 +128,36 @@ extension WorkoutExerciseItemData {
         }
     }
 }
+
+// MARK: - Utility helpers
+
+extension Array where Element == WorkoutSetData {
+    mutating func cloneLoadIfNeeded(from sourceSet: WorkoutSetData) {
+        switch sourceSet.loadType {
+        case .absolute:
+            guard let weight = sourceSet.weight else { return }
+            propagateAbsoluteLoad(weight, sourceId: sourceSet.id)
+        case .percentage:
+            guard let percentage = sourceSet.percentageOfMax else { return }
+            propagatePercentageLoad(percentage, sourceId: sourceSet.id)
+        }
+    }
+
+    private mutating func propagateAbsoluteLoad(_ weight: Double, sourceId: UUID) {
+        for index in indices {
+            guard self[index].id != sourceId else { continue }
+            guard self[index].weight == nil && self[index].percentageOfMax == nil else { continue }
+            self[index].loadType = .absolute
+            self[index].weight = weight
+        }
+    }
+
+    private mutating func propagatePercentageLoad(_ percentage: Double, sourceId: UUID) {
+        for index in indices {
+            guard self[index].id != sourceId else { continue }
+            guard self[index].weight == nil && self[index].percentageOfMax == nil else { continue }
+            self[index].loadType = .percentage
+            self[index].percentageOfMax = percentage
+        }
+    }
+}

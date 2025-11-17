@@ -6,6 +6,7 @@ struct EditWorkoutExerciseView: View {
     @Environment(\.modelContext) private var modelContext
     @Binding var exerciseData: WorkoutExerciseItemData
     let exercises: [Exercise]
+    @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
 
     @State private var notes: String
     @State private var restMinutes: Int
@@ -76,7 +77,11 @@ struct EditWorkoutExerciseView: View {
 
             Section {
                 ForEach($exerciseData.sets) { $set in
-                    SetRow(set: $set, exercise: exerciseData.exercise, oneRepMax: oneRepMax)
+                    SetRow(
+                        set: $set,
+                        exercise: exerciseData.exercise,
+                        oneRepMax: oneRepMax
+                    )
                 }
                 .onMove(perform: moveSets)
                 .onDelete(perform: deleteSets)
@@ -90,7 +95,7 @@ struct EditWorkoutExerciseView: View {
                 HStack {
                     Text("Serie")
                     Spacer()
-                    EditButton()
+                    TitleCaseEditButton()
                 }
             }
         }
@@ -115,16 +120,24 @@ struct EditWorkoutExerciseView: View {
     @ToolbarContentBuilder
     private func toolbarContent() -> some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
-            Button("Fatto") {
+            Button("Conferma") {
                 saveChanges()
             }
         }
     }
 
     private func saveChanges() {
+        applyCloneLoadIfNeeded()
         exerciseData.notes = notes.isEmpty ? nil : notes
         exerciseData.restTime = TimeInterval(restMinutes * 60 + restSeconds)
         dismiss()
+    }
+
+    private func applyCloneLoadIfNeeded() {
+        guard cloneLoadEnabled else { return }
+        for set in exerciseData.sets where set.weight != nil || set.percentageOfMax != nil {
+            exerciseData.sets.cloneLoadIfNeeded(from: set)
+        }
     }
 
     private func addSet() {
@@ -179,7 +192,11 @@ struct SetRow: View {
 
             // Campi principali in base al tipo di serie
             if set.setType == .reps {
-                RepsAndLoadFields(set: $set, oneRepMax: oneRepMax, targetParameters: targetParameters)
+                RepsAndLoadFields(
+                    set: $set,
+                    oneRepMax: oneRepMax,
+                    targetParameters: targetParameters
+                )
 
                 // Campi Cluster Set
                 if isClusterSet {
