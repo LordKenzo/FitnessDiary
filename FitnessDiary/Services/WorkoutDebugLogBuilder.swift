@@ -78,8 +78,14 @@ private extension WorkoutDebugLogBuilder {
         let clusterSize = max(set.clusterSize ?? totalReps, 1)
         var lines: [String] = []
 
+        let loadText = loadDescription(for: set)
+
         for rep in 1...totalReps {
-            lines.append("Esercizio Cluster \(exerciseName(exercise)) Ripetizione \(rep)")
+            var entry = "Esercizio Cluster \(exerciseName(exercise)) Ripetizione \(rep)"
+            if let loadText {
+                entry += " \(loadText)"
+            }
+            lines.append(entry)
 
             if rep % clusterSize == 0,
                rep < totalReps,
@@ -159,20 +165,52 @@ private extension WorkoutDebugLogBuilder {
     static func setDescription(for set: WorkoutSet?) -> String {
         guard let set = set else { return "senza dettagli" }
 
+        var components: [String] = []
+
         switch set.setType {
         case .reps:
-            let repsText: String
-            if let reps = set.reps {
-                repsText = "\(reps) ripetizioni"
-            } else {
-                repsText = "ripetizioni"
-            }
             if let description = set.restPauseDescription {
-                return description
+                components.append(description)
+            } else if let reps = set.reps {
+                components.append("\(reps) ripetizioni")
+            } else {
+                components.append("ripetizioni")
             }
-            return repsText
         case .duration:
-            return "tempo \(formatDuration(set.duration))"
+            components.append("tempo \(formatDuration(set.duration))")
+        }
+
+        if let loadText = loadDescription(for: set) {
+            components.append(loadText)
+        }
+
+        return components.joined(separator: " ")
+    }
+
+    static func loadDescription(for set: WorkoutSet) -> String? {
+        switch set.actualLoadType {
+        case .absolute:
+            guard let weight = set.weight else { return nil }
+            return "con \(formatWeight(weight)) kg"
+        case .percentage:
+            guard let percentage = set.percentageOfMax else { return nil }
+            return "al \(formatPercentage(percentage))% 1RM"
+        }
+    }
+
+    static func formatWeight(_ weight: Double) -> String {
+        if weight.truncatingRemainder(dividingBy: 1) == 0 {
+            return "\(Int(weight))"
+        } else {
+            return String(format: "%.1f", weight)
+        }
+    }
+
+    static func formatPercentage(_ percentage: Double) -> String {
+        if percentage.truncatingRemainder(dividingBy: 1) == 0 {
+            return "\(Int(percentage))"
+        } else {
+            return String(format: "%.1f", percentage)
         }
     }
 
