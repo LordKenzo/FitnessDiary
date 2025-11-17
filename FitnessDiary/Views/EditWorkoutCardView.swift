@@ -180,7 +180,7 @@ struct EditWorkoutCardView: View {
                 }
 
                 if debugWorkoutLogEnabled && !workoutBlocks.isEmpty {
-                    Section("Debug") {
+                    Section("Testo Scheda") {
                         NavigationLink {
                             WorkoutDebugLogView(blockData: workoutBlocks)
                         } label: {
