@@ -325,11 +325,30 @@ extension WorkoutExecutionViewModel {
 
 struct WorkoutExecutionView: View {
     @StateObject private var viewModel: WorkoutExecutionViewModel
+    @State private var bluetoothManager = BluetoothHeartRateManager()
     @Query(sort: \WorkoutCard.name) private var workoutCards: [WorkoutCard]
+    @Query private var userProfiles: [UserProfile]
     @AppStorage("workoutCountdownSeconds") private var defaultCountdownSeconds = 10
 
     init(viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
+    private var userProfile: UserProfile? {
+        userProfiles.first
+    }
+
+    private var detectedZone: HeartRateZone? {
+        guard let profile = userProfile else { return nil }
+        let hr = bluetoothManager.currentHeartRate
+
+        guard hr > 0 else { return nil }
+
+        if hr <= profile.zone1Max { return .zone1 }
+        else if hr <= profile.zone2Max { return .zone2 }
+        else if hr <= profile.zone3Max { return .zone3 }
+        else if hr <= profile.zone4Max { return .zone4 }
+        else { return .zone5 }
     }
 
     var body: some View {
@@ -357,6 +376,11 @@ struct WorkoutExecutionView: View {
             .navigationTitle(viewModel.sessionTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
+            .onChange(of: bluetoothManager.currentHeartRate) { _, newHeartRate in
+                if viewModel.isSessionActive, newHeartRate > 0, let zone = detectedZone {
+                    viewModel.changeZone(to: zone)
+                }
+            }
         }
     }
 
@@ -518,14 +542,41 @@ struct WorkoutExecutionView: View {
                     Image(systemName: "heart.fill")
                         .foregroundStyle(.red)
                         .scaleEffect(1.1)
-                    Text("Zone Cardio")
-                        .font(.headline)
+                    if bluetoothManager.isConnected {
+                        if bluetoothManager.currentHeartRate > 0 {
+                            Text("\(bluetoothManager.currentHeartRate) BPM")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                        } else {
+                            Text("-- BPM")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        Text("Non connesso")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
-                Text(viewModel.currentZone.name)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if let zone = detectedZone {
+                    Text(zone.name)
+                        .font(.subheadline)
+                        .foregroundStyle(zone.color)
+                        .fontWeight(.semibold)
+                }
             }
+
+            if !bluetoothManager.isConnected {
+                NavigationLink {
+                    HeartRateMonitorView(bluetoothManager: bluetoothManager)
+                } label: {
+                    Label("Connetti cardiofrequenzimetro", systemImage: "antenna.radiowaves.left.and.right")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            }
+
             HeartRateHistogram(currentZone: viewModel.currentZone, usagePercentages: viewModel.zoneUsagePercentages)
                 .frame(height: 140)
         }

@@ -10,10 +10,18 @@ import SwiftUI
 import SwiftData
 
 struct HeartRateMonitorView: View {
-    @State private var bluetoothManager = BluetoothHeartRateManager()
+    @State private var internalBluetoothManager = BluetoothHeartRateManager()
     @Query private var profiles: [UserProfile]
-    
-    init() {}
+
+    private let externalBluetoothManager: BluetoothHeartRateManager?
+
+    private var bluetoothManager: BluetoothHeartRateManager {
+        externalBluetoothManager ?? internalBluetoothManager
+    }
+
+    init(bluetoothManager: BluetoothHeartRateManager? = nil) {
+        self.externalBluetoothManager = bluetoothManager
+    }
 
     
     private var userProfile: UserProfile? {
