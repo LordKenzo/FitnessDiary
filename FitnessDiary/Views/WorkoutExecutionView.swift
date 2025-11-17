@@ -469,10 +469,8 @@ struct WorkoutExecutionView: View {
             .buttonStyle(.borderedProminent)
         }
         .padding()
-        .background(
-            .thinMaterial,
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var headerSection: some View {
@@ -520,10 +518,8 @@ struct WorkoutExecutionView: View {
             .disabled(!viewModel.isSessionActive || viewModel.isCountdownActive)
         }
         .padding()
-        .background(
-            .thinMaterial,
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var heartRateSection: some View {
@@ -547,10 +543,8 @@ struct WorkoutExecutionView: View {
                 .frame(height: 140)
         }
         .padding()
-        .background(
-            .thinMaterial,
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-        )
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     @ViewBuilder
