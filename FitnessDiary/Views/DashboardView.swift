@@ -2,10 +2,14 @@ import SwiftUI
 import SwiftData
 
 struct DashboardView: View {
-    @Environment(\.calendar) private var calendar
-    @Query(sortDescriptors: [SortDescriptor(\WorkoutSessionLog.date, order: .reverse)]) private var sessionLogs: [WorkoutSessionLog]
+    private let calendar = Calendar.current
+    @Query private var storedSessionLogs: [WorkoutSessionLog]
 
     init() {}
+
+    private var sessionLogs: [WorkoutSessionLog] {
+        storedSessionLogs.sorted { $0.date > $1.date }
+    }
 
     private let focusMuscles = ["Petto", "Dorso", "Gambe e Glutei", "Core", "Spalle"]
     private let quickActions = [
