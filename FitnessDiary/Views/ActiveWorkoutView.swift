@@ -29,8 +29,37 @@ struct ActiveWorkoutView: View {
     @State private var showingAbandonAlert = false
     @State private var showingSetInput = false
     @State private var autoStartRest = true
+    @State private var isDataLoaded = false
 
     var body: some View {
+        Group {
+            if isDataLoaded {
+                workoutContent
+            } else {
+                loadingView
+            }
+        }
+        .onAppear {
+            verifyDataLoaded()
+        }
+    }
+
+    // MARK: - Loading View
+
+    private var loadingView: some View {
+        VStack(spacing: 20) {
+            ProgressView()
+                .scaleEffect(1.5)
+
+            Text("Caricamento allenamento...")
+                .font(.headline)
+                .foregroundColor(.secondary)
+        }
+    }
+
+    // MARK: - Main Content
+
+    private var workoutContent: some View {
         VStack(spacing: 0) {
             // Header con info allenamento
             workoutHeader
@@ -106,9 +135,6 @@ struct ActiveWorkoutView: View {
             }
         } message: {
             Text("L'allenamento verrà salvato come incompleto.")
-        }
-        .onAppear {
-            prepareCurrentSet()
         }
     }
 
@@ -628,6 +654,35 @@ struct ActiveWorkoutView: View {
 
         inputRPE = 5.0
         inputNotes = ""
+    }
+
+    private func verifyDataLoaded() {
+        // Verifica che tutte le relazioni necessarie siano caricate
+        // Usa un task per dare tempo a SwiftData di caricare i dati
+        Task {
+            // Piccolo delay per dare tempo a SwiftData
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 secondi
+
+            await MainActor.run {
+                // Verifica che le relazioni principali siano accessibili
+                let hasCard = session.workoutCard.blocks.count >= 0
+                let hasBlocks = session.currentBlock != nil || session.workoutCard.blocks.isEmpty
+
+                if hasCard && hasBlocks {
+                    isDataLoaded = true
+                    prepareCurrentSet()
+                } else {
+                    // Retry dopo altro delay
+                    Task {
+                        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 secondi
+                        await MainActor.run {
+                            isDataLoaded = true
+                            prepareCurrentSet()
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Actions
