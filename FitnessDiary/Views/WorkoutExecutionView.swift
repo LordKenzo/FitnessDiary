@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import Combine
+import Observation
 
 // MARK: - View Model
 
@@ -325,11 +326,16 @@ extension WorkoutExecutionViewModel {
 
 struct WorkoutExecutionView: View {
     @StateObject private var viewModel: WorkoutExecutionViewModel
+    @Bindable private var bluetoothManager: BluetoothHeartRateManager
     @Query(sort: \WorkoutCard.name) private var workoutCards: [WorkoutCard]
     @AppStorage("workoutCountdownSeconds") private var defaultCountdownSeconds = 10
 
-    init(viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel()) {
+    init(
+        viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel(),
+        bluetoothManager: BluetoothHeartRateManager = BluetoothHeartRateManager()
+    ) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.bluetoothManager = bluetoothManager
     }
 
     var body: some View {
@@ -518,8 +524,9 @@ struct WorkoutExecutionView: View {
                     Image(systemName: "heart.fill")
                         .foregroundStyle(.red)
                         .scaleEffect(1.1)
-                    Text("Zone Cardio")
+                    Text(heartRateText)
                         .font(.headline)
+                        .contentTransition(.numericText())
                 }
                 Spacer()
                 Text(viewModel.currentZone.name)
@@ -706,6 +713,14 @@ struct WorkoutExecutionView: View {
 
     private var stepsRemaining: Int {
         max(viewModel.steps.count - (viewModel.currentStepIndex + 1), 0)
+    }
+
+    private var heartRateText: String {
+        if bluetoothManager.isConnected {
+            return "\(bluetoothManager.currentHeartRate) bpm"
+        } else {
+            return "Collega sensore"
+        }
     }
 
     private func format(seconds: TimeInterval) -> String {
@@ -900,5 +915,5 @@ private enum WorkoutExecutionStepFactory {
 }
 
 #Preview {
-    WorkoutExecutionView(viewModel: .demo())
+    WorkoutExecutionView(viewModel: .demo(), bluetoothManager: BluetoothHeartRateManager())
 }
