@@ -153,7 +153,11 @@ private extension WorkoutDebugLogBuilder {
             }
 
             for group in groups {
-                lines.append("\(name) \(group.count)x\(group.descriptor)")
+                var line = "\(name) \(group.count)x\(group.descriptor)"
+                if let restSuffix = technicalRestSuffix(for: exercise, in: block) {
+                    line += " \(restSuffix)"
+                }
+                lines.append(line)
             }
         }
         return lines
@@ -637,6 +641,12 @@ private extension WorkoutDebugLogBuilder {
             components.append("\(seconds)\"")
         }
         return components.joined()
+    }
+
+    static func technicalRestSuffix(for exercise: WorkoutExerciseItem, in block: WorkoutBlock) -> String? {
+        let restTime = exercise.restTime ?? block.globalRestTime
+        guard let restTime else { return nil }
+        return "\(formatShortDuration(restTime)) Rest"
     }
 
     static func initialCountdownEntry() -> String? {
