@@ -11,6 +11,7 @@ final class WorkoutBlock: Identifiable {
     // Parametri globali del blocco
     var globalSets: Int // numero di serie totali del blocco (es. 3 superset)
     var globalRestTime: TimeInterval? // recupero tra le serie del blocco
+    var recoveryAfterBlock: TimeInterval? // recupero DOPO il completamento del blocco (prima del prossimo blocco)
     var notes: String?
 
     // Parametri Tabata (solo per methodType == .tabata)
@@ -22,13 +23,14 @@ final class WorkoutBlock: Identifiable {
     @Relationship(deleteRule: .cascade)
     var exerciseItems: [WorkoutExerciseItem] // lista esercizi nel blocco
 
-    init(order: Int, blockType: BlockType = .simple, methodType: MethodType? = nil, globalSets: Int = 3, globalRestTime: TimeInterval? = 60, notes: String? = nil, tabataWorkDuration: TimeInterval? = nil, tabataRestDuration: TimeInterval? = nil, tabataRounds: Int? = nil, tabataRecoveryBetweenRounds: TimeInterval? = nil, exerciseItems: [WorkoutExerciseItem] = []) {
+    init(order: Int, blockType: BlockType = .simple, methodType: MethodType? = nil, globalSets: Int = 3, globalRestTime: TimeInterval? = 60, recoveryAfterBlock: TimeInterval? = nil, notes: String? = nil, tabataWorkDuration: TimeInterval? = nil, tabataRestDuration: TimeInterval? = nil, tabataRounds: Int? = nil, tabataRecoveryBetweenRounds: TimeInterval? = nil, exerciseItems: [WorkoutExerciseItem] = []) {
         self.id = UUID()
         self.order = order
         self.blockType = blockType
         self.methodType = methodType
         self.globalSets = globalSets
         self.globalRestTime = globalRestTime
+        self.recoveryAfterBlock = recoveryAfterBlock
         self.notes = notes
         self.tabataWorkDuration = tabataWorkDuration
         self.tabataRestDuration = tabataRestDuration

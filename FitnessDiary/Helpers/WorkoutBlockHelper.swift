@@ -17,6 +17,7 @@ class WorkoutBlockHelper {
             order: blocks.count,
             globalSets: 3,
             globalRestTime: 90,
+            recoveryAfterBlock: nil,  // Opzionale, default nessun rest
             notes: nil,
             exerciseItems: [exerciseItem]
         )
@@ -31,6 +32,7 @@ class WorkoutBlockHelper {
             order: blocks.count,
             globalSets: 3,
             globalRestTime: 120,
+            recoveryAfterBlock: nil,  // Opzionale, default nessun rest
             notes: nil,
             exerciseItems: []
         )
@@ -61,6 +63,7 @@ class WorkoutBlockHelper {
             methodType: blockData.methodType,
             globalSets: blockData.globalSets,
             globalRestTime: blockData.globalRestTime,
+            recoveryAfterBlock: blockData.recoveryAfterBlock,
             notes: blockData.notes,
             tabataWorkDuration: blockData.tabataWorkDuration,
             tabataRestDuration: blockData.tabataRestDuration,

@@ -729,11 +729,21 @@ struct ActiveWorkoutView: View {
         // Save performance
         session.completeCurrentSet(performance: performance)
 
+        // Check if we're about to finish the current block (for inter-block rest)
+        let willChangeBlock = checkIfFinishingCurrentBlock()
+        let previousBlock = session.currentBlock
+
         // Move to next set
         session.moveToNextSet()
 
         // Auto-start rest timer based on workout structure
-        startRestTimerIfNeeded()
+        if willChangeBlock, let block = previousBlock, let recoveryTime = block.recoveryAfterBlock, recoveryTime > 0 {
+            // Rest tra blocchi (priorità massima)
+            timerManager.startRestTimer(restDuration: recoveryTime)
+        } else {
+            // Rest normale tra serie
+            startRestTimerIfNeeded()
+        }
 
         // Reset input fields
         prepareCurrentSet()
@@ -745,6 +755,20 @@ struct ActiveWorkoutView: View {
         if session.isCompleted {
             completeWorkout()
         }
+    }
+
+    /// Verifica se il prossimo moveToNextSet() cambierà blocco
+    private func checkIfFinishingCurrentBlock() -> Bool {
+        guard let block = session.currentBlock,
+              let exercise = session.currentExercise else {
+            return false
+        }
+
+        // Siamo all'ultima serie dell'ultimo esercizio del blocco?
+        let isLastSet = session.currentSetIndex >= (exercise.sets.count - 1)
+        let isLastExercise = session.currentExerciseIndex >= (block.exerciseItems.count - 1)
+
+        return isLastSet && isLastExercise
     }
 
     /// Avvia automaticamente il timer di rest in base alla struttura dell'allenamento

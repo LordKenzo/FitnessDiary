@@ -10,6 +10,8 @@ struct EditWorkoutBlockView: View {
     @State private var globalSets: Int
     @State private var globalRestMinutes: Int
     @State private var globalRestSeconds: Int
+    @State private var recoveryAfterBlockMinutes: Int
+    @State private var recoveryAfterBlockSeconds: Int
     @State private var notes: String
     @State private var showingExercisePicker = false
 
@@ -26,6 +28,9 @@ struct EditWorkoutBlockView: View {
         let restTime = blockData.wrappedValue.globalRestTime ?? 60
         _globalRestMinutes = State(initialValue: Int(restTime) / 60)
         _globalRestSeconds = State(initialValue: Int(restTime) % 60)
+        let recoveryAfterTime = blockData.wrappedValue.recoveryAfterBlock ?? 0
+        _recoveryAfterBlockMinutes = State(initialValue: Int(recoveryAfterTime) / 60)
+        _recoveryAfterBlockSeconds = State(initialValue: Int(recoveryAfterTime) % 60)
         _notes = State(initialValue: blockData.wrappedValue.notes ?? "")
 
         // Initialize Tabata parameters
@@ -172,6 +177,37 @@ struct EditWorkoutBlockView: View {
                     Text("Durata totale: \(minutes) min \(seconds) sec (\(tabataRounds) giri × 8 esercizi)")
                         .font(.caption)
                 }
+            }
+
+            // Recovery after block section - disponibile per tutti i tipi di blocco
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Recupero dopo Blocco")
+                        .font(.subheadline)
+
+                    HStack(spacing: 16) {
+                        Picker("Minuti", selection: $recoveryAfterBlockMinutes) {
+                            ForEach(0..<10, id: \.self) { min in
+                                Text("\(min)m").tag(min)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(width: 80)
+
+                        Picker("Secondi", selection: $recoveryAfterBlockSeconds) {
+                            ForEach(Array(stride(from: 0, to: 60, by: 5)), id: \.self) { sec in
+                                Text("\(sec)s").tag(sec)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(width: 80)
+                    }
+                }
+                .onChange(of: recoveryAfterBlockMinutes) { _, _ in updateRecoveryAfterBlock() }
+                .onChange(of: recoveryAfterBlockSeconds) { _, _ in updateRecoveryAfterBlock() }
+            } footer: {
+                Text("Tempo di recupero automatico dopo il completamento di questo blocco, prima di iniziare il prossimo")
+                    .font(.caption)
             }
 
             // Exercises section
@@ -364,6 +400,10 @@ struct EditWorkoutBlockView: View {
             blockData.globalRestTime = nil // Dropset non deve avere rest time
         }
 
+        // Salva recovery after block
+        let totalRecoverySeconds = TimeInterval(recoveryAfterBlockMinutes * 60 + recoveryAfterBlockSeconds)
+        blockData.recoveryAfterBlock = totalRecoverySeconds > 0 ? totalRecoverySeconds : nil
+
         blockData.notes = notes.isEmpty ? nil : notes
 
         // Salva parametri Tabata se è un metodo Tabata
@@ -378,6 +418,11 @@ struct EditWorkoutBlockView: View {
         if blockData.blockType == .method {
             syncExerciseSets()
         }
+    }
+
+    private func updateRecoveryAfterBlock() {
+        let totalSeconds = TimeInterval(recoveryAfterBlockMinutes * 60 + recoveryAfterBlockSeconds)
+        blockData.recoveryAfterBlock = totalSeconds > 0 ? totalSeconds : nil
     }
 
     private func calculateTabataTotalDuration() -> Int {
