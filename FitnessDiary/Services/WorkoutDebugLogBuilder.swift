@@ -78,8 +78,8 @@ private extension WorkoutDebugLogBuilder {
             return ["Cluster senza esercizi"]
         }
 
-        let totalReps = max(set.reps ?? 0, exercise.sets.count)
-        let clusterSize = max(set.clusterSize ?? totalReps, 1)
+        let totalReps = max(set.reps ?? 1, 1)
+        let clusterSize = max(min(set.clusterSize ?? totalReps, totalReps), 1)
         var lines: [String] = []
 
         let loadText = loadDescription(for: set)
@@ -105,7 +105,7 @@ private extension WorkoutDebugLogBuilder {
         let exercises = block.exerciseItems.sorted { $0.order < $1.order }
         guard !exercises.isEmpty else { return ["Tabata senza esercizi"] }
 
-        let rounds = max(block.tabataRounds ?? block.globalSets, 1)
+        let rounds = max(block.tabataRounds ?? 5, 1)
         let workDuration = block.tabataWorkDuration ?? 20
         let restDuration = block.tabataRestDuration ?? 10
 
@@ -242,9 +242,12 @@ private extension WorkoutDebugLogBuilder {
     }
 
     static func storedCountdownSeconds() -> Int {
-        if let stored = UserDefaults.standard.object(forKey: "workoutCountdownSeconds") as? Int {
+        if let stored = UserDefaults.standard.object(forKey: countdownSecondsKey) as? Int {
             return stored
         }
-        return 10
+        return defaultCountdownSeconds
     }
+
+    static let countdownSecondsKey = "workoutCountdownSeconds"
+    static let defaultCountdownSeconds = 10
 }
