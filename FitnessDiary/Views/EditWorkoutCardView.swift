@@ -178,6 +178,16 @@ struct EditWorkoutCardView: View {
                     }
                 }
 
+                if !workoutBlocks.isEmpty {
+                    Section("Debug") {
+                        NavigationLink {
+                            WorkoutDebugLogView(blockData: workoutBlocks)
+                        } label: {
+                            Label("Anteprima sequenza esercizi", systemImage: "list.bullet.rectangle")
+                        }
+                    }
+                }
+
                 Section {
                     Button(role: .destructive) {
                         deleteCard()

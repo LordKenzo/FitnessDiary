@@ -115,6 +115,16 @@ struct AddWorkoutCardView: View {
                         }
                     }
                 }
+
+                if !workoutBlocks.isEmpty {
+                    Section("Debug") {
+                        NavigationLink {
+                            WorkoutDebugLogView(blockData: workoutBlocks)
+                        } label: {
+                            Label("Anteprima sequenza esercizi", systemImage: "list.bullet.rectangle")
+                        }
+                    }
+                }
             }
             .navigationTitle("Nuova Scheda")
             .navigationBarTitleDisplayMode(.inline)
