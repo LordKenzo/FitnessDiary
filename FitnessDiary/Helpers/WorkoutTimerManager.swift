@@ -191,8 +191,8 @@ final class WorkoutTimerManager {
         displayTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
 
-            // Il timer è schedulato su RunLoop.main, quindi siamo già sul main thread
-            MainActor.assumeIsolated {
+            // Usa Task per eseguire su main actor in modo sicuro
+            Task { @MainActor in
                 // Incrementa tickCount per triggherare Observable
                 self.tickCount += 1
 
