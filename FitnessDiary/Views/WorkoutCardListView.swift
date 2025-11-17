@@ -175,6 +175,7 @@ struct WorkoutCardListView: View {
             }
             .searchable(text: $searchText, prompt: "Cerca scheda")
             .navigationTitle("Schede")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItemGroup(placement: .topBarLeading) {
                     ownerFilterMenu()
