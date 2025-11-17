@@ -192,7 +192,7 @@ struct WorkoutSessionView: View {
     }
 
     private func repsEditor(for set: WorkoutSet) -> some View {
-        let binding = Binding(
+        let binding: Binding<WorkoutSessionViewModel.SetExecutionResult> = Binding(
             get: {
                 if let saved = viewModel.setResults[set.id] {
                     return saved
