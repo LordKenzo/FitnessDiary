@@ -69,9 +69,9 @@ final class WorkoutSessionViewModel {
     private var pausedDate: Date?
     private var accumulatedPause: TimeInterval = 0
 
-    var intraSetTimer = TrainingTimerEngine(mode: .countdown(30))
-    var interSetTimer = TrainingTimerEngine(mode: .countdown(90))
-    var protocolTimer = TrainingTimerEngine(mode: .countdown(60))
+    let intraSetTimer: TrainingTimerEngine
+    let interSetTimer: TrainingTimerEngine
+    let protocolTimer: TrainingTimerEngine
 
     var setResults: [UUID: SetExecutionResult] = [:]
     var exerciseRPE: [UUID: Int] = [:]
@@ -84,6 +84,9 @@ final class WorkoutSessionViewModel {
 
     init(card: WorkoutCard) {
         self.card = card
+        self.intraSetTimer = TrainingTimerEngine(mode: .countdown(30))
+        self.interSetTimer = TrainingTimerEngine(mode: .countdown(90))
+        self.protocolTimer = TrainingTimerEngine(mode: .countdown(60))
         configureRecommendedTimers()
         configureProtocolTimer()
     }
@@ -410,7 +413,10 @@ final class TrainingTimerEngine {
         state = .running
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.tick()
+            guard let self else { return }
+            Task { @MainActor in
+                self.tick()
+            }
         }
     }
 
@@ -425,7 +431,10 @@ final class TrainingTimerEngine {
         state = .running
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.tick()
+            guard let self else { return }
+            Task { @MainActor in
+                self.tick()
+            }
         }
     }
 
