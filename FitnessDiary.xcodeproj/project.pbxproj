@@ -270,6 +270,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FitnessDiary/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FittyPal;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Per connettersi al tuo heart rate monitor e monitorare il battito cardiaco durante gli allenamenti";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Per connettersi al tuo dispositivo heart rate";
@@ -309,6 +310,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FitnessDiary/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FittyPal;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Per connettersi al tuo heart rate monitor e monitorare il battito cardiaco durante gli allenamenti";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Per connettersi al tuo dispositivo heart rate";
