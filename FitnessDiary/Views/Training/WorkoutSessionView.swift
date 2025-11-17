@@ -177,7 +177,7 @@ struct WorkoutSessionView: View {
             return "Contrast Training: alterna forza e potenza"
         case .complexTraining:
             return "Complex Training combinato"
-        default:
+        @unknown default:
             return method.description
         }
     }
