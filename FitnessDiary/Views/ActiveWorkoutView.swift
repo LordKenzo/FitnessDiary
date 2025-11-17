@@ -35,8 +35,32 @@ struct ActiveWorkoutView: View {
         Group {
             if isDataLoaded {
                 workoutContent
+                    .navigationTitle(session.workoutCard.name)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationBarBackButtonHidden(true)
+                    .toolbar {
+                        toolbarContent
+                    }
+                    .alert("Completa Allenamento", isPresented: $showingCompleteAlert) {
+                        Button("Annulla", role: .cancel) { }
+                        Button("Completa") {
+                            completeWorkout()
+                        }
+                    } message: {
+                        Text("Sei sicuro di voler completare l'allenamento?")
+                    }
+                    .alert("Abbandona Allenamento", isPresented: $showingAbandonAlert) {
+                        Button("Annulla", role: .cancel) { }
+                        Button("Abbandona", role: .destructive) {
+                            abandonWorkout()
+                        }
+                    } message: {
+                        Text("L'allenamento verrà salvato come incompleto.")
+                    }
             } else {
                 loadingView
+                    .navigationTitle("Caricamento...")
+                    .navigationBarTitleDisplayMode(.inline)
             }
         }
         .onAppear {
@@ -94,47 +118,32 @@ struct ActiveWorkoutView: View {
                 .padding()
             }
         }
-        .navigationTitle(session.workoutCard.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                pauseButton
-            }
+    }
 
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button {
-                        showingCompleteAlert = true
-                    } label: {
-                        Label("Completa Allenamento", systemImage: "checkmark.circle")
-                    }
+    // MARK: - Toolbar Content
 
-                    Button(role: .destructive) {
-                        showingAbandonAlert = true
-                    } label: {
-                        Label("Abbandona", systemImage: "xmark.circle")
-                    }
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            pauseButton
+        }
+
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Menu {
+                Button {
+                    showingCompleteAlert = true
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Label("Completa Allenamento", systemImage: "checkmark.circle")
                 }
+
+                Button(role: .destructive) {
+                    showingAbandonAlert = true
+                } label: {
+                    Label("Abbandona", systemImage: "xmark.circle")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
             }
-        }
-        .alert("Completa Allenamento", isPresented: $showingCompleteAlert) {
-            Button("Annulla", role: .cancel) { }
-            Button("Completa") {
-                completeWorkout()
-            }
-        } message: {
-            Text("Sei sicuro di voler completare l'allenamento?")
-        }
-        .alert("Abbandona Allenamento", isPresented: $showingAbandonAlert) {
-            Button("Annulla", role: .cancel) { }
-            Button("Abbandona", role: .destructive) {
-                abandonWorkout()
-            }
-        } message: {
-            Text("L'allenamento verrà salvato come incompleto.")
         }
     }
 
