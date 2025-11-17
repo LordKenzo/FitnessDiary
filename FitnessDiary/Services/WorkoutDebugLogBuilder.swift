@@ -33,6 +33,8 @@ private struct TechnicalSetGroup: Equatable {
 }
 
 private extension WorkoutDebugLogBuilder {
+    static let defaultTabataRounds = 5
+
     static func buildVerboseLog(for blocks: [WorkoutBlock]) -> [String] {
         var lines: [String] = []
 
@@ -224,7 +226,8 @@ private extension WorkoutDebugLogBuilder {
         }
 
         let line = segments.joined(separator: " + ")
-        return ["\(exerciseName(exercise)) 1x(\(line))"]
+        let rounds = max(block.globalSets, 1)
+        return ["\(exerciseName(exercise)) \(rounds)x(\(line))"]
     }
 
     static func restPauseEntries(for block: WorkoutBlock) -> [String] {
@@ -232,30 +235,45 @@ private extension WorkoutDebugLogBuilder {
             return ["Rest-Pause senza esercizi"]
         }
 
-        guard let set = orderedSets(for: exercise).first,
-              let reps = set.reps else {
+        let sets = orderedSets(for: exercise)
+        guard !sets.isEmpty else {
             return ["Rest-Pause senza serie"]
         }
 
-        var line = "\(exerciseName(exercise)) 1x\(reps)"
-        if let load = technicalLoadText(for: set) {
-            line += load
+        let rounds = max(block.globalSets, 1)
+        var lines: [String] = []
+
+        for (index, set) in sets.enumerated() {
+            guard let reps = set.reps else { continue }
+
+            var line = "\(exerciseName(exercise))"
+            if sets.count > 1 {
+                line += " Set \(index + 1):"
+            }
+
+            line += " \(rounds)x\(reps)"
+            if let load = technicalLoadText(for: set) {
+                line += load
+            }
+
+            var rpDetails: [String] = []
+            if let pauseCount = set.restPauseCount {
+                rpDetails.append("x\(pauseCount)")
+            }
+            if let duration = set.restPauseDuration {
+                rpDetails.append(formatShortDuration(duration))
+            }
+
+            if rpDetails.isEmpty {
+                line += " + RP"
+            } else {
+                line += " + RP: \(rpDetails.joined(separator: ", "))"
+            }
+
+            lines.append(line)
         }
 
-        var rpDetails: [String] = []
-        if let pauseCount = set.restPauseCount {
-            rpDetails.append("x\(pauseCount)")
-        }
-        if let duration = set.restPauseDuration {
-            rpDetails.append(formatShortDuration(duration))
-        }
-
-        if rpDetails.isEmpty {
-            line += " + RP"
-        } else {
-            line += " + RP: \(rpDetails.joined(separator: ", "))"
-        }
-        return [line]
+        return lines.isEmpty ? ["Rest-Pause senza serie"] : lines
     }
 
     static func clusterNotationEntries(for block: WorkoutBlock) -> [String] {
@@ -335,7 +353,7 @@ private extension WorkoutDebugLogBuilder {
 
         let work = formatShortDuration(block.tabataWorkDuration ?? 20)
         let rest = formatShortDuration(block.tabataRestDuration ?? 10)
-        let rounds = max(block.tabataRounds ?? 1, 1)
+        let rounds = max(block.tabataRounds ?? defaultTabataRounds, 1)
 
         var lines: [String] = []
         let header = "Tabata \(work)/\(rest) × 8"
@@ -390,7 +408,7 @@ private extension WorkoutDebugLogBuilder {
         let exercises = block.exerciseItems.sorted { $0.order < $1.order }
         guard !exercises.isEmpty else { return ["Tabata senza esercizi"] }
 
-        let rounds = max(block.tabataRounds ?? 5, 1)
+        let rounds = max(block.tabataRounds ?? defaultTabataRounds, 1)
         let workDuration = block.tabataWorkDuration ?? 20
         let restDuration = block.tabataRestDuration ?? 10
 
