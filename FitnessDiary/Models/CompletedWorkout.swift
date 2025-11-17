@@ -86,6 +86,27 @@ final class CompletedWorkout: Identifiable {
         let rpeValues = session.completedSets.compactMap { $0.rpe }
         let avgRPE = rpeValues.isEmpty ? nil : rpeValues.reduce(0, +) / Double(rpeValues.count)
 
+        // Clone SetPerformance objects to prevent cascade delete
+        // When session is deleted, its completedSets will be cascade-deleted
+        // We need independent copies for the CompletedWorkout
+        let clonedPerformances = session.completedSets.map { originalPerformance in
+            SetPerformance(
+                blockIndex: originalPerformance.blockIndex,
+                exerciseIndex: originalPerformance.exerciseIndex,
+                setIndex: originalPerformance.setIndex,
+                round: originalPerformance.round,
+                actualReps: originalPerformance.actualReps,
+                actualWeight: originalPerformance.actualWeight,
+                actualDuration: originalPerformance.actualDuration,
+                completedAt: originalPerformance.completedAt,
+                notes: originalPerformance.notes,
+                rpe: originalPerformance.rpe,
+                clusterTimings: originalPerformance.clusterTimings,
+                clusterReps: originalPerformance.clusterReps,
+                restPauseReps: originalPerformance.restPauseReps
+            )
+        }
+
         return CompletedWorkout(
             workoutCard: session.workoutCard,
             client: session.client,
@@ -95,7 +116,7 @@ final class CompletedWorkout: Identifiable {
             totalDuration: totalDuration,
             activeDuration: session.activeDuration,
             totalPausedTime: session.totalPausedTime,
-            performances: session.completedSets,
+            performances: clonedPerformances,
             notes: session.notes,
             averageRPE: avgRPE,
             wasCompletelyFinished: session.isCompleted,

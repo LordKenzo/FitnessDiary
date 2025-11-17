@@ -43,7 +43,16 @@ struct TabataTimerView: View {
         .background(currentPhaseColor.opacity(0.1))
         .cornerRadius(16)
         .onAppear {
-            startTabata()
+            // Only start if timer is idle to avoid restarting when view reappears
+            if timerManager.timerState == .idle {
+                startTabata()
+            }
+        }
+        .onDisappear {
+            // Stop timer and clear callbacks to prevent memory leaks
+            timerManager.stop()
+            timerManager.onTimerComplete = nil
+            timerManager.onTimerTick = nil
         }
     }
 

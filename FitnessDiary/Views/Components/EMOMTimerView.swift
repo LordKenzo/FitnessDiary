@@ -49,7 +49,16 @@ struct EMOMTimerView: View {
         )
         .cornerRadius(16)
         .onAppear {
-            startEMOM()
+            // Only start if timer is idle to avoid restarting when view reappears
+            if timerManager.timerState == .idle {
+                startEMOM()
+            }
+        }
+        .onDisappear {
+            // Stop timer and clear callbacks to prevent memory leaks
+            timerManager.stop()
+            timerManager.onTimerComplete = nil
+            timerManager.onTimerTick = nil
         }
     }
 
@@ -246,6 +255,13 @@ struct EMOMTimerView: View {
     }
 
     private func startNewMinute() {
+        // Guard against empty exercise circuits
+        guard exerciseCount > 0 else {
+            timerManager.stop()
+            onComplete?()
+            return
+        }
+
         // Trigger minute start callback
         onMinuteStart?(currentMinute)
 

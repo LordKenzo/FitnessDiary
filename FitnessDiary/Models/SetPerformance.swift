@@ -109,12 +109,19 @@ final class SetPerformance: Identifiable {
 
     /// Calcola la percentuale di completamento rispetto al target
     func completionPercentage(targetReps: Int?, targetWeight: Double?, targetDuration: TimeInterval?) -> Double? {
-        // Per ora calcoliamo in base alle reps se disponibili
+        // Priorità: reps, peso, durata
+
+        // 1. Calcoliamo in base alle reps se disponibili
         if let actual = actualReps, let target = targetReps, target > 0 {
             return Double(actual) / Double(target) * 100.0
         }
 
-        // Altrimenti in base alla durata
+        // 2. Altrimenti in base al peso
+        if let actual = actualWeight, let target = targetWeight, target > 0 {
+            return actual / target * 100.0
+        }
+
+        // 3. Altrimenti in base alla durata
         if let actual = actualDuration, let target = targetDuration, target > 0 {
             return actual / target * 100.0
         }

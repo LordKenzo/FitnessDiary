@@ -198,6 +198,11 @@ final class WorkoutTimerManager {
                 self.onTimerTick?(self.remainingTime)
             }
         }
+
+        // Add timer to .common run loop mode to keep it alive during scrolling/gestures
+        if let timer = displayTimer {
+            RunLoop.main.add(timer, forMode: .common)
+        }
     }
 
     private func stopDisplayTimer() {
