@@ -331,6 +331,7 @@ struct WorkoutExecutionView: View {
     @Query private var profiles: [UserProfile]
     @AppStorage("workoutCountdownSeconds") private var defaultCountdownSeconds = 10
     @State private var isCompletionSheetPresented = false
+    @State private var isHistoryPresented = false
     @State private var completionNotes: String = ""
     @State private var selectedMood: WorkoutMood = .neutral
     @State private var includeRPE = false
@@ -387,6 +388,11 @@ struct WorkoutExecutionView: View {
         .sheet(isPresented: $isCompletionSheetPresented) {
             completionSheet
         }
+        .sheet(isPresented: $isHistoryPresented) {
+            NavigationStack {
+                WorkoutHistoryView()
+            }
+        }
         .alert("Impossibile salvare l'allenamento", isPresented: $isSaveErrorAlertPresented) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -397,6 +403,14 @@ struct WorkoutExecutionView: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarLeading) {
+            Button {
+                isHistoryPresented = true
+            } label: {
+                Label("Storico", systemImage: "clock.arrow.circlepath")
+            }
+            .labelStyle(.iconOnly)
+            .accessibilityLabel("Storico allenamenti")
+
             if viewModel.isSessionActive {
                 Button("Termina") {
                     viewModel.resetSession()
