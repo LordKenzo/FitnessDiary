@@ -12,28 +12,32 @@ struct WorkoutBlockRow: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.white)
                 .frame(width: 28, height: 28)
-                .background(block.blockType == .method && block.methodType != nil ? block.methodType!.color : .blue)
+                .background(blockColor)
                 .clipShape(Circle())
 
             // Icon
-            Image(systemName: block.blockType == .method && block.methodType != nil ? block.methodType!.icon : "figure.strengthtraining.traditional")
+            Image(systemName: blockIcon)
                 .font(.title3)
-                .foregroundStyle(block.blockType == .method && block.methodType != nil ? block.methodType!.color : .blue)
+                .foregroundStyle(blockColor)
                 .frame(width: 32)
 
             // Content
             VStack(alignment: .leading, spacing: 4) {
-                Text(block.title)
+                Text(blockTitle)
                     .font(.headline)
 
                 HStack(spacing: 8) {
-                    Text(block.subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    if let restTime = block.formattedRestTime {
-                        Text("•")
+                    if let subtitle = subtitleText {
+                        Text(subtitle)
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
+                    }
+
+                    if block.blockType != .rest, let restTime = block.formattedRestTime {
+                        if subtitleText != nil {
+                            Text("•")
+                                .foregroundStyle(.secondary)
+                        }
                         HStack(spacing: 2) {
                             Image(systemName: "clock")
                                 .font(.caption)
@@ -60,6 +64,46 @@ struct WorkoutBlockRow: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(.vertical, 8)
+    }
+}
+
+private extension WorkoutBlockRow {
+    var blockColor: Color {
+        if block.blockType == .method, let method = block.methodType {
+            return method.color
+        } else if block.blockType == .rest {
+            return .orange
+        }
+        return .blue
+    }
+
+    var blockIcon: String {
+        if block.blockType == .method, let method = block.methodType {
+            return method.icon
+        } else if block.blockType == .rest {
+            return "moon.zzz.fill"
+        }
+        return "figure.strengthtraining.traditional"
+    }
+
+    var blockTitle: String {
+        switch block.blockType {
+        case .method:
+            return block.methodType?.rawValue ?? block.title
+        case .rest:
+            return BlockType.rest.rawValue
+        case .simple:
+            return block.title
+        }
+    }
+
+    var subtitleText: String? {
+        switch block.blockType {
+        case .rest:
+            return block.formattedRestTime ?? "Durata personalizzata"
+        default:
+            return block.subtitle
+        }
     }
 }
 
@@ -121,8 +165,16 @@ struct WorkoutBlockRow: View {
         exerciseItems: [exerciseItem2, exerciseItem3]
     )
 
+    let restBlock = WorkoutBlock(
+        order: 2,
+        blockType: .rest,
+        globalRestTime: 90,
+        notes: "Pausa tra i blocchi"
+    )
+
     return List {
         WorkoutBlockRow(block: simpleBlock, order: 1)
         WorkoutBlockRow(block: methodBlock, order: 2)
+        WorkoutBlockRow(block: restBlock, order: 3)
     }
 }

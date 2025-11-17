@@ -37,6 +37,20 @@ class WorkoutBlockHelper {
         blocks.append(newBlock)
     }
 
+    /// Adds a rest block to the blocks array
+    static func addRestBlock(to blocks: inout [WorkoutBlockData]) {
+        let newBlock = WorkoutBlockData(
+            blockType: .rest,
+            methodType: nil,
+            order: blocks.count,
+            globalSets: 1,
+            globalRestTime: 60,
+            notes: nil,
+            exerciseItems: []
+        )
+        blocks.append(newBlock)
+    }
+
     /// Moves a block from one position to another and updates order indices
     static func moveBlock(in blocks: inout [WorkoutBlockData], from source: IndexSet, to destination: Int) {
         blocks.move(fromOffsets: source, toOffset: destination)

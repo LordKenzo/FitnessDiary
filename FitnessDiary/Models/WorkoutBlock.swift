@@ -39,9 +39,15 @@ final class WorkoutBlock: Identifiable {
 
     // Helper per il titolo del blocco
     var title: String {
-        if blockType == .method, let method = methodType {
-            return method.rawValue
-        } else {
+        switch blockType {
+        case .method:
+            if let method = methodType {
+                return method.rawValue
+            }
+            return BlockType.method.rawValue
+        case .rest:
+            return BlockType.rest.rawValue
+        case .simple:
             if let firstExercise = exerciseItems.first?.exercise {
                 return firstExercise.name
             }
@@ -51,9 +57,12 @@ final class WorkoutBlock: Identifiable {
 
     // Helper per il sottotitolo
     var subtitle: String {
-        if blockType == .method {
+        switch blockType {
+        case .method:
             return "\(exerciseItems.count) esercizi • \(globalSets) serie"
-        } else {
+        case .rest:
+            return formattedRestTime ?? "Durata personalizzata"
+        case .simple:
             let totalSets = exerciseItems.first?.sets.count ?? 0
             return "\(totalSets) serie"
         }

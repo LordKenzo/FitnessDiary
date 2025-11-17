@@ -159,6 +159,12 @@ struct EditWorkoutCardView: View {
                         } label: {
                             Label("Con Metodo", systemImage: "bolt.horizontal.fill")
                         }
+
+                        Button {
+                            addRestBlock()
+                        } label: {
+                            Label("Riposo", systemImage: "moon.zzz.fill")
+                        }
                     } label: {
                         Label("Aggiungi Blocco", systemImage: "plus.circle.fill")
                     }
@@ -221,6 +227,10 @@ struct EditWorkoutCardView: View {
 
     private func addMethodBlock(_ method: MethodType) {
         WorkoutBlockHelper.addMethodBlock(to: &workoutBlocks, method: method)
+    }
+
+    private func addRestBlock() {
+        WorkoutBlockHelper.addRestBlock(to: &workoutBlocks)
     }
 
     private func moveBlock(from source: IndexSet, to destination: Int) {

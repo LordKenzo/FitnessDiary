@@ -107,8 +107,8 @@ final class WorkoutCard: Identifiable {
 
         // Verifica ogni blocco
         for block in blocks {
-            // Blocco senza esercizi = bozza
-            if block.exerciseItems.isEmpty {
+            // I blocchi di riposo sono validi anche senza esercizi
+            if block.blockType != .rest && block.exerciseItems.isEmpty {
                 return true
             }
 
@@ -136,6 +136,9 @@ final class WorkoutCard: Identifiable {
 extension WorkoutBlock {
     /// Stima della durata del blocco in secondi
     var estimatedDurationSeconds: TimeInterval {
+        if blockType == .rest {
+            return globalRestTime ?? 0
+        }
         // Tempo di recupero totale: globalSets - 1 (recupero tra le serie) * globalRestTime
         let totalRestTime = Double(max(0, globalSets - 1)) * (globalRestTime ?? 0)
 
