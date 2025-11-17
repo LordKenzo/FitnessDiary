@@ -33,6 +33,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
     @Published private(set) var countdownRemainingSeconds: Int = 0
     @Published private(set) var isSessionActive: Bool = false
     @Published private(set) var sessionTitle: String = "Allenamento"
+    @Published private(set) var activeCard: WorkoutCard?
 
     // Inputs for reps-based work
     @Published var completedSets: Int = 0
@@ -177,6 +178,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
         isPaused = false
         currentHeartRateZone = nil
         sessionTitle = card.name
+        activeCard = card
         isSessionActive = true
         countdownRemainingSeconds = countdownSeconds
         isCountdownActive = countdownSeconds > 0
@@ -202,6 +204,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
         isSessionActive = false
         sessionTitle = "Allenamento"
         zoneDurations = [:]
+        activeCard = nil
     }
 
     func skipCountdown() {
@@ -321,11 +324,17 @@ extension WorkoutExecutionViewModel {
 // MARK: - View
 
 struct WorkoutExecutionView: View {
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel: WorkoutExecutionViewModel
     @Bindable private var bluetoothManager: BluetoothHeartRateManager
     @Query(sort: \WorkoutCard.name) private var workoutCards: [WorkoutCard]
     @Query private var profiles: [UserProfile]
     @AppStorage("workoutCountdownSeconds") private var defaultCountdownSeconds = 10
+    @State private var isCompletionSheetPresented = false
+    @State private var completionNotes: String = ""
+    @State private var selectedMood: WorkoutMood = .neutral
+    @State private var includeRPE = false
+    @State private var completionRPE: Double = 7
 
     init(
         viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel(),
@@ -367,6 +376,14 @@ struct WorkoutExecutionView: View {
         }
         .onChange(of: profiles) { _, _ in
             refreshHeartRateZone()
+        }
+        .onChange(of: viewModel.isWorkoutCompleted) { _, isCompleted in
+            if isCompleted {
+                prepareCompletionSheet()
+            }
+        }
+        .sheet(isPresented: $isCompletionSheetPresented) {
+            completionSheet
         }
     }
 
@@ -773,46 +790,174 @@ struct WorkoutExecutionView: View {
         viewModel.updateHeartRateZone(activeHeartRateZone)
     }
 
+    private func prepareCompletionSheet() {
+        completionNotes = ""
+        selectedMood = .neutral
+        includeRPE = false
+        completionRPE = 7
+        isCompletionSheetPresented = true
+    }
+
+    private func saveWorkoutLog() {
+        let trimmedNotes = completionNotes.trimmingCharacters(in: .whitespacesAndNewlines)
+        let rpeValue = includeRPE ? Int(completionRPE.rounded()) : nil
+        let log = WorkoutSessionLog(
+            card: viewModel.activeCard,
+            cardName: viewModel.activeCard?.name ?? viewModel.sessionTitle,
+            notes: trimmedNotes,
+            mood: selectedMood,
+            rpe: rpeValue,
+            durationSeconds: viewModel.generalElapsedTime
+        )
+        modelContext.insert(log)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save workout log", error)
+        }
+        dismissCompletionSheet()
+    }
+
+    private func dismissCompletionSheet(resetSession: Bool = true) {
+        isCompletionSheetPresented = false
+        if resetSession {
+            viewModel.resetSession()
+        }
+    }
+
+    private func discardWorkoutLog() {
+        dismissCompletionSheet(resetSession: true)
+    }
+
+    private var completionSheet: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        completionSummarySection
+                        moodSelectionSection
+                        notesSection
+                        rpeSection
+                    }
+                    .padding(.horizontal)
+                }
+
+                VStack(spacing: 12) {
+                    Button {
+                        saveWorkoutLog()
+                    } label: {
+                        Label("Salva allenamento", systemImage: "square.and.arrow.down")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button(role: .destructive) {
+                        discardWorkoutLog()
+                    } label: {
+                        Label("Scarta", systemImage: "trash")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(.horizontal)
+                .padding(.bottom)
+            }
+            .navigationTitle("Fine allenamento")
+        }
+        .interactiveDismissDisabled()
+        .presentationDetents([.medium, .large])
+    }
+
+    private var completionSummarySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(viewModel.activeCard?.name ?? viewModel.sessionTitle)
+                .font(.title3)
+                .fontWeight(.semibold)
+            Label("Durata", systemImage: "clock")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Text(format(seconds: viewModel.generalElapsedTime))
+                .font(.system(.title, design: .rounded))
+                .monospacedDigit()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    private var moodSelectionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Come ti senti?")
+                .font(.headline)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 90), spacing: 12)], spacing: 12) {
+                ForEach(WorkoutMood.allCases) { mood in
+                    Button {
+                        selectedMood = mood
+                    } label: {
+                        VStack(spacing: 6) {
+                            Text(mood.emoji)
+                                .font(.system(size: 32))
+                            Text(mood.title)
+                                .font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(selectedMood == mood ? Color.accentColor.opacity(0.15) : Color(.secondarySystemBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(selectedMood == mood ? Color.accentColor : Color.gray.opacity(0.2), lineWidth: 1.5)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var notesSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Note")
+                .font(.headline)
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $completionNotes)
+                    .frame(minHeight: 120)
+                    .padding(8)
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                if completionNotes.isEmpty {
+                    Text("Annota sensazioni, focus o modifiche")
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                        .allowsHitTesting(false)
+                }
+            }
+        }
+    }
+
+    private var rpeSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle("Aggiungi RPE", isOn: $includeRPE.animation())
+            if includeRPE {
+                VStack(alignment: .leading, spacing: 8) {
+                    Slider(value: $completionRPE, in: 1...10, step: 1)
+                    Text("RPE: \(Int(completionRPE))")
+                        .font(.subheadline)
+                        .monospacedDigit()
+                }
+                .transition(.opacity)
+            }
+        }
+    }
+
     private func format(seconds: TimeInterval) -> String {
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute, .second]
         formatter.zeroFormattingBehavior = [.pad]
         return formatter.string(from: seconds) ?? "00:00"
     }
-
-    @ViewBuilder
-    private var countdownOverlay: some View {
-        if viewModel.isCountdownActive {
-            Color.black.opacity(0.35)
-                .ignoresSafeArea()
-                .overlay {
-                    countdownView
-                        .padding(24)
-                }
-                .transition(.opacity)
-        }
-    }
-
-    private var countdownView: some View {
-        VStack(spacing: 12) {
-            Text("Countdown iniziale")
-                .font(.headline)
-            Text("\(viewModel.countdownRemainingSeconds)s")
-                .font(.system(size: 64, weight: .bold, design: .rounded))
-                .monospacedDigit()
-            Text("Puoi saltarlo se sei già pronto")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            Button("Salta countdown") {
-                viewModel.skipCountdown()
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-    }
-}
 
 // MARK: - Histogram Component
 
