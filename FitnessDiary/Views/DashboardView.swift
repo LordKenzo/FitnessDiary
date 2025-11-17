@@ -3,7 +3,9 @@ import SwiftData
 
 struct DashboardView: View {
     @Environment(\.calendar) private var calendar
-    @Query(sortDescriptors: [SortDescriptor(\.date, order: .reverse)]) private var sessionLogs: [WorkoutSessionLog]
+    @Query(sortDescriptors: [SortDescriptor(\WorkoutSessionLog.date, order: .reverse)]) private var sessionLogs: [WorkoutSessionLog]
+
+    init() {}
 
     private let focusMuscles = ["Petto", "Dorso", "Gambe e Glutei", "Core", "Spalle"]
     private let quickActions = [
