@@ -217,14 +217,11 @@ final class WorkoutExecutionViewModel: ObservableObject {
     private func completeWorkout() {
         isWorkoutCompleted = true
         isPaused = true
-        timerCancellable?.cancel()
     }
 
     private func resetStepState(resetCounters: Bool = false) {
         stepElapsedTime = 0
-        if resetCounters {
-            completedSets = 0
-        }
+        completedSets = 0
         loadText = ""
         perceivedExertion = 7
         actualRepsText = repsTextForCurrentStep()
