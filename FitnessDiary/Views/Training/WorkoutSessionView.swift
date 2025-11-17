@@ -168,7 +168,7 @@ struct WorkoutSessionView: View {
         case .circuit:
             return "Circuito da \(block.globalSets) giri"
         case .tabata:
-            return "Protocollo Tabata classico (20"" / 10"")"
+            return "Protocollo Tabata classico (20\" / 10\")"
         case .pyramidAscending:
             return "Piramide crescente: aumenta i carichi ogni serie"
         case .pyramidDescending:
@@ -183,20 +183,22 @@ struct WorkoutSessionView: View {
     }
 
     private func exerciseSummary(_ exerciseItem: WorkoutExerciseItem) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let totalSets = max(exerciseItem.sets.count, viewModel.currentBlock?.globalSets ?? 1)
+
+        return VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(exerciseItem.exercise?.name ?? "Esercizio")
                         .font(.title2)
                         .fontWeight(.bold)
-                    if let muscle = exerciseItem.exercise?.primaryMuscle {
-                        Text(muscle.rawValue)
+                    if let muscleName = exerciseItem.exercise?.primaryMuscles.first?.name {
+                        Text(muscleName)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
-                Text("Serie \(viewModel.currentSetIndex + 1)/\(max(exerciseItem.sets.count, viewModel.currentBlock?.globalSets ?? 1))")
+                Text("Serie \(viewModel.currentSetIndex + 1)/\(totalSets)")
                     .font(.callout)
                     .padding(8)
                     .background(Color(.secondarySystemBackground))
