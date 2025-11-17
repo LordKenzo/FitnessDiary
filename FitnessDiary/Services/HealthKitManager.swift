@@ -14,9 +14,9 @@ final class HealthKitManager: ObservableObject {
         HKObjectType.characteristicType(forIdentifier: .biologicalSex)!
     ]
     
-    /// Requests permission to read the manager's configured HealthKit data types and sets `isAuthorized` to `true` on success.
+    /// Requests permission to read the manager's configured HealthKit data types.
+    /// Sets `isAuthorized` to `true` if authorization is granted, `false` otherwise (retry-friendly).
     /// - Throws: `HealthKitError.notAvailable` if HealthKit data is not available on the device.
-    /// - Throws: `HealthKitError.authorizationFailed` if the user denies authorization.
     func requestAuthorization() async throws {
         guard HKHealthStore.isHealthDataAvailable() else {
             throw HealthKitError.notAvailable

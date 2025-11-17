@@ -635,16 +635,19 @@ struct ActiveWorkoutView: View {
                             .font(.title2)
                     }
                 } else {
-                    // Duration input (optional - could use timer)
+                    // Duration input - mostra tempo effettivo del timer se attivo
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Durata Effettiva")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
 
-                        Text(timerManager.formatTime(inputDuration))
+                        // Mostra elapsedTime se timer attivo, altrimenti inputDuration
+                        let displayDuration = (timerManager.timerState != .idle && timerManager.elapsedTime > 0) ? timerManager.elapsedTime : inputDuration
+                        Text(timerManager.formatTime(displayDuration))
                             .font(.title2)
                             .fontWeight(.bold)
                             .monospacedDigit()
+                            .contentTransition(.numericText())
                     }
                 }
 
@@ -944,6 +947,20 @@ struct ActiveWorkoutView: View {
     private func completeCurrentSet() {
         guard let set = session.currentSet else { return }
 
+        // Per set basati su durata, usa il tempo effettivo del timer se disponibile
+        let effectiveDuration: TimeInterval? = {
+            if set.setType == .duration {
+                // Se il timer è stato usato (running o completed), usa elapsedTime
+                // Altrimenti usa inputDuration (fallback per input manuale)
+                if timerManager.timerState != .idle && timerManager.elapsedTime > 0 {
+                    return timerManager.elapsedTime
+                } else {
+                    return inputDuration > 0 ? inputDuration : nil
+                }
+            }
+            return nil
+        }()
+
         // Create performance record
         let performance = SetPerformance(
             blockIndex: session.currentBlockIndex,
@@ -952,7 +969,7 @@ struct ActiveWorkoutView: View {
             round: session.currentRound,
             actualReps: Int(inputReps),
             actualWeight: Double(inputWeight),
-            actualDuration: set.setType == .duration ? inputDuration : nil,
+            actualDuration: effectiveDuration,
             notes: inputNotes.isEmpty ? nil : inputNotes,
             rpe: inputRPE
         )

@@ -176,11 +176,9 @@ final class WorkoutTimerManager: @unchecked Sendable {
     func skipToEnd() {
         guard timerState == .running else { return }
 
-        stopDisplayTimer()
-        cancelNotifications()
-
-        timerState = .completed
-        onTimerComplete?()
+        // Force logical completion at the current elapsed time
+        targetDuration = elapsedTime
+        handleTimerCompletion()
     }
 
     // MARK: - Display Timer (UI Updates)
