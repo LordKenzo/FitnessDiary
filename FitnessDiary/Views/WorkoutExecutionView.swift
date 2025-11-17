@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import Combine
 
 // MARK: - View Model
@@ -16,6 +17,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
         let zone: HeartRateZone
         let estimatedDuration: TimeInterval
         let type: StepType
+        let highlight: String
     }
 
     @Published private(set) var steps: [Step]
@@ -26,18 +28,27 @@ final class WorkoutExecutionViewModel: ObservableObject {
     @Published private(set) var isWorkoutCompleted: Bool = false
     @Published private(set) var currentZone: HeartRateZone
     @Published private var zoneDurations: [HeartRateZone: TimeInterval] = [:]
+    @Published private(set) var isCountdownActive: Bool = false
+    @Published private(set) var countdownRemainingSeconds: Int = 0
+    @Published private(set) var isSessionActive: Bool = false
+    @Published private(set) var sessionTitle: String = "Allenamento"
 
     // Inputs for reps-based work
     @Published var completedSets: Int = 0
     @Published var loadText: String = ""
     @Published var perceivedExertion: Double = 7
+    @Published var actualRepsText: String = ""
 
     private var timerCancellable: AnyCancellable?
 
-    init(steps: [Step]) {
+    init(steps: [Step] = []) {
         self.steps = steps
         self.currentStepIndex = 0
         self.currentZone = steps.first?.zone ?? .zone1
+        if !steps.isEmpty {
+            isSessionActive = true
+            sessionTitle = "Allenamento Demo"
+        }
         startTimer()
     }
 
@@ -90,7 +101,25 @@ final class WorkoutExecutionViewModel: ObservableObject {
         }
     }
 
+    var encouragementMessage: String {
+        if isCountdownActive {
+            return "Respira e preparati a dare il massimo"
+        }
+
+        guard let currentStep else {
+            return isSessionActive ? "Segui il flusso della scheda" : "Scegli una scheda per iniziare"
+        }
+
+        switch currentStep.type {
+        case .timed(_, let isRest):
+            return isRest ? "Approfitta del recupero" : "Concentrati sul ritmo"
+        case .reps:
+            return "Tecnica precisa e respiro controllato"
+        }
+    }
+
     func togglePause() {
+        guard isSessionActive, !isCountdownActive else { return }
         isPaused.toggle()
     }
 
@@ -119,8 +148,73 @@ final class WorkoutExecutionViewModel: ObservableObject {
 
             if completedSets >= totalSets {
                 skipToNextStep()
+            } else {
+                prepareForNextSet()
             }
         }
+    }
+
+    func skipCurrentSet() {
+        guard let step = currentStep else { return }
+        if case let .reps(totalSets, _) = step.type {
+            if completedSets < totalSets {
+                completedSets += 1
+            }
+
+            if completedSets >= totalSets {
+                skipToNextStep()
+            } else {
+                prepareForNextSet()
+            }
+        }
+    }
+
+    func start(card: WorkoutCard, countdownSeconds: Int) {
+        steps = WorkoutExecutionStepFactory.steps(for: card)
+        currentStepIndex = 0
+        generalElapsedTime = 0
+        stepElapsedTime = 0
+        zoneDurations = [:]
+        completedSets = 0
+        loadText = ""
+        actualRepsText = ""
+        perceivedExertion = 7
+        isWorkoutCompleted = false
+        isPaused = false
+        currentZone = steps.first?.zone ?? .zone1
+        sessionTitle = card.name
+        isSessionActive = true
+        countdownRemainingSeconds = countdownSeconds
+        isCountdownActive = countdownSeconds > 0
+
+        if !isCountdownActive {
+            resetStepState()
+        }
+    }
+
+    func resetSession() {
+        steps = []
+        currentStepIndex = 0
+        generalElapsedTime = 0
+        stepElapsedTime = 0
+        completedSets = 0
+        loadText = ""
+        actualRepsText = ""
+        perceivedExertion = 7
+        isPaused = false
+        isWorkoutCompleted = false
+        isCountdownActive = false
+        countdownRemainingSeconds = 0
+        isSessionActive = false
+        sessionTitle = "Allenamento"
+        currentZone = .zone1
+        zoneDurations = [:]
+    }
+
+    func skipCountdown() {
+        guard isCountdownActive else { return }
+        isCountdownActive = false
+        resetStepState()
     }
 
     func changeZone(to zone: HeartRateZone) {
@@ -130,7 +224,6 @@ final class WorkoutExecutionViewModel: ObservableObject {
     private func completeWorkout() {
         isWorkoutCompleted = true
         isPaused = true
-        timerCancellable?.cancel()
     }
 
     private func resetStepState(resetCounters: Bool = false) {
@@ -142,9 +235,15 @@ final class WorkoutExecutionViewModel: ObservableObject {
         }
         loadText = ""
         perceivedExertion = 7
+        actualRepsText = repsTextForCurrentStep()
         if let currentStep {
             currentZone = currentStep.zone
         }
+    }
+
+    private func prepareForNextSet() {
+        loadText = ""
+        actualRepsText = repsTextForCurrentStep()
     }
 
     private func startTimer() {
@@ -156,7 +255,17 @@ final class WorkoutExecutionViewModel: ObservableObject {
     }
 
     private func handleTick() {
-        guard !isPaused, !isWorkoutCompleted, currentStep != nil else { return }
+        if isCountdownActive {
+            guard countdownRemainingSeconds > 0 else { return }
+            countdownRemainingSeconds -= 1
+            if countdownRemainingSeconds == 0 {
+                isCountdownActive = false
+                resetStepState()
+            }
+            return
+        }
+
+        guard isSessionActive, !isPaused, !isWorkoutCompleted, currentStep != nil else { return }
         generalElapsedTime += 1
 
         if let currentStep {
@@ -175,56 +284,51 @@ final class WorkoutExecutionViewModel: ObservableObject {
             break
         }
     }
+
+    private func repsTextForCurrentStep() -> String {
+        guard let currentStep else { return "" }
+        switch currentStep.type {
+        case let .reps(_, repsPerSet):
+            return String(repsPerSet)
+        case .timed:
+            return ""
+        }
+    }
 }
 
 extension WorkoutExecutionViewModel {
     static func demo() -> WorkoutExecutionViewModel {
         let steps: [Step] = [
             Step(
-                title: "Countdown iniziale",
-                subtitle: "Respira e preparati",
-                zone: .zone1,
-                estimatedDuration: 30,
-                type: .timed(duration: 30, isRest: true)
-            ),
-            Step(
                 title: "Riscaldamento Bike",
-                subtitle: "Cadenza agile",
+                subtitle: "Cadenza agile 5'",
                 zone: .zone2,
                 estimatedDuration: 300,
-                type: .timed(duration: 300, isRest: false)
+                type: .timed(duration: 300, isRest: false),
+                highlight: "Cuore pronto"
             ),
             Step(
                 title: "Panca Piana",
                 subtitle: "3x10 @ 50kg",
                 zone: .zone3,
                 estimatedDuration: 420,
-                type: .reps(totalSets: 3, repsPerSet: 10)
+                type: .reps(totalSets: 3, repsPerSet: 10),
+                highlight: "Stabilità massima"
             ),
             Step(
                 title: "Recupero",
-                subtitle: "Respira profondamente",
+                subtitle: "90s di pausa",
                 zone: .zone1,
                 estimatedDuration: 90,
-                type: .timed(duration: 90, isRest: true)
-            ),
-            Step(
-                title: "Rematore Bilanciere",
-                subtitle: "4x8 @ 60kg",
-                zone: .zone4,
-                estimatedDuration: 480,
-                type: .reps(totalSets: 4, repsPerSet: 8)
-            ),
-            Step(
-                title: "Defaticamento",
-                subtitle: "Camminata sul tapis roulant",
-                zone: .zone2,
-                estimatedDuration: 240,
-                type: .timed(duration: 240, isRest: false)
+                type: .timed(duration: 90, isRest: true),
+                highlight: "Respira e reset"
             )
         ]
 
-        return WorkoutExecutionViewModel(steps: steps)
+        let viewModel = WorkoutExecutionViewModel(steps: steps)
+        viewModel.isSessionActive = true
+        viewModel.sessionTitle = "Scheda Demo"
+        return viewModel
     }
 }
 
@@ -232,42 +336,145 @@ extension WorkoutExecutionViewModel {
 
 struct WorkoutExecutionView: View {
     @StateObject private var viewModel: WorkoutExecutionViewModel
+    @Query(sort: \WorkoutCard.name) private var workoutCards: [WorkoutCard]
+    @AppStorage("workoutCountdownSeconds") private var defaultCountdownSeconds = 10
 
-    init(viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel.demo()) {
+    init(viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel()) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    headerSection
-                    heartRateSection
-                    currentStepSection
-                    upcomingSection
-                }
-                .padding(24)
-            }
-            .navigationTitle("Allenamento Live")
-            .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button(action: viewModel.goToPreviousStep) {
-                        Label("Indietro", systemImage: "backward.fill")
-                    }
-                    .disabled(viewModel.currentStepIndex == 0)
+            Group {
+                if viewModel.isSessionActive {
+                    ZStack {
+                        ScrollView {
+                            VStack(spacing: 24) {
+                                headerSection
+                                heartRateSection
+                                currentStepSection
+                                upcomingSection
+                            }
+                            .padding(24)
+                        }
+                        .disabled(viewModel.isCountdownActive)
 
-                    Button(action: viewModel.skipToNextStep) {
-                        Label("Avanti", systemImage: "forward.fill")
+                        countdownOverlay
                     }
+                } else {
+                    workoutPicker
+                }
+            }
+            .navigationTitle(viewModel.sessionTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { toolbarContent }
+        }
+    }
+
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .topBarLeading) {
+            if viewModel.isSessionActive {
+                Button("Termina") {
+                    viewModel.resetSession()
                 }
             }
         }
+
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            if viewModel.isSessionActive {
+                Button(action: viewModel.goToPreviousStep) {
+                    Label("Indietro", systemImage: "backward.fill")
+                }
+                .disabled(viewModel.currentStepIndex == 0)
+
+                Button(action: viewModel.skipToNextStep) {
+                    Label("Avanti", systemImage: "forward.fill")
+                }
+                .disabled(viewModel.isWorkoutCompleted)
+            }
+        }
+    }
+
+    private var workoutPicker: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                Text("Seleziona una scheda per iniziare")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .padding(.top, 16)
+
+                if workoutCards.isEmpty {
+                    ContentUnavailableView {
+                        Label("Nessuna scheda disponibile", systemImage: "doc.text")
+                    } description: {
+                        Text("Crea una scheda nella tab Schede per farla comparire qui")
+                    }
+                    .padding()
+                } else {
+                    ForEach(workoutCards) { card in
+                        workoutCardButton(for: card)
+                    }
+                }
+            }
+            .padding(24)
+        }
+    }
+
+    private func workoutCardButton(for card: WorkoutCard) -> some View {
+        let scriptLines = WorkoutDebugLogBuilder.buildLog(for: card.blocks)
+        return VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(card.name)
+                        .font(.headline)
+                    if let description = card.cardDescription {
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                VStack(alignment: .trailing) {
+                    Text("Durata stimata")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("\(card.estimatedDurationMinutes) min")
+                        .font(.body)
+                        .bold()
+                }
+            }
+
+            if !scriptLines.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(scriptLines.prefix(3), id: \.self) { line in
+                        Text(line)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if scriptLines.count > 3 {
+                        Text("…")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            }
+
+            Button {
+                viewModel.start(card: card, countdownSeconds: defaultCountdownSeconds)
+            } label: {
+                Label("Avvia con countdown di \(defaultCountdownSeconds)s", systemImage: "play.circle.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline) {
-                Label("Timer", systemImage: "clock.arrow.circlepath")
+                Label("Durata Totale", systemImage: "clock.arrow.circlepath")
                     .font(.headline)
                 Spacer()
                 Text(format(seconds: viewModel.generalElapsedTime))
@@ -278,15 +485,21 @@ struct WorkoutExecutionView: View {
             Divider()
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(viewModel.currentStep?.title ?? "Nessun esercizio")
+                Text("Nome esercizio")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(viewModel.currentStep?.title ?? "In attesa")
                     .font(.title3)
                     .fontWeight(.semibold)
-                Text(viewModel.currentStep?.subtitle ?? "")
+                Text(viewModel.currentStep?.subtitle ?? "Seleziona una scheda per iniziare")
                     .foregroundStyle(.secondary)
+                Text(viewModel.encouragementMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.green)
             }
 
             HStack {
-                Label("Stimato", systemImage: "hourglass")
+                Label("Tempo stimato scheda", systemImage: "hourglass")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -300,6 +513,7 @@ struct WorkoutExecutionView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .disabled(!viewModel.isSessionActive || viewModel.isCountdownActive)
         }
         .padding()
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -308,8 +522,14 @@ struct WorkoutExecutionView: View {
     private var heartRateSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Label("Zone Cardio", systemImage: "heart.fill")
-                    .font(.headline)
+                HStack(spacing: 8) {
+                    Image(systemName: "heart.fill")
+                        .foregroundStyle(.red)
+                        .scaleEffect(1.1)
+                        .symbolEffect(.pulse, options: .repeat, value: viewModel.generalElapsedTime)
+                    Text("Zone Cardio")
+                        .font(.headline)
+                }
                 Spacer()
                 Text(viewModel.currentZone.name)
                     .font(.subheadline)
@@ -329,13 +549,17 @@ struct WorkoutExecutionView: View {
             Text("Fase corrente")
                 .font(.headline)
 
-            if let step = viewModel.currentStep {
+            if let step = viewModel.currentStep, !viewModel.isCountdownActive {
                 switch step.type {
                 case let .timed(_, isRest):
                     timedStepView(step: step, isRest: isRest)
                 case let .reps(totalSets, repsPerSet):
                     repsStepView(step: step, totalSets: totalSets, repsPerSet: repsPerSet)
                 }
+            } else if viewModel.isCountdownActive {
+                Text("Il countdown è attivo")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             } else if viewModel.isWorkoutCompleted {
                 Label("Allenamento completato", systemImage: "checkmark.seal.fill")
                     .font(.title3)
@@ -358,6 +582,10 @@ struct WorkoutExecutionView: View {
                     .font(.system(.title3, design: .rounded))
                     .monospacedDigit()
             }
+
+            Text(step.highlight)
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
             ProgressView(value: viewModel.stepProgress)
                 .tint(isRest ? .blue : .orange)
@@ -387,6 +615,9 @@ struct WorkoutExecutionView: View {
                 Text("Ripetizioni suggerite: \(repsPerSet)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                Text(step.highlight)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             ProgressView(value: viewModel.stepProgress)
@@ -398,6 +629,15 @@ struct WorkoutExecutionView: View {
                     .foregroundStyle(.secondary)
                 TextField("Kg", text: $viewModel.loadText)
                     .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Ripetizioni completate")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("Ripetizioni", text: $viewModel.actualRepsText)
+                    .keyboardType(.numberPad)
                     .textFieldStyle(.roundedBorder)
             }
 
@@ -417,6 +657,13 @@ struct WorkoutExecutionView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .disabled(viewModel.completedSets >= totalSets)
+
+            Button(role: .cancel, action: viewModel.skipCurrentSet) {
+                Label("Salta serie", systemImage: "forward.end.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
             .disabled(viewModel.completedSets >= totalSets)
         }
     }
@@ -476,6 +723,39 @@ struct WorkoutExecutionView: View {
         formatter.zeroFormattingBehavior = [.pad]
         return formatter.string(from: seconds) ?? "00:00"
     }
+
+    @ViewBuilder
+    private var countdownOverlay: some View {
+        if viewModel.isCountdownActive {
+            Color.black.opacity(0.35)
+                .ignoresSafeArea()
+                .overlay {
+                    countdownView
+                        .padding(24)
+                }
+                .transition(.opacity)
+        }
+    }
+
+    private var countdownView: some View {
+        VStack(spacing: 12) {
+            Text("Countdown iniziale")
+                .font(.headline)
+            Text("\(viewModel.countdownRemainingSeconds)s")
+                .font(.system(size: 64, weight: .bold, design: .rounded))
+                .monospacedDigit()
+            Text("Puoi saltarlo se sei già pronto")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Button("Salta countdown") {
+                viewModel.skipCountdown()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
 }
 
 // MARK: - Histogram Component
@@ -513,6 +793,121 @@ private struct HeartRateHistogram: View {
     }
 }
 
+// MARK: - Step Factory
+
+private enum WorkoutExecutionStepFactory {
+    static func steps(for card: WorkoutCard) -> [WorkoutExecutionViewModel.Step] {
+        var result: [WorkoutExecutionViewModel.Step] = []
+        let orderedBlocks = card.blocks.sorted { $0.order < $1.order }
+
+        for block in orderedBlocks {
+            switch block.blockType {
+            case .rest:
+                let restDuration = block.globalRestTime ?? 0
+                let subtitle = block.notes ?? (restDuration > 0 ? "Recupero \(formatDuration(restDuration))" : "Recupero libero")
+                result.append(
+                    WorkoutExecutionViewModel.Step(
+                        title: "Pausa", 
+                        subtitle: subtitle,
+                        zone: .zone1,
+                        estimatedDuration: restDuration,
+                        type: .timed(duration: restDuration, isRest: true),
+                        highlight: "Respira profondamente"
+                    )
+                )
+            case .simple, .method:
+                result.append(contentsOf: stepsForExercises(in: block))
+            }
+        }
+
+        return result
+    }
+
+    private static func stepsForExercises(in block: WorkoutBlock) -> [WorkoutExecutionViewModel.Step] {
+        var steps: [WorkoutExecutionViewModel.Step] = []
+        let exercises = block.exerciseItems.sorted { $0.order < $1.order }
+
+        for exercise in exercises {
+            let sets = exercise.sets.sorted { $0.order < $1.order }
+            guard let firstSet = sets.first else { continue }
+
+            let title = exercise.exercise?.name ?? "Esercizio"
+            let subtitle = exercise.notes ?? setDescription(for: firstSet, totalSets: sets.count, restTime: exercise.restTime ?? block.globalRestTime)
+            let highlight = exercise.targetExpression?.rawValue ?? "Focus sulla tecnica"
+
+            switch firstSet.setType {
+            case .duration:
+                let duration = max(firstSet.duration ?? 30, 10)
+                steps.append(
+                    WorkoutExecutionViewModel.Step(
+                        title: title,
+                        subtitle: subtitle,
+                        zone: .zone3,
+                        estimatedDuration: duration,
+                        type: .timed(duration: duration, isRest: false),
+                        highlight: highlight
+                    )
+                )
+            case .reps:
+                let reps = max(firstSet.reps ?? 8, 1)
+                steps.append(
+                    WorkoutExecutionViewModel.Step(
+                        title: title,
+                        subtitle: subtitle,
+                        zone: .zone4,
+                        estimatedDuration: TimeInterval(reps * max(sets.count, 1)),
+                        type: .reps(totalSets: max(sets.count, 1), repsPerSet: reps),
+                        highlight: highlight
+                    )
+                )
+            }
+        }
+
+        return steps
+    }
+
+    private static func setDescription(for set: WorkoutSet, totalSets: Int, restTime: TimeInterval?) -> String {
+        var parts: [String] = []
+
+        if totalSets > 0 {
+            parts.append("\(totalSets)x")
+        }
+
+        switch set.setType {
+        case .reps:
+            if let reps = set.reps {
+                parts.append("\(reps) reps")
+            }
+        case .duration:
+            if let duration = set.duration {
+                parts.append(formatDuration(duration))
+            }
+        }
+
+        if let weight = set.weight {
+            parts.append(String(format: "@ %.0f kg", weight))
+        } else if let percentage = set.percentageOfMax {
+            parts.append(String(format: "@ %.0f%% 1RM", percentage))
+        }
+
+        if let restTime {
+            parts.append("Rec. \(formatDuration(restTime))")
+        }
+
+        return parts.joined(separator: " • ")
+    }
+
+    private static func formatDuration(_ duration: TimeInterval) -> String {
+        let minutes = Int(duration) / 60
+        let seconds = Int(duration) % 60
+        if minutes > 0 {
+            return "\(minutes)m \(seconds)s"
+        } else {
+            return "\(seconds)s"
+        }
+    }
+}
+
 #Preview {
-    WorkoutExecutionView()
+    WorkoutExecutionView(viewModel: .demo())
 }
