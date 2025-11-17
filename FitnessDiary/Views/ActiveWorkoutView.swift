@@ -96,6 +96,7 @@ struct ActiveWorkoutView: View {
         }
         .onDisappear {
             stopCountdown()
+            timerManager.stop()
         }
     }
 
@@ -854,8 +855,10 @@ struct ActiveWorkoutView: View {
         guard let set = session.currentSet else { return false }
 
         if set.setType == .reps {
-            // Require at least reps or weight
-            return !inputReps.isEmpty || !inputWeight.isEmpty
+            // Require at least reps or weight, AND validate they are valid numbers
+            let hasValidReps = !inputReps.isEmpty && Int(inputReps) != nil
+            let hasValidWeight = !inputWeight.isEmpty && Double(inputWeight) != nil
+            return hasValidReps || hasValidWeight
         } else {
             // For duration, always allow (could use timer value)
             return true
@@ -1009,8 +1012,8 @@ struct ActiveWorkoutView: View {
             exerciseIndex: session.currentExerciseIndex,
             setIndex: session.currentSetIndex,
             round: session.currentRound,
-            actualReps: Int(inputReps),
-            actualWeight: Double(inputWeight),
+            actualReps: Int(inputReps) ?? 0,
+            actualWeight: Double(inputWeight) ?? 0.0,
             actualDuration: effectiveDuration,
             notes: inputNotes.isEmpty ? nil : inputNotes,
             rpe: inputRPE
@@ -1120,10 +1123,10 @@ struct ActiveWorkoutView: View {
         timerManager.startRestTimer(restDuration: restDuration)
 
         // Quando il timer finisce, passa al blocco successivo
+        // Note: Struct views don't have retain cycles like class instances
+        // The closure captures a value-copy of self, which is safe in SwiftUI
         timerManager.onTimerComplete = {
-            Task { @MainActor in
-                self.completeRestBlock()
-            }
+            self.completeRestBlock()
         }
     }
 
