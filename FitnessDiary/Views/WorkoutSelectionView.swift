@@ -31,8 +31,7 @@ struct WorkoutSelectionView: View {
     @State private var selectedClient: Client?
     @State private var showingClientPicker = false
     @State private var searchText = ""
-    @State private var navigateToActiveWorkout = false
-    @State private var currentSession: WorkoutSession?
+    @State private var sessionToStart: WorkoutSession?
 
     var body: some View {
         NavigationStack {
@@ -53,10 +52,8 @@ struct WorkoutSelectionView: View {
                 }
             }
             .navigationTitle("Inizia Allenamento")
-            .navigationDestination(isPresented: $navigateToActiveWorkout) {
-                if let session = currentSession {
-                    ActiveWorkoutView(session: session)
-                }
+            .navigationDestination(item: $sessionToStart) { session in
+                ActiveWorkoutView(session: session)
             }
             .searchable(text: $searchText, prompt: "Cerca scheda...")
         }
@@ -211,16 +208,16 @@ struct WorkoutSelectionView: View {
 
         do {
             try modelContext.save()
-            currentSession = session
-            navigateToActiveWorkout = true
+            // Trigger navigation usando item binding
+            sessionToStart = session
         } catch {
             print("⚠️ Failed to save workout session: \(error)")
         }
     }
 
     private func resumeWorkout(_ session: WorkoutSession) {
-        currentSession = session
-        navigateToActiveWorkout = true
+        // Trigger navigation usando item binding
+        sessionToStart = session
     }
 
     private func abandonWorkout(_ session: WorkoutSession) {
