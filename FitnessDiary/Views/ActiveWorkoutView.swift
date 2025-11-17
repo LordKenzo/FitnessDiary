@@ -8,14 +8,31 @@
 import SwiftUI
 import SwiftData
 
+// Workout View States
+enum WorkoutViewState {
+    case countdown
+    case active
+}
+
 struct ActiveWorkoutView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
     @Bindable var session: WorkoutSession
 
+    // User Profile for settings
+    @Query private var profiles: [UserProfile]
+
     // Timer manager
     @State private var timerManager = WorkoutTimerManager()
+
+    // Heart Rate Manager
+    @State private var heartRateManager = BluetoothHeartRateManager()
+
+    // Workout State
+    @State private var workoutState: WorkoutViewState = .countdown
+    @State private var countdownSeconds: Int = 10
+    @State private var countdownTimer: Timer?
 
     // Performance input state
     @State private var inputReps: String = ""
@@ -31,32 +48,43 @@ struct ActiveWorkoutView: View {
     @State private var autoStartRest = true
     @State private var isDataLoaded = false
 
+    private var userProfile: UserProfile? {
+        profiles.first
+    }
+
     var body: some View {
         Group {
             if isDataLoaded {
-                workoutContent
-                    .navigationTitle(session.workoutCard.name)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .navigationBarBackButtonHidden(true)
-                    .toolbar {
-                        toolbarContent
-                    }
-                    .alert("Completa Allenamento", isPresented: $showingCompleteAlert) {
-                        Button("Annulla", role: .cancel) { }
-                        Button("Completa") {
-                            completeWorkout()
+                if workoutState == .countdown {
+                    countdownView
+                        .navigationTitle("Preparazione")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .navigationBarBackButtonHidden(true)
+                } else {
+                    workoutContent
+                        .navigationTitle(session.workoutCard.name)
+                        .navigationBarTitleDisplayMode(.inline)
+                        .navigationBarBackButtonHidden(true)
+                        .toolbar {
+                            toolbarContent
                         }
-                    } message: {
-                        Text("Sei sicuro di voler completare l'allenamento?")
-                    }
-                    .alert("Abbandona Allenamento", isPresented: $showingAbandonAlert) {
-                        Button("Annulla", role: .cancel) { }
-                        Button("Abbandona", role: .destructive) {
-                            abandonWorkout()
+                        .alert("Completa Allenamento", isPresented: $showingCompleteAlert) {
+                            Button("Annulla", role: .cancel) { }
+                            Button("Completa") {
+                                completeWorkout()
+                            }
+                        } message: {
+                            Text("Sei sicuro di voler completare l'allenamento?")
                         }
-                    } message: {
-                        Text("L'allenamento verrà salvato come incompleto.")
-                    }
+                        .alert("Abbandona Allenamento", isPresented: $showingAbandonAlert) {
+                            Button("Annulla", role: .cancel) { }
+                            Button("Abbandona", role: .destructive) {
+                                abandonWorkout()
+                            }
+                        } message: {
+                            Text("L'allenamento verrà salvato come incompleto.")
+                        }
+                }
             } else {
                 loadingView
                     .navigationTitle("Caricamento...")
@@ -65,6 +93,9 @@ struct ActiveWorkoutView: View {
         }
         .onAppear {
             verifyDataLoaded()
+        }
+        .onDisappear {
+            stopCountdown()
         }
     }
 
@@ -78,6 +109,43 @@ struct ActiveWorkoutView: View {
             Text("Caricamento allenamento...")
                 .font(.headline)
                 .foregroundColor(.secondary)
+        }
+    }
+
+    // MARK: - Countdown View
+
+    private var countdownView: some View {
+        VStack(spacing: 40) {
+            Spacer()
+
+            VStack(spacing: 16) {
+                Text("Inizia tra...")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+
+                Text("\(countdownSeconds)")
+                    .font(.system(size: 100, weight: .bold, design: .rounded))
+                    .foregroundStyle(countdownSeconds <= 3 ? .red : .primary)
+                    .contentTransition(.numericText())
+            }
+
+            Button {
+                skipCountdown()
+            } label: {
+                Text("Inizia Subito")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal, 40)
+
+            Spacer()
+        }
+        .onAppear {
+            startCountdown()
         }
     }
 
@@ -151,7 +219,8 @@ struct ActiveWorkoutView: View {
 
     private var workoutHeader: some View {
         VStack(spacing: 8) {
-            HStack {
+            HStack(spacing: 16) {
+                // Durata
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Durata")
                         .font(.caption)
@@ -160,26 +229,68 @@ struct ActiveWorkoutView: View {
                     // Usa tickCount per far aggiornare la durata in tempo reale
                     let _ = timerManager.tickCount
                     Text(timerManager.formatLongTime(session.activeDuration))
-                        .font(.title2)
+                        .font(.title3)
                         .fontWeight(.semibold)
                         .monospacedDigit()
                 }
 
                 Spacer()
 
+                // Heart Rate (compatto)
+                if heartRateManager.isConnected {
+                    VStack(spacing: 4) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "heart.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.red)
+                            Text("BPM")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text("\(heartRateManager.currentHeartRate)")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundStyle(currentHeartRateColor)
+                            .contentTransition(.numericText())
+                    }
+                }
+
+                Spacer()
+
+                // Serie
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Serie")
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
                     Text("\(session.totalCompletedSets) / \(session.workoutCard.totalSets)")
-                        .font(.title2)
+                        .font(.title3)
                         .fontWeight(.semibold)
                 }
             }
         }
         .padding()
         .background(Color(.systemGray6))
+    }
+
+    // Helper per determinare colore BPM in base alla zona
+    private var currentHeartRateColor: Color {
+        guard let profile = userProfile else { return .gray }
+        let hr = heartRateManager.currentHeartRate
+        guard hr > 0 else { return .gray }
+
+        if hr <= profile.zone1Max {
+            return .blue
+        } else if hr <= profile.zone2Max {
+            return .green
+        } else if hr <= profile.zone3Max {
+            return .yellow
+        } else if hr <= profile.zone4Max {
+            return .orange
+        } else {
+            return .red
+        }
     }
 
     // MARK: - Progress Bar
@@ -693,6 +804,17 @@ struct ActiveWorkoutView: View {
 
                 if hasCard && hasBlocks {
                     isDataLoaded = true
+
+                    // Inizializza countdown da UserProfile (default 10 se non presente)
+                    countdownSeconds = userProfile?.workoutCountdownSeconds ?? 10
+
+                    // Se countdown è 0, salta direttamente al workout
+                    if countdownSeconds == 0 {
+                        workoutState = .active
+                    } else {
+                        workoutState = .countdown
+                    }
+
                     prepareCurrentSet()
                 } else {
                     // Retry dopo altro delay
@@ -700,12 +822,50 @@ struct ActiveWorkoutView: View {
                         try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 secondi
                         await MainActor.run {
                             isDataLoaded = true
+
+                            // Inizializza countdown da UserProfile
+                            countdownSeconds = userProfile?.workoutCountdownSeconds ?? 10
+
+                            if countdownSeconds == 0 {
+                                workoutState = .active
+                            } else {
+                                workoutState = .countdown
+                            }
+
                             prepareCurrentSet()
                         }
                     }
                 }
             }
         }
+    }
+
+    // MARK: - Countdown Functions
+
+    private func startCountdown() {
+        guard countdownSeconds > 0 else {
+            workoutState = .active
+            return
+        }
+
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] _ in
+            if countdownSeconds > 1 {
+                countdownSeconds -= 1
+            } else {
+                stopCountdown()
+                workoutState = .active
+            }
+        }
+    }
+
+    private func skipCountdown() {
+        stopCountdown()
+        workoutState = .active
+    }
+
+    private func stopCountdown() {
+        countdownTimer?.invalidate()
+        countdownTimer = nil
     }
 
     // MARK: - Actions

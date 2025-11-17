@@ -20,6 +20,10 @@ final class UserProfile {
     var zone5Max: Int // VO2 Max: 90-100%
     
     var maxHeartRate: Int // Calcolata o personalizzata
+
+    // Impostazioni allenamento
+    var workoutCountdownSeconds: Int // Countdown pre-allenamento (default 10s, skippabile)
+
     @Relationship(deleteRule: .cascade)
     var oneRepMaxRecords: [OneRepMax] // Record di 1RM per i Big 5
 
@@ -51,6 +55,10 @@ final class UserProfile {
         self.zone3Max = Int(Double(calculatedMaxHR) * 0.80)
         self.zone4Max = Int(Double(calculatedMaxHR) * 0.90)
         self.zone5Max = calculatedMaxHR
+
+        // Impostazioni allenamento di default
+        self.workoutCountdownSeconds = 10
+
         self.oneRepMaxRecords = []
     }
     
