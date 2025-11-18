@@ -16,16 +16,28 @@ struct ExerciseListView: View {
     @State private var filterTrainingRole: TrainingRole?
     @State private var filterCategory: ExerciseCategory?
     @State private var filterPrimaryMuscle: Muscle?
+    @State private var filterReferencePlane: ReferencePlane?
+    @State private var filterMotorSchemas: Set<MotorSchema> = []
+    @State private var filterTags: Set<ExerciseTag> = []
+    @State private var filterFavoritesOnly = false
+    @State private var showingFiltersSheet = false
     
     private var filteredExercises: [Exercise] {
         exercises.filter { exercise in
-            let matchesSearch = searchText.isEmpty || exercise.name.localizedCaseInsensitiveContains(searchText)
+            let matchesSearch = searchText.isEmpty ||
+            exercise.name.localizedCaseInsensitiveContains(searchText) ||
+            (exercise.focusOn?.localizedCaseInsensitiveContains(searchText) ?? false)
             let matchesMetabolism = filterPrimaryMetabolism == nil || exercise.primaryMetabolism == filterPrimaryMetabolism
             let matchesBiomechanical = filterBiomechanicalStructure == nil || exercise.biomechanicalStructure == filterBiomechanicalStructure
             let matchesRole = filterTrainingRole == nil || exercise.trainingRole == filterTrainingRole
             let matchesCategory = filterCategory == nil || exercise.category == filterCategory
             let matchesPrimaryMuscle = filterPrimaryMuscle == nil || exercise.primaryMuscles.contains(where: { $0.id == filterPrimaryMuscle!.id })
-            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory && matchesPrimaryMuscle
+            let matchesReferencePlane = filterReferencePlane == nil || exercise.referencePlane == filterReferencePlane
+            let matchesMotorSchemas = filterMotorSchemas.isEmpty || !Set(exercise.motorSchemas).isDisjoint(with: filterMotorSchemas)
+            let matchesTags = filterTags.isEmpty || !Set(exercise.tags).isDisjoint(with: filterTags)
+            let matchesFavorite = !filterFavoritesOnly || exercise.isFavorite
+
+            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory && matchesPrimaryMuscle && matchesReferencePlane && matchesMotorSchemas && matchesTags && matchesFavorite
         }
     }
     
@@ -54,18 +66,39 @@ struct ExerciseListView: View {
             }
         }
         .searchable(text: $searchText, prompt: L("exercises.search"))
+        .safeAreaInset(edge: .top) {
+            if isAnyFilterActive() {
+                ActiveFiltersBar(
+                    filterPrimaryMuscle: $filterPrimaryMuscle,
+                    filterPrimaryMetabolism: $filterPrimaryMetabolism,
+                    filterBiomechanicalStructure: $filterBiomechanicalStructure,
+                    filterTrainingRole: $filterTrainingRole,
+                    filterCategory: $filterCategory,
+                    filterReferencePlane: $filterReferencePlane,
+                    filterMotorSchemas: $filterMotorSchemas,
+                    filterTags: $filterTags,
+                    filterFavoritesOnly: $filterFavoritesOnly,
+                    onClearAll: removeAllFilters
+                )
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+                .background(.regularMaterial)
+            }
+        }
         .navigationTitle(L("exercises.title"))
         .toolbar {
-            ToolbarItemGroup(placement: .topBarLeading) {
-                muscleFilterMenu()
-                otherFiltersMenu()
-            }
-            
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingAddExercise = true
-                } label: {
-                    Image(systemName: "plus")
+                HStack(spacing: 12) {
+                    Button {
+                        showingFiltersSheet = true
+                    } label: {
+                        Image(systemName: isAnyFilterActive() ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                    }
+                    Button {
+                        showingAddExercise = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
             }
         }
@@ -74,6 +107,21 @@ struct ExerciseListView: View {
         }
         .sheet(item: $selectedExercise) { exercise in
             EditExerciseView(exercise: exercise, muscles: muscles, equipment: equipment)
+        }
+        .sheet(isPresented: $showingFiltersSheet) {
+            ExerciseFiltersView(
+                filterPrimaryMetabolism: $filterPrimaryMetabolism,
+                filterBiomechanicalStructure: $filterBiomechanicalStructure,
+                filterTrainingRole: $filterTrainingRole,
+                filterCategory: $filterCategory,
+                filterPrimaryMuscle: $filterPrimaryMuscle,
+                filterReferencePlane: $filterReferencePlane,
+                filterMotorSchemas: $filterMotorSchemas,
+                filterTags: $filterTags,
+                filterFavoritesOnly: $filterFavoritesOnly,
+                muscles: muscles,
+                onClearAll: removeAllFilters
+            )
         }
     }
     
@@ -87,112 +135,134 @@ struct ExerciseListView: View {
         }
     }
     
-    @ViewBuilder
-    private func muscleFilterMenu() -> some View {
-        Menu {
-            Button(action: { filterPrimaryMuscle = nil }) {
-                Label("Tutti i muscoli", systemImage: filterPrimaryMuscle == nil ? "checkmark" : "")
-            }
-            ForEach(muscles) { muscle in
-                Button(action: { filterPrimaryMuscle = muscle }) {
-                    Label(muscle.name, systemImage: filterPrimaryMuscle?.id == muscle.id ? "checkmark" : "figure.strengthtraining.traditional")
-                }
-            }
-        } label: {
-            Image(systemName: "figure.strengthtraining.traditional")
-        }
+    private func removeAllFilters() {
+        filterPrimaryMetabolism = nil
+        filterBiomechanicalStructure = nil
+        filterTrainingRole = nil
+        filterCategory = nil
+        filterPrimaryMuscle = nil
+        filterReferencePlane = nil
+        filterMotorSchemas.removeAll()
+        filterTags.removeAll()
+        filterFavoritesOnly = false
     }
 
-    
-    @ViewBuilder
-    private func otherFiltersMenu() -> some View {
-        Menu {
-            Section("Metabolismo Primario") {
-                metabolismFilterSection()
-            }
-            Section("Struttura Biomeccanica") {
-                biomechanicalStructureFilterSection()
-            }
-            Section("Ruolo nell'Allenamento") {
-                trainingRoleFilterSection()
-            }
-            Section("Categoria") {
-                categoryFilterSection()
-            }
-            if isAnyFilterActive() {
-                Divider()
-                removeAllFiltersButton()
-            }
-        } label: {
-            Image(systemName: "line.3.horizontal.decrease.circle")
-        }
-    }
-    
-    @ViewBuilder
-    private func metabolismFilterSection() -> some View {
-        Button(action: { filterPrimaryMetabolism = nil }) {
-            Label("Tutti", systemImage: filterPrimaryMetabolism == nil ? "checkmark" : "")
-        }
-        ForEach(PrimaryMetabolism.allCases, id: \.self) { type in
-            Button(action: { filterPrimaryMetabolism = type }) {
-                Label(type.rawValue, systemImage: filterPrimaryMetabolism == type ? "checkmark" : type.icon)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func biomechanicalStructureFilterSection() -> some View {
-        Button(action: { filterBiomechanicalStructure = nil }) {
-            Label("Tutti", systemImage: filterBiomechanicalStructure == nil ? "checkmark" : "")
-        }
-        ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
-            Button(action: { filterBiomechanicalStructure = type }) {
-                Label(type.rawValue, systemImage: filterBiomechanicalStructure == type ? "checkmark" : type.icon)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func trainingRoleFilterSection() -> some View {
-        Button(action: { filterTrainingRole = nil }) {
-            Label("Tutti", systemImage: filterTrainingRole == nil ? "checkmark" : "")
-        }
-        ForEach(TrainingRole.allCases, id: \.self) { role in
-            Button(action: { filterTrainingRole = role }) {
-                Label(role.rawValue, systemImage: filterTrainingRole == role ? "checkmark" : role.icon)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func categoryFilterSection() -> some View {
-        Button(action: { filterCategory = nil }) {
-            Label("Tutti", systemImage: filterCategory == nil ? "checkmark" : "")
-        }
-        ForEach(ExerciseCategory.allCases, id: \.self) { category in
-            Button(action: { filterCategory = category }) {
-                Label(category.rawValue, systemImage: filterCategory == category ? "checkmark" : category.icon)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func removeAllFiltersButton() -> some View {
-        Button("Rimuovi Filtri", role: .destructive) {
-            filterPrimaryMetabolism = nil
-            filterBiomechanicalStructure = nil
-            filterTrainingRole = nil
-            filterCategory = nil
-            filterPrimaryMuscle = nil
-        }
-    }
-    
     private func isAnyFilterActive() -> Bool {
         return filterPrimaryMetabolism != nil ||
         filterBiomechanicalStructure != nil ||
         filterTrainingRole != nil ||
         filterCategory != nil ||
-        filterPrimaryMuscle != nil
+        filterPrimaryMuscle != nil ||
+        filterReferencePlane != nil ||
+        !filterMotorSchemas.isEmpty ||
+        !filterTags.isEmpty ||
+        filterFavoritesOnly
+    }
+}
+
+private struct ActiveFiltersBar: View {
+    @Binding var filterPrimaryMuscle: Muscle?
+    @Binding var filterPrimaryMetabolism: PrimaryMetabolism?
+    @Binding var filterBiomechanicalStructure: BiomechanicalStructure?
+    @Binding var filterTrainingRole: TrainingRole?
+    @Binding var filterCategory: ExerciseCategory?
+    @Binding var filterReferencePlane: ReferencePlane?
+    @Binding var filterMotorSchemas: Set<MotorSchema>
+    @Binding var filterTags: Set<ExerciseTag>
+    @Binding var filterFavoritesOnly: Bool
+    let onClearAll: () -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                if let muscle = filterPrimaryMuscle {
+                    ActiveFilterChip(title: muscle.name, systemImage: "figure.strengthtraining.traditional") {
+                        filterPrimaryMuscle = nil
+                    }
+                }
+
+                if let metabolism = filterPrimaryMetabolism {
+                    ActiveFilterChip(title: metabolism.rawValue, systemImage: metabolism.icon) {
+                        filterPrimaryMetabolism = nil
+                    }
+                }
+
+                if let structure = filterBiomechanicalStructure {
+                    ActiveFilterChip(title: structure.rawValue, systemImage: structure.icon) {
+                        filterBiomechanicalStructure = nil
+                    }
+                }
+
+                if let role = filterTrainingRole {
+                    ActiveFilterChip(title: role.rawValue, systemImage: role.icon) {
+                        filterTrainingRole = nil
+                    }
+                }
+
+                if let category = filterCategory {
+                    ActiveFilterChip(title: category.rawValue, systemImage: category.icon) {
+                        filterCategory = nil
+                    }
+                }
+
+                if let plane = filterReferencePlane {
+                    ActiveFilterChip(title: plane.rawValue, systemImage: plane.icon) {
+                        filterReferencePlane = nil
+                    }
+                }
+
+                ForEach(filterMotorSchemas.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { schema in
+                    ActiveFilterChip(title: schema.rawValue, systemImage: schema.icon) {
+                        filterMotorSchemas.remove(schema)
+                    }
+                }
+
+                ForEach(filterTags.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { tag in
+                    ActiveFilterChip(title: tag.rawValue, systemImage: tag.icon) {
+                        filterTags.remove(tag)
+                    }
+                }
+
+                if filterFavoritesOnly {
+                    ActiveFilterChip(title: "Preferiti", systemImage: "star.fill") {
+                        filterFavoritesOnly = false
+                    }
+                }
+
+                Button("Reset", role: .destructive, action: onClearAll)
+                    .buttonStyle(.bordered)
+                    .font(.caption)
+            }
+            .padding(.vertical, 8)
+        }
+    }
+}
+
+private struct ActiveFilterChip: View {
+    let title: String
+    var systemImage: String?
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                if let systemImage {
+                    Image(systemName: systemImage)
+                }
+                Text(title)
+                    .lineLimit(1)
+                Image(systemName: "xmark.circle.fill")
+                    .font(.caption2)
+            }
+            .font(.caption)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(Color.accentColor.opacity(0.15))
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
