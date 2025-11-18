@@ -105,6 +105,10 @@
 				en,
 				it,
 				es,
+				fr,
+				pt,
+				ru,
+				de,
 				Base,
 			);
 			mainGroup = 3EFEE4D82EC9C5A90045A07A;

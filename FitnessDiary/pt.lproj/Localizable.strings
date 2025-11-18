@@ -1,0 +1,132 @@
+/*
+ * Localizable.strings (Portuguese)
+ * FitnessDiary
+ */
+
+// MARK: - Tab Bar
+"tab.dashboard" = "Painel";
+"tab.workout" = "Treino";
+"tab.cards" = "Fichas";
+"tab.settings" = "Configurações";
+
+// MARK: - Dashboard
+"dashboard.title" = "FittyPal";
+"dashboard.greeting" = "Olá do FittyPal";
+"dashboard.hero.ready" = "Pronto para começar?";
+"dashboard.hero.sessions.one" = "1 sessão este mês";
+"dashboard.hero.sessions.many" = "%d sessões este mês";
+"dashboard.last.session" = "Última sessão";
+"dashboard.no.notes" = "Sem notas";
+"dashboard.empty.sessions" = "Quando você registrar seus treinos, encontrará aqui uma prévia da sua última sessão.";
+"dashboard.weekly.goal" = "Meta semanal";
+"dashboard.sessions.count" = "%d/%d sessões";
+"dashboard.streak" = "Sequência";
+"dashboard.streak.days" = "%d dias";
+
+// MARK: - Dashboard Metrics
+"metrics.sessions" = "Sessões";
+"metrics.sessions.subtitle" = "Últimos 30 dias";
+"metrics.duration" = "Duração";
+"metrics.duration.subtitle" = "Tempo total";
+"metrics.avg.rpe" = "RPE médio";
+"metrics.avg.rpe.subtitle" = "Sessões recentes";
+"metrics.mood" = "Humor mais frequente";
+"metrics.mood.subtitle" = "Aguardando dados";
+
+// MARK: - Dashboard Sections
+"section.weekly.trend" = "Tendência semanal";
+"section.weekly.trend.subtitle" = "Sessões concluídas";
+"section.focus.muscles" = "Músculos em foco";
+"section.focus.muscles.subtitle" = "Baseado nos treinos recentes";
+"section.quick.actions" = "Ações rápidas";
+"section.quick.actions.subtitle" = "Tudo ao seu alcance";
+"section.future.insights" = "Insights futuros";
+"section.future.insights.subtitle" = "Dados detalhados em breve";
+"section.future.insights.description" = "Nesta seção você encontrará análises detalhadas: distribuição muscular, progresso de RPE e duração média das sessões.";
+
+// MARK: - Quick Actions
+"quick.action.start.workout" = "Iniciar Treino";
+"quick.action.manual.log" = "Registrar Manualmente";
+"quick.action.set.goal" = "Definir Meta";
+"quick.action.coming.soon" = "Em breve";
+
+// MARK: - Settings
+"settings.title" = "Configurações";
+"settings.section.general" = "Geral";
+"settings.section.account" = "Conta";
+"settings.section.clients" = "Clientes";
+"settings.section.monitoring" = "Monitoramento";
+"settings.section.library" = "Biblioteca";
+
+"settings.general.preferences" = "Preferências Gerais";
+"settings.profile" = "Perfil";
+"settings.clients.management" = "Gestão de Clientes";
+"settings.heart.rate" = "Frequência Cardíaca";
+"settings.strength.expressions" = "Expressões de Força";
+"settings.muscles" = "Músculos";
+"settings.equipment" = "Equipamentos";
+"settings.exercises" = "Exercícios";
+
+// MARK: - General Preferences
+"preferences.title" = "Preferências Gerais";
+"preferences.section.general" = "Preferências Gerais";
+"preferences.debug.log" = "Gerar Sequência de Treino";
+"preferences.clone.load" = "Clonar carga automaticamente";
+"preferences.countdown" = "Contagem regressiva inicial";
+"preferences.countdown.seconds" = "%d seg";
+"preferences.language" = "Idioma";
+"preferences.language.select" = "Selecionar idioma";
+"preferences.made.by" = "Feito com ❤️ por Lorenzo Franceschini";
+
+// MARK: - Language Settings
+"language.english" = "English";
+"language.italian" = "Italiano";
+"language.spanish" = "Español";
+
+// MARK: - Muscle Groups
+"muscle.chest" = "Peito";
+"muscle.back" = "Costas";
+"muscle.legs" = "Pernas e Glúteos";
+"muscle.core" = "Core";
+"muscle.shoulders" = "Ombros";
+
+// MARK: - Common
+"common.ok" = "OK";
+"common.cancel" = "Cancelar";
+"common.done" = "Concluído";
+"common.save" = "Salvar";
+"common.delete" = "Excluir";
+"common.edit" = "Editar";
+"common.add" = "Adicionar";
+"common.close" = "Fechar";
+"common.back" = "Voltar";
+"common.next" = "Próximo";
+"common.previous" = "Anterior";
+"common.search" = "Pesquisar";
+"common.filter" = "Filtrar";
+"common.loading" = "Carregando...";
+"common.error" = "Erro";
+"common.success" = "Sucesso";
+"common.warning" = "Aviso";
+"common.info" = "Info";
+
+// MARK: - Units
+"unit.seconds" = "seg";
+"unit.minutes" = "min";
+"unit.hours" = "h";
+"unit.days" = "dias";
+"unit.weeks" = "semanas";
+"unit.months" = "meses";
+"unit.reps" = "reps";
+"unit.sets" = "séries";
+"unit.kg" = "kg";
+"unit.lbs" = "lbs";
+
+// MARK: - Workout
+"workout.rpe" = "RPE";
+"workout.session" = "Sessão";
+"workout.exercise" = "Exercício";
+"workout.rest" = "Descanso";
+"workout.duration" = "Duração";
+"workout.notes" = "Notas";
+"workout.mood" = "Humor";

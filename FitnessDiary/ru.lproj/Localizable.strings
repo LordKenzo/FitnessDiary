@@ -1,0 +1,132 @@
+/*
+ * Localizable.strings (Russian)
+ * FitnessDiary
+ */
+
+// MARK: - Tab Bar
+"tab.dashboard" = "Панель";
+"tab.workout" = "Тренировка";
+"tab.cards" = "Карточки";
+"tab.settings" = "Настройки";
+
+// MARK: - Dashboard
+"dashboard.title" = "FittyPal";
+"dashboard.greeting" = "Привет от FittyPal";
+"dashboard.hero.ready" = "Готовы начать?";
+"dashboard.hero.sessions.one" = "1 занятие в этом месяце";
+"dashboard.hero.sessions.many" = "%d занятий в этом месяце";
+"dashboard.last.session" = "Последнее занятие";
+"dashboard.no.notes" = "Нет заметок";
+"dashboard.empty.sessions" = "Когда вы запишете свои тренировки, здесь появится предварительный просмотр последнего занятия.";
+"dashboard.weekly.goal" = "Недельная цель";
+"dashboard.sessions.count" = "%d/%d занятий";
+"dashboard.streak" = "Серия";
+"dashboard.streak.days" = "%d дней";
+
+// MARK: - Dashboard Metrics
+"metrics.sessions" = "Занятия";
+"metrics.sessions.subtitle" = "Последние 30 дней";
+"metrics.duration" = "Продолжительность";
+"metrics.duration.subtitle" = "Общее время";
+"metrics.avg.rpe" = "Средний RPE";
+"metrics.avg.rpe.subtitle" = "Недавние занятия";
+"metrics.mood" = "Самое частое настроение";
+"metrics.mood.subtitle" = "Ожидание данных";
+
+// MARK: - Dashboard Sections
+"section.weekly.trend" = "Недельная тенденция";
+"section.weekly.trend.subtitle" = "Завершенные занятия";
+"section.focus.muscles" = "Мышцы в фокусе";
+"section.focus.muscles.subtitle" = "На основе недавних тренировок";
+"section.quick.actions" = "Быстрые действия";
+"section.quick.actions.subtitle" = "Всё под рукой";
+"section.future.insights" = "Будущая аналитика";
+"section.future.insights.subtitle" = "Подробные данные скоро";
+"section.future.insights.description" = "В этом разделе вы найдете подробный анализ: распределение мышц, прогресс RPE и среднюю продолжительность занятий.";
+
+// MARK: - Quick Actions
+"quick.action.start.workout" = "Начать тренировку";
+"quick.action.manual.log" = "Записать вручную";
+"quick.action.set.goal" = "Установить цель";
+"quick.action.coming.soon" = "Скоро";
+
+// MARK: - Settings
+"settings.title" = "Настройки";
+"settings.section.general" = "Общие";
+"settings.section.account" = "Аккаунт";
+"settings.section.clients" = "Клиенты";
+"settings.section.monitoring" = "Мониторинг";
+"settings.section.library" = "Библиотека";
+
+"settings.general.preferences" = "Общие настройки";
+"settings.profile" = "Профиль";
+"settings.clients.management" = "Управление клиентами";
+"settings.heart.rate" = "Пульс";
+"settings.strength.expressions" = "Выражения силы";
+"settings.muscles" = "Мышцы";
+"settings.equipment" = "Оборудование";
+"settings.exercises" = "Упражнения";
+
+// MARK: - General Preferences
+"preferences.title" = "Общие настройки";
+"preferences.section.general" = "Общие настройки";
+"preferences.debug.log" = "Генерировать последовательность тренировок";
+"preferences.clone.load" = "Автоматически клонировать нагрузку";
+"preferences.countdown" = "Начальный отсчет";
+"preferences.countdown.seconds" = "%d сек";
+"preferences.language" = "Язык";
+"preferences.language.select" = "Выбрать язык";
+"preferences.made.by" = "Сделано с ❤️ Lorenzo Franceschini";
+
+// MARK: - Language Settings
+"language.english" = "English";
+"language.italian" = "Italiano";
+"language.spanish" = "Español";
+
+// MARK: - Muscle Groups
+"muscle.chest" = "Грудь";
+"muscle.back" = "Спина";
+"muscle.legs" = "Ноги и ягодицы";
+"muscle.core" = "Пресс";
+"muscle.shoulders" = "Плечи";
+
+// MARK: - Common
+"common.ok" = "ОК";
+"common.cancel" = "Отмена";
+"common.done" = "Готово";
+"common.save" = "Сохранить";
+"common.delete" = "Удалить";
+"common.edit" = "Изменить";
+"common.add" = "Добавить";
+"common.close" = "Закрыть";
+"common.back" = "Назад";
+"common.next" = "Далее";
+"common.previous" = "Предыдущий";
+"common.search" = "Поиск";
+"common.filter" = "Фильтр";
+"common.loading" = "Загрузка...";
+"common.error" = "Ошибка";
+"common.success" = "Успех";
+"common.warning" = "Предупреждение";
+"common.info" = "Инфо";
+
+// MARK: - Units
+"unit.seconds" = "сек";
+"unit.minutes" = "мин";
+"unit.hours" = "ч";
+"unit.days" = "дней";
+"unit.weeks" = "недель";
+"unit.months" = "месяцев";
+"unit.reps" = "повт";
+"unit.sets" = "подходов";
+"unit.kg" = "кг";
+"unit.lbs" = "фунтов";
+
+// MARK: - Workout
+"workout.rpe" = "RPE";
+"workout.session" = "Занятие";
+"workout.exercise" = "Упражнение";
+"workout.rest" = "Отдых";
+"workout.duration" = "Продолжительность";
+"workout.notes" = "Заметки";
+"workout.mood" = "Настроение";
