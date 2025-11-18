@@ -14,11 +14,21 @@ struct WorkoutCardListView: View {
     @State private var filterOwner: FilterOwner = .all
     @State private var selectedClient: Client?
     @State private var expandedFolders: Set<UUID> = []
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
-    enum FilterOwner: String, CaseIterable {
-        case all = "Tutte"
-        case mine = "Mio"
-        case client = "Cliente"
+    @MainActor
+    enum FilterOwner: CaseIterable {
+        case all
+        case mine
+        case client
+
+        var localizedName: String {
+            switch self {
+            case .all: return L("cards.filter.all")
+            case .mine: return L("cards.filter.mine")
+            case .client: return L("cards.filter.client")
+            }
+        }
     }
 
     private var filteredCards: [WorkoutCard] {
@@ -54,11 +64,11 @@ struct WorkoutCardListView: View {
             List {
                 if allCards.isEmpty {
                     ContentUnavailableView {
-                        Label("Nessuna scheda", systemImage: "doc.text")
+                        Label(L("cards.no.cards"), systemImage: "doc.text")
                     } description: {
-                        Text("Crea la tua prima scheda di allenamento")
+                        Text(L("cards.no.cards.description"))
                     } actions: {
-                        Button("Crea Scheda") {
+                        Button(L("cards.create")) {
                             showingAddCard = true
                         }
                         .buttonStyle(.borderedProminent)
@@ -90,12 +100,12 @@ struct WorkoutCardListView: View {
                                             Button(role: .destructive) {
                                                 deleteCard(card)
                                             } label: {
-                                                Label("Elimina", systemImage: "trash")
+                                                Label(L("confirm.delete"), systemImage: "trash")
                                             }
                                             Button {
                                                 selectedCard = card
                                             } label: {
-                                                Label("Modifica", systemImage: "pencil")
+                                                Label(L("common.edit"), systemImage: "pencil")
                                             }
                                             .tint(.blue)
                                         }
@@ -173,7 +183,7 @@ struct WorkoutCardListView: View {
                     }
                 }
             }
-            .searchable(text: $searchText, prompt: "Cerca scheda")
+            .searchable(text: $searchText, prompt: L("cards.search"))
             .navigationTitle("Schede")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -230,7 +240,7 @@ struct WorkoutCardListView: View {
                         selectedClient = nil
                     }
                 }) {
-                    Label(owner.rawValue, systemImage: filterOwner == owner ? "checkmark" : "")
+                    Label(owner.localizedName, systemImage: filterOwner == owner ? "checkmark" : "")
                 }
             }
 
@@ -251,7 +261,7 @@ struct WorkoutCardListView: View {
                 }
             }
         } label: {
-            Label(filterOwner == .client && selectedClient != nil ? selectedClient!.fullName : filterOwner.rawValue,
+            Label(filterOwner == .client && selectedClient != nil ? selectedClient!.fullName : filterOwner.localizedName,
                   systemImage: "person.crop.circle")
         }
     }

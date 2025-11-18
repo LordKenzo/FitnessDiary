@@ -4,6 +4,7 @@ import SwiftData
 struct DashboardView: View {
     private let calendar = Calendar.current
     @Query private var storedSessionLogs: [WorkoutSessionLog]
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
     init() {}
 
@@ -11,12 +12,23 @@ struct DashboardView: View {
         storedSessionLogs.sorted { $0.date > $1.date }
     }
 
-    private let focusMuscles = ["Petto", "Dorso", "Gambe e Glutei", "Core", "Spalle"]
-    private let quickActions = [
-        QuickAction(title: "Inizia Allenamento", icon: "play.circle.fill", tint: .green),
-        QuickAction(title: "Registra Manualmente", icon: "square.and.pencil", tint: .orange),
-        QuickAction(title: "Imposta Obiettivo", icon: "target", tint: .purple)
-    ]
+    private var focusMuscles: [String] {
+        [
+            L("muscle.chest"),
+            L("muscle.back"),
+            L("muscle.legs"),
+            L("muscle.core"),
+            L("muscle.shoulders")
+        ]
+    }
+
+    private var quickActions: [QuickAction] {
+        [
+            QuickAction(title: L("quick.action.start.workout"), icon: "play.circle.fill", tint: .green),
+            QuickAction(title: L("quick.action.manual.log"), icon: "square.and.pencil", tint: .orange),
+            QuickAction(title: L("quick.action.set.goal"), icon: "target", tint: .purple)
+        ]
+    }
 
     private let durationFormatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
@@ -25,12 +37,12 @@ struct DashboardView: View {
         return formatter
     }()
 
-    private let dateFormatter: DateFormatter = {
+    private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "it_IT")
+        formatter.locale = Locale(identifier: localizationManager.currentLanguage.rawValue)
         formatter.dateStyle = .medium
         return formatter
-    }()
+    }
 
     var body: some View {
         NavigationStack {
@@ -51,7 +63,7 @@ struct DashboardView: View {
                 .padding(20)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("FittyPal")
+            .navigationTitle(L("dashboard.title"))
             .navigationBarTitleDisplayMode(.large)
         }
     }
@@ -59,7 +71,7 @@ struct DashboardView: View {
     private var heroHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Ciao da FittyPal")
+                Text(localized: "dashboard.greeting")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Text(heroHeadline)
@@ -68,7 +80,7 @@ struct DashboardView: View {
 
             if let latest = sessionLogs.first {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Ultima sessione")
+                    Text(localized: "dashboard.last.session")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     HStack(alignment: .center, spacing: 12) {
@@ -80,7 +92,7 @@ struct DashboardView: View {
                             Text(dateFormatter.string(from: latest.date))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Text(latest.notes.isEmpty ? "Nessuna nota" : "\"\(latest.notes)\"")
+                            Text(latest.notes.isEmpty ? L("dashboard.no.notes") : "\"\(latest.notes)\"")
                                 .font(.footnote.italic())
                                 .lineLimit(2)
                                 .foregroundStyle(.secondary)
@@ -88,7 +100,7 @@ struct DashboardView: View {
                         Spacer()
                         if let rpe = latest.rpe {
                             VStack(spacing: 2) {
-                                Text("RPE")
+                                Text(localized: "workout.rpe")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                                 Text("\(rpe)")
@@ -102,7 +114,7 @@ struct DashboardView: View {
                 }
                 Divider()
             } else {
-                Text("Quando registri i tuoi allenamenti troverai qui l'anteprima dell'ultima sessione.")
+                Text(localized: "dashboard.empty.sessions")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                 Divider()
@@ -110,20 +122,20 @@ struct DashboardView: View {
 
             HStack(alignment: .bottom, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Obiettivo settimanale")
+                    Text(localized: "dashboard.weekly.goal")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("\(sessionsThisWeek)/\(weeklyGoal) sessioni")
+                    Text(String(format: L("dashboard.sessions.count"), sessionsThisWeek, weeklyGoal))
                         .font(.headline)
                     ProgressView(value: min(weeklyProgress, 1))
                         .tint(.blue)
                 }
                 Spacer()
                 VStack(alignment: .trailing) {
-                    Text("Streak")
+                    Text(localized: "dashboard.streak")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("\(currentStreak) giorni")
+                    Text(String(format: L("dashboard.streak.days"), currentStreak))
                         .font(.title2.bold())
                 }
             }
@@ -161,7 +173,7 @@ struct DashboardView: View {
 
     private var trendSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(title: "Trend settimanale", subtitle: "Sessioni completate")
+            sectionHeader(title: L("section.weekly.trend"), subtitle: L("section.weekly.trend.subtitle"))
             ActivitySparkline(values: weeklyTrend)
                 .frame(height: 120)
         }
@@ -173,7 +185,7 @@ struct DashboardView: View {
 
     private var focusSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(title: "Muscoli in focus", subtitle: "Basato sugli ultimi allenamenti")
+            sectionHeader(title: L("section.focus.muscles"), subtitle: L("section.focus.muscles.subtitle"))
             FlowLayout(tags: focusMuscles)
         }
         .padding()
@@ -184,7 +196,7 @@ struct DashboardView: View {
 
     private var quickActionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(title: "Azioni rapide", subtitle: "Tutto a portata di tap")
+            sectionHeader(title: L("section.quick.actions"), subtitle: L("section.quick.actions.subtitle"))
             ForEach(Array(quickActions.enumerated()), id: \.element.id) { index, action in
                 Button {
                     // Future integration point
@@ -199,7 +211,7 @@ struct DashboardView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(action.title)
                                 .font(.headline)
-                            Text("Disponibile a breve")
+                            Text(localized: "quick.action.coming.soon")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -224,8 +236,8 @@ struct DashboardView: View {
 
     private var placeholderInsights: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(title: "Insight futuri", subtitle: "Presto vedrai dati dettagliati")
-            Text("In questa sezione potrai trovare analisi approfondite: distribuzione dei muscoli allenati, progressi di RPE e durata media per sessione.")
+            sectionHeader(title: L("section.future.insights"), subtitle: L("section.future.insights.subtitle"))
+            Text(localized: "section.future.insights.description")
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .padding()
@@ -252,27 +264,27 @@ struct DashboardView: View {
     private var metricCards: [MetricCard] {
         [
             MetricCard(
-                title: "Sessioni",
+                title: L("metrics.sessions"),
                 value: "\(sessionsLast30Days.count)",
-                subtitle: "Ultimi 30 giorni",
+                subtitle: L("metrics.sessions.subtitle"),
                 icon: "calendar.circle"
             ),
             MetricCard(
-                title: "Durata",
+                title: L("metrics.duration"),
                 value: durationFormatter.string(from: totalDurationLast30Days) ?? "0h",
-                subtitle: "Tempo totale",
+                subtitle: L("metrics.duration.subtitle"),
                 icon: "clock.fill"
             ),
             MetricCard(
-                title: "RPE medio",
+                title: L("metrics.avg.rpe"),
                 value: averageRPEString,
-                subtitle: "Ultime sessioni",
+                subtitle: L("metrics.avg.rpe.subtitle"),
                 icon: "waveform.path.ecg"
             ),
             MetricCard(
-                title: "Umore più frequente",
+                title: L("metrics.mood"),
                 value: dominantMood?.emoji ?? "🙂",
-                subtitle: dominantMood?.title ?? "In attesa dei dati",
+                subtitle: dominantMood?.title ?? L("metrics.mood.subtitle"),
                 icon: "face.smiling"
             )
         ]
@@ -328,11 +340,11 @@ struct DashboardView: View {
     private var heroHeadline: String {
         switch sessionsLast30Days.count {
         case 0:
-            return "Pronto a cominciare?"
+            return L("dashboard.hero.ready")
         case 1:
-            return "1 sessione questo mese"
+            return L("dashboard.hero.sessions.one")
         default:
-            return "\(sessionsLast30Days.count) sessioni questo mese"
+            return String(format: L("dashboard.hero.sessions.many"), sessionsLast30Days.count)
         }
     }
 

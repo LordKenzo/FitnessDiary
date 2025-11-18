@@ -7,6 +7,7 @@ struct ExerciseListView: View {
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
     @Query(sort: \Muscle.name) private var muscles: [Muscle]
     @Query(sort: \Equipment.name) private var equipment: [Equipment]
+    @ObservedObject private var localizationManager = LocalizationManager.shared
     @State private var showingAddExercise = false
     @State private var selectedExercise: Exercise?
     @State private var searchText = ""
@@ -32,11 +33,11 @@ struct ExerciseListView: View {
         List {
             if exercises.isEmpty {
                 ContentUnavailableView {
-                    Label("Nessun esercizio", systemImage: "figure.strengthtraining.traditional")
+                    Label(L("exercises.no.exercises"), systemImage: "figure.strengthtraining.traditional")
                 } description: {
-                    Text("Aggiungi il tuo primo esercizio")
+                    Text(L("exercises.no.exercises.description"))
                 } actions: {
-                    Button("Aggiungi Esercizio") {
+                    Button(L("exercises.add")) {
                         showingAddExercise = true
                     }
                     .buttonStyle(.borderedProminent)
@@ -52,8 +53,8 @@ struct ExerciseListView: View {
                 .onDelete(perform: deleteExercises)
             }
         }
-        .searchable(text: $searchText, prompt: "Cerca esercizio")
-        .navigationTitle("Esercizi")
+        .searchable(text: $searchText, prompt: L("exercises.search"))
+        .navigationTitle(L("exercises.title"))
         .toolbar {
             ToolbarItemGroup(placement: .topBarLeading) {
                 muscleFilterMenu()

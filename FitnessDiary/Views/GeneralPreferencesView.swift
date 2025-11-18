@@ -4,21 +4,39 @@ struct GeneralPreferencesView: View {
     @AppStorage("debugWorkoutLogEnabled") private var debugWorkoutLogEnabled = false
     @AppStorage("workoutCountdownSeconds") private var workoutCountdownSeconds = 10
     @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
     var body: some View {
         Form {
-            Section("Preferenze Generali") {
-                Toggle("Genera Sequenza Allenamento", isOn: $debugWorkoutLogEnabled)
+            Section(L("preferences.section.general")) {
+                // Language Picker
+                Picker(L("preferences.language"), selection: Binding(
+                    get: { localizationManager.currentLanguage },
+                    set: { newLanguage in
+                        localizationManager.setLanguage(newLanguage)
+                    }
+                )) {
+                    ForEach(AppLanguage.allCases) { language in
+                        HStack {
+                            Text(language.flag)
+                            Text(language.displayName)
+                        }
+                        .tag(language)
+                    }
+                }
+                .pickerStyle(.menu)
 
-                Toggle("Clona automaticamente il carico", isOn: $cloneLoadEnabled)
+                Toggle(L("preferences.debug.log"), isOn: $debugWorkoutLogEnabled)
+
+                Toggle(L("preferences.clone.load"), isOn: $cloneLoadEnabled)
                     .tint(.blue)
                     .font(.subheadline)
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("Countdown iniziale")
+                        Text(localized: "preferences.countdown")
                         Spacer()
-                        Text("\(workoutCountdownSeconds) sec")
+                        Text(String(format: L("preferences.countdown.seconds"), workoutCountdownSeconds))
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
                     }
@@ -33,14 +51,14 @@ struct GeneralPreferencesView: View {
                     )
                 }
 
-                Text("Made with ❤️ by Lorenzo Franceschini")
+                Text(localized: "preferences.made.by")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 4)
             }
         }
-        .navigationTitle("Preferenze Generali")
+        .navigationTitle(L("preferences.title"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

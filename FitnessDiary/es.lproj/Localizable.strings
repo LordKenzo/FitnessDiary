@@ -1,0 +1,258 @@
+/*
+ * Localizable.strings (Spanish)
+ * FitnessDiary
+ */
+
+// MARK: - Tab Bar
+"tab.dashboard" = "Panel";
+"tab.workout" = "Entrenamiento";
+"tab.cards" = "Tarjetas";
+"tab.settings" = "Ajustes";
+
+// MARK: - Dashboard
+"dashboard.title" = "FittyPal";
+"dashboard.greeting" = "Hola desde FittyPal";
+"dashboard.hero.ready" = "¿Listo para empezar?";
+"dashboard.hero.sessions.one" = "1 sesión este mes";
+"dashboard.hero.sessions.many" = "%d sesiones este mes";
+"dashboard.last.session" = "Última sesión";
+"dashboard.no.notes" = "Sin notas";
+"dashboard.empty.sessions" = "Cuando registres tus entrenamientos, encontrarás aquí una vista previa de tu última sesión.";
+"dashboard.weekly.goal" = "Objetivo semanal";
+"dashboard.sessions.count" = "%d/%d sesiones";
+"dashboard.streak" = "Racha";
+"dashboard.streak.days" = "%d días";
+
+// MARK: - Dashboard Metrics
+"metrics.sessions" = "Sesiones";
+"metrics.sessions.subtitle" = "Últimos 30 días";
+"metrics.duration" = "Duración";
+"metrics.duration.subtitle" = "Tiempo total";
+"metrics.avg.rpe" = "RPE promedio";
+"metrics.avg.rpe.subtitle" = "Sesiones recientes";
+"metrics.mood" = "Estado de ánimo más frecuente";
+"metrics.mood.subtitle" = "Esperando datos";
+
+// MARK: - Dashboard Sections
+"section.weekly.trend" = "Tendencia semanal";
+"section.weekly.trend.subtitle" = "Sesiones completadas";
+"section.focus.muscles" = "Músculos en foco";
+"section.focus.muscles.subtitle" = "Basado en entrenamientos recientes";
+"section.quick.actions" = "Acciones rápidas";
+"section.quick.actions.subtitle" = "Todo al alcance de tu mano";
+"section.future.insights" = "Información futura";
+"section.future.insights.subtitle" = "Datos detallados próximamente";
+"section.future.insights.description" = "En esta sección encontrarás análisis en profundidad: distribución muscular, progreso de RPE y duración promedio de sesiones.";
+
+// MARK: - Quick Actions
+"quick.action.start.workout" = "Iniciar Entrenamiento";
+"quick.action.manual.log" = "Registrar Manualmente";
+"quick.action.set.goal" = "Establecer Objetivo";
+"quick.action.coming.soon" = "Próximamente";
+
+// MARK: - Settings
+"settings.title" = "Ajustes";
+"settings.section.general" = "General";
+"settings.section.account" = "Cuenta";
+"settings.section.clients" = "Clientes";
+"settings.section.monitoring" = "Monitoreo";
+"settings.section.library" = "Biblioteca";
+
+"settings.general.preferences" = "Preferencias Generales";
+"settings.profile" = "Perfil";
+"settings.clients.management" = "Gestión de Clientes";
+"settings.heart.rate" = "Frecuencia Cardíaca";
+"settings.strength.expressions" = "Expresiones de Fuerza";
+"settings.muscles" = "Músculos";
+"settings.equipment" = "Equipamiento";
+"settings.exercises" = "Ejercicios";
+
+// MARK: - General Preferences
+"preferences.title" = "Preferencias Generales";
+"preferences.section.general" = "Preferencias Generales";
+"preferences.debug.log" = "Generar Secuencia de Entrenamiento";
+"preferences.clone.load" = "Clonar carga automáticamente";
+"preferences.countdown" = "Cuenta regresiva inicial";
+"preferences.countdown.seconds" = "%d seg";
+"preferences.language" = "Idioma";
+"preferences.language.select" = "Seleccionar idioma";
+"preferences.made.by" = "Hecho con ❤️ por Lorenzo Franceschini";
+
+// MARK: - Language Settings
+"language.english" = "English";
+"language.french" = "Français";
+"language.italian" = "Italiano";
+"language.spanish" = "Español";
+"language.german" = "Deutsch";
+"language.portuguese" = "Português";
+"language.russian" = "Русский";
+
+// MARK: - Muscle Groups
+"muscle.chest" = "Pecho";
+"muscle.back" = "Espalda";
+"muscle.legs" = "Piernas y Glúteos";
+"muscle.core" = "Core";
+"muscle.shoulders" = "Hombros";
+
+// MARK: - Common
+"common.ok" = "OK";
+"common.cancel" = "Cancelar";
+"common.done" = "Hecho";
+"common.save" = "Guardar";
+"common.delete" = "Eliminar";
+"common.edit" = "Editar";
+"common.add" = "Agregar";
+"common.close" = "Cerrar";
+"common.back" = "Atrás";
+"common.next" = "Siguiente";
+"common.previous" = "Anterior";
+"common.search" = "Buscar";
+"common.filter" = "Filtrar";
+"common.select" = "Seleccionar";
+"common.loading" = "Cargando...";
+"common.error" = "Error";
+"common.success" = "Éxito";
+"common.warning" = "Advertencia";
+"common.info" = "Info";
+
+// MARK: - Units
+"unit.seconds" = "seg";
+"unit.minutes" = "min";
+"unit.hours" = "h";
+"unit.days" = "días";
+"unit.weeks" = "semanas";
+"unit.months" = "meses";
+"unit.reps" = "reps";
+"unit.sets" = "series";
+"unit.kg" = "kg";
+"unit.lbs" = "lbs";
+"unit.cm" = "cm";
+
+// MARK: - Workout
+"workout.rpe" = "RPE";
+"workout.session" = "Sesión";
+"workout.exercise" = "Ejercicio";
+"workout.rest" = "Descanso";
+"workout.duration" = "Duración";
+"workout.notes" = "Notas";
+"workout.mood" = "Estado de ánimo";
+
+// MARK: - Onboarding
+"onboarding.skip" = "Saltar";
+
+// MARK: - Profile
+"profile.title" = "Perfil";
+"profile.no.profile" = "Sin Perfil";
+"profile.no.profile.description" = "Crea tu perfil para empezar";
+"profile.create" = "Crear Perfil";
+"profile.edit" = "Editar Perfil";
+"profile.physical.data" = "Datos Físicos";
+"profile.personal.data" = "Datos Personales";
+"profile.gender" = "Sexo";
+"profile.age" = "Edad";
+"profile.weight" = "Peso";
+"profile.height" = "Altura";
+"profile.bmi" = "IMC";
+"profile.years" = "años";
+"profile.one.rep.max" = "Máximos 1RM";
+"profile.manage.maxes" = "Gestionar Máximos";
+"profile.heart.rate" = "Frecuencia Cardíaca";
+"profile.max.hr" = "FC Máxima";
+"profile.calculated.hr" = "FC Calculada";
+"profile.bpm" = "lpm";
+"profile.hr.footer" = "FC máxima personalizada o calculada con fórmula 220 - edad";
+"profile.cardio.zones" = "Zonas Cardio";
+"profile.customize.zones" = "Personalizar Zonas Cardio";
+"profile.photo" = "Foto de Perfil";
+"profile.change.photo" = "Cambiar Foto";
+"profile.remove.photo" = "Eliminar Foto";
+"profile.name" = "Nombre";
+"profile.update.from.health" = "Actualizar desde Apple Health";
+
+// MARK: - Clients
+"clients.title" = "Clientes";
+"clients.no.clients" = "Sin Clientes";
+"clients.no.clients.description" = "Agrega tu primer cliente para empezar";
+"clients.add" = "Agregar Cliente";
+"clients.search" = "Buscar cliente";
+"clients.first.name" = "Nombre";
+"clients.last.name" = "Apellido";
+"clients.email" = "Email";
+"clients.phone" = "Teléfono";
+"clients.notes" = "Notas";
+"clients.delete.title" = "Eliminar Cliente";
+"clients.delete.message" = "¿Estás seguro de que quieres eliminar este cliente?";
+"clients.delete.confirm.message" = "¿Estás seguro de que quieres eliminar a %@? Esta acción no se puede deshacer.";
+"clients.delete.all" = "Eliminar Todos";
+"clients.delete.all.confirm" = "Eliminar Todos los Clientes";
+"clients.delete.all.confirm.message" = "¿Estás seguro de que quieres eliminar todos los %d clientes? Esta acción no se puede deshacer.";
+"clients.workouts" = "Tarjetas";
+"clients.new" = "Nuevo Cliente";
+"clients.edit" = "Editar Cliente";
+"clients.form.required" = "Datos Obligatorios";
+"clients.form.optional" = "Datos Opcionales";
+"clients.form.photo.label" = "Foto";
+"clients.form.gym" = "Gimnasio";
+"clients.form.medical.history" = "Historial Médico";
+"clients.form.gender.not.specified" = "No especificado";
+"clients.assigned.workouts" = "Tarjetas Asignadas";
+"clients.view.workouts" = "Ver Tarjetas";
+
+// MARK: - Exercises
+"exercises.title" = "Ejercicios";
+"exercises.no.exercises" = "Sin ejercicios";
+"exercises.no.exercises.description" = "Agrega tu primer ejercicio";
+"exercises.add" = "Agregar Ejercicio";
+"exercises.search" = "Buscar ejercicio";
+"exercises.name" = "Nombre";
+"exercises.description" = "Descripción";
+"exercises.primary.muscles" = "Músculos Primarios";
+"exercises.secondary.muscles" = "Músculos Secundarios";
+"exercises.equipment" = "Equipamiento";
+"exercises.category" = "Categoría";
+"exercises.notes" = "Notas";
+
+// MARK: - Muscles
+"muscles.title" = "Músculos";
+"muscles.no.muscles" = "Sin músculos";
+"muscles.no.muscles.description" = "Inicializa la base de datos con músculos predeterminados o agrega nuevos";
+"muscles.initialize" = "Inicializar Base de Datos";
+"muscles.add" = "Agregar Músculo";
+"muscles.name" = "Nombre";
+"muscles.category" = "Categoría";
+
+// MARK: - Equipment
+"equipment.title" = "Equipamiento";
+"equipment.no.equipment" = "Sin equipamiento";
+"equipment.no.equipment.description" = "Inicializa la base de datos con equipamiento predeterminado o agrega nuevo";
+"equipment.initialize" = "Inicializar Base de Datos";
+"equipment.add" = "Agregar Equipamiento";
+"equipment.name" = "Nombre";
+
+// MARK: - Workout Cards
+"cards.title" = "Tarjetas";
+"cards.no.cards" = "Sin tarjetas";
+"cards.no.cards.description" = "Crea tu primera tarjeta de entrenamiento";
+"cards.create" = "Crear Tarjeta";
+"cards.search" = "Buscar tarjeta";
+"cards.filter.all" = "Todas";
+"cards.filter.mine" = "Mías";
+"cards.filter.client" = "Cliente";
+"cards.name" = "Nombre";
+"cards.description" = "Descripción";
+"cards.add.block" = "Agregar Bloque";
+"cards.add.folder" = "Agregar Carpeta";
+"cards.no.folder" = "Sin Carpeta";
+
+// MARK: - Folders
+"folders.title" = "Carpetas";
+"folders.name" = "Nombre de Carpeta";
+"folders.color" = "Color";
+"folders.edit" = "Editar Carpeta";
+"folders.create" = "Crear Carpeta";
+
+// MARK: - Confirmation Dialogs
+"confirm.delete" = "Eliminar";
+"confirm.cancel" = "Cancelar";
+"confirm.save" = "Guardar";
+"confirm.discard" = "Descartar";

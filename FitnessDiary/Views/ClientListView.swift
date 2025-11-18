@@ -12,6 +12,7 @@ import PhotosUI
 struct ClientListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: [SortDescriptor(\Client.lastName), SortDescriptor(\Client.firstName)]) private var clients: [Client]
+    @ObservedObject private var localizationManager = LocalizationManager.shared
     @State private var showingAddClient = false
     @State private var selectedClient: Client?
     @State private var searchText = ""
@@ -36,11 +37,11 @@ struct ClientListView: View {
         List {
             if clients.isEmpty {
                 ContentUnavailableView {
-                    Label("Nessun Cliente", systemImage: "person.3")
+                    Label(L("clients.no.clients"), systemImage: "person.3")
                 } description: {
-                    Text("Aggiungi il tuo primo cliente per iniziare")
+                    Text(L("clients.no.clients.description"))
                 } actions: {
-                    Button("Aggiungi Cliente") {
+                    Button(L("clients.add")) {
                         showingAddClient = true
                     }
                     .buttonStyle(.borderedProminent)
@@ -56,7 +57,7 @@ struct ClientListView: View {
                             Button {
                                 clientForWorkoutCards = client
                             } label: {
-                                Label("Schede", systemImage: "list.bullet.clipboard")
+                                Label(L("clients.workouts"), systemImage: "list.bullet.clipboard")
                             }
                             .tint(.blue)
                         }
@@ -65,21 +66,21 @@ struct ClientListView: View {
                                 clientToDelete = client
                                 showingDeleteConfirmation = true
                             } label: {
-                                Label("Elimina", systemImage: "trash")
+                                Label(L("confirm.delete"), systemImage: "trash")
                             }
                         }
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Cerca cliente")
-        .navigationTitle("Clienti")
+        .searchable(text: $searchText, prompt: L("clients.search"))
+        .navigationTitle(L("clients.title"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
                         showingAddClient = true
                     } label: {
-                        Label("Aggiungi Cliente", systemImage: "plus")
+                        Label(L("clients.add"), systemImage: "plus")
                     }
 
                     if !clients.isEmpty {
@@ -87,7 +88,7 @@ struct ClientListView: View {
                         Button(role: .destructive) {
                             showingDeleteAllConfirmation = true
                         } label: {
-                            Label("Elimina Tutti", systemImage: "trash")
+                            Label(L("clients.delete.all"), systemImage: "trash")
                         }
                     }
                 } label: {
@@ -106,23 +107,23 @@ struct ClientListView: View {
                 ClientWorkoutCardsView(client: client)
             }
         }
-        .alert("Elimina Cliente", isPresented: $showingDeleteConfirmation, presenting: clientToDelete) { client in
-            Button("Annulla", role: .cancel) {
+        .alert(L("clients.delete.title"), isPresented: $showingDeleteConfirmation, presenting: clientToDelete) { client in
+            Button(L("confirm.cancel"), role: .cancel) {
                 clientToDelete = nil
             }
-            Button("Elimina", role: .destructive) {
+            Button(L("confirm.delete"), role: .destructive) {
                 deleteClient(client)
             }
         } message: { client in
-            Text("Sei sicuro di voler eliminare \(client.fullName)? Questa azione non può essere annullata.")
+            Text(String(format: L("clients.delete.confirm.message"), client.fullName))
         }
-        .alert("Elimina Tutti i Clienti", isPresented: $showingDeleteAllConfirmation) {
-            Button("Annulla", role: .cancel) { }
-            Button("Elimina Tutti", role: .destructive) {
+        .alert(L("clients.delete.all.confirm"), isPresented: $showingDeleteAllConfirmation) {
+            Button(L("confirm.cancel"), role: .cancel) { }
+            Button(L("clients.delete.all"), role: .destructive) {
                 deleteAllClients()
             }
         } message: {
-            Text("Sei sicuro di voler eliminare tutti i \(clients.count) clienti? Questa azione non può essere annullata.")
+            Text(String(format: L("clients.delete.all.confirm.message"), clients.count))
         }
     }
 
@@ -140,6 +141,7 @@ struct ClientListView: View {
 
 struct ClientRow: View {
     let client: Client
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
     var body: some View {
         HStack(spacing: 12) {
@@ -165,7 +167,7 @@ struct ClientRow: View {
 
                 HStack(spacing: 8) {
                     if let age = client.age {
-                        Label("\(age) anni", systemImage: "calendar")
+                        Label("\(age) \(L("profile.years"))", systemImage: "calendar")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -193,6 +195,7 @@ struct ClientRow: View {
 struct AddClientView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
     @State private var firstName = ""
     @State private var lastName = ""
@@ -211,31 +214,31 @@ struct AddClientView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Dati Obbligatori") {
-                    TextField("Nome", text: $firstName)
-                    TextField("Cognome", text: $lastName)
+                Section(L("clients.form.required")) {
+                    TextField(L("clients.first.name"), text: $firstName)
+                    TextField(L("clients.last.name"), text: $lastName)
                 }
 
-                Section("Foto Profilo") {
+                Section(L("profile.photo")) {
                     ClientPhotoPickerRow(
-                        title: "Foto",
+                        title: L("clients.form.photo.label"),
                         item: $photoItem,
                         photoData: $photoData
                     )
                 }
 
-                Section("Dati Facoltativi") {
+                Section(L("clients.form.optional")) {
                     HStack {
-                        Text("Età")
+                        Text(L("profile.age"))
                         Spacer()
-                        TextField("Anni", value: $age, format: .number)
+                        TextField(L("profile.years"), value: $age, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
                     }
 
-                    Picker("Sesso", selection: $selectedGender) {
-                        Text("Non specificato").tag(nil as Gender?)
+                    Picker(L("profile.gender"), selection: $selectedGender) {
+                        Text(L("clients.form.gender.not.specified")).tag(nil as Gender?)
                         ForEach([Gender.male, Gender.female, Gender.other], id: \.self) { gender in
                             Label(gender.rawValue, systemImage: gender.icon)
                                 .tag(gender as Gender?)
@@ -243,42 +246,42 @@ struct AddClientView: View {
                     }
 
                     HStack {
-                        Text("Peso (kg)")
+                        Text(L("profile.weight"))
                         Spacer()
-                        TextField("kg", value: $weight, format: .number)
+                        TextField(L("unit.kg"), value: $weight, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
                     }
 
                     HStack {
-                        Text("Altezza (cm)")
+                        Text(L("profile.height"))
                         Spacer()
-                        TextField("cm", value: $height, format: .number)
+                        TextField(L("unit.cm"), value: $height, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
                     }
 
-                    TextField("Palestra", text: $gym)
+                    TextField(L("clients.form.gym"), text: $gym)
                 }
 
-                Section("Anamnesi") {
+                Section(L("clients.form.medical.history")) {
                     TextEditor(text: $medicalHistory)
                         .frame(minHeight: 100)
                 }
             }
-            .navigationTitle("Nuovo Cliente")
+            .navigationTitle(L("clients.new"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button(L("confirm.cancel")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Salva") {
+                    Button(L("confirm.save")) {
                         saveClient()
                     }
                     .disabled(!isFormValid)
@@ -317,6 +320,7 @@ struct AddClientView: View {
 struct EditClientView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
     @Bindable var client: Client
 
@@ -335,7 +339,7 @@ struct EditClientView: View {
                 workoutCardsSection
                 deleteSection
             }
-            .navigationTitle("Modifica Cliente")
+            .navigationTitle(L("clients.edit"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 doneButton
@@ -351,16 +355,16 @@ struct EditClientView: View {
     // MARK: - View Components
 
     private var requiredDataSection: some View {
-        Section("Dati Obbligatori") {
-            TextField("Nome", text: $client.firstName)
-            TextField("Cognome", text: $client.lastName)
+        Section(L("clients.form.required")) {
+            TextField(L("clients.first.name"), text: $client.firstName)
+            TextField(L("clients.last.name"), text: $client.lastName)
         }
     }
 
     private var photoSection: some View {
-        Section("Foto Profilo") {
+        Section(L("profile.photo")) {
             ClientPhotoPickerRow(
-                title: "Foto",
+                title: L("clients.form.photo.label"),
                 item: $photoItem,
                 photoData: $client.profileImageData
             )
@@ -368,18 +372,18 @@ struct EditClientView: View {
     }
 
     private var optionalDataSection: some View {
-        Section("Dati Facoltativi") {
+        Section(L("clients.form.optional")) {
             HStack {
-                Text("Età")
+                Text(L("profile.age"))
                 Spacer()
-                TextField("Anni", value: $client.age, format: .number)
+                TextField(L("profile.years"), value: $client.age, format: .number)
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.trailing)
                     .frame(width: 100)
             }
 
-            Picker("Sesso", selection: $client.gender) {
-                Text("Non specificato").tag(nil as Gender?)
+            Picker(L("profile.gender"), selection: $client.gender) {
+                Text(L("clients.form.gender.not.specified")).tag(nil as Gender?)
                 ForEach([Gender.male, Gender.female, Gender.other], id: \.self) { gender in
                     Label(gender.rawValue, systemImage: gender.icon)
                         .tag(gender as Gender?)
@@ -387,24 +391,24 @@ struct EditClientView: View {
             }
 
             HStack {
-                Text("Peso (kg)")
+                Text(L("profile.weight"))
                 Spacer()
-                TextField("kg", value: $client.weight, format: .number)
+                TextField(L("unit.kg"), value: $client.weight, format: .number)
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
                     .frame(width: 100)
             }
 
             HStack {
-                Text("Altezza (cm)")
+                Text(L("profile.height"))
                 Spacer()
-                TextField("cm", value: $client.height, format: .number)
+                TextField(L("unit.cm"), value: $client.height, format: .number)
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
                     .frame(width: 100)
             }
 
-            TextField("Palestra", text: Binding(
+            TextField(L("clients.form.gym"), text: Binding(
                 get: { client.gym ?? "" },
                 set: { client.gym = $0.isEmpty ? nil : $0 }
             ))
@@ -412,7 +416,7 @@ struct EditClientView: View {
     }
 
     private var medicalHistorySection: some View {
-        Section("Anamnesi") {
+        Section(L("clients.form.medical.history")) {
             TextEditor(text: Binding(
                 get: { client.medicalHistory ?? "" },
                 set: { client.medicalHistory = $0.isEmpty ? nil : $0 }
@@ -422,12 +426,12 @@ struct EditClientView: View {
     }
 
     private var oneRepMaxSection: some View {
-        Section("Massimali 1RM") {
+        Section(L("profile.one.rep.max")) {
             NavigationLink {
                 OneRepMaxView(records: $client.oneRepMaxRecords)
             } label: {
                 HStack {
-                    Label("Gestisci Massimali", systemImage: "figure.strengthtraining.traditional")
+                    Label(L("profile.manage.maxes"), systemImage: "figure.strengthtraining.traditional")
                     Spacer()
                     Text("\(client.oneRepMaxRecords.count)/5")
                         .foregroundStyle(.secondary)
@@ -438,18 +442,18 @@ struct EditClientView: View {
     }
 
     private var workoutCardsSection: some View {
-        Section("Schede Assegnate") {
+        Section(L("clients.assigned.workouts")) {
             NavigationLink {
                 ClientWorkoutCardsView(client: client)
             } label: {
-                Label("Vedi Schede", systemImage: "list.bullet.clipboard")
+                Label(L("clients.view.workouts"), systemImage: "list.bullet.clipboard")
             }
         }
     }
 
     private var deleteSection: some View {
         Section {
-            Button("Elimina Cliente", role: .destructive) {
+            Button(L("clients.delete.title"), role: .destructive) {
                 deleteClient()
             }
         }
@@ -457,7 +461,7 @@ struct EditClientView: View {
 
     private var doneButton: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
-            Button("Fatto") {
+            Button(L("common.done")) {
                 dismiss()
             }
             .disabled(!isFormValid)
@@ -476,14 +480,19 @@ struct EditClientView: View {
 }
 
 // ClientPhotoPickerRow component (versione semplificata per singola foto)
+@MainActor
 struct ClientPhotoPickerRow: View {
     let title: String
     @Binding var item: PhotosPickerItem?
     @Binding var photoData: Data?
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
     @State private var showingFullscreen = false
 
     var body: some View {
+        let deleteLabel = L("confirm.delete")
+        let selectLabel = L("common.select")
+
         HStack {
             Text(title)
 
@@ -503,12 +512,12 @@ struct ClientPhotoPickerRow: View {
                             photoData = nil
                             item = nil
                         } label: {
-                            Label("Elimina", systemImage: "trash")
+                            Label(deleteLabel, systemImage: "trash")
                         }
                     }
             } else {
                 PhotosPicker(selection: $item, matching: .images) {
-                    Label("Seleziona", systemImage: "photo")
+                    Label(selectLabel, systemImage: "photo")
                 }
             }
         }
