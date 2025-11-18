@@ -66,7 +66,7 @@ struct WorkoutCardListView: View {
                     ContentUnavailableView {
                         Label(L("cards.no.cards"), systemImage: "doc.text")
                     } description: {
-                        Text("Crea la tua prima scheda di allenamento")
+                        Text(L("cards.no.cards.description"))
                     } actions: {
                         Button(L("cards.create")) {
                             showingAddCard = true

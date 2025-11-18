@@ -80,8 +80,12 @@
 
 // MARK: - Language Settings
 "language.english" = "English";
+"language.french" = "Français";
 "language.italian" = "Italiano";
 "language.spanish" = "Español";
+"language.german" = "Deutsch";
+"language.portuguese" = "Português";
+"language.russian" = "Русский";
 
 // MARK: - Muscle Groups
 "muscle.chest" = "Peito";
@@ -122,6 +126,7 @@
 "unit.sets" = "séries";
 "unit.kg" = "kg";
 "unit.lbs" = "lbs";
+"unit.cm" = "cm";
 
 // MARK: - Workout
 "workout.rpe" = "RPE";

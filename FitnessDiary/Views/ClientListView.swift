@@ -257,7 +257,7 @@ struct AddClientView: View {
                     HStack {
                         Text(L("profile.height"))
                         Spacer()
-                        TextField("cm", value: $height, format: .number)
+                        TextField(L("unit.cm"), value: $height, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 100)
@@ -402,7 +402,7 @@ struct EditClientView: View {
             HStack {
                 Text(L("profile.height"))
                 Spacer()
-                TextField("cm", value: $client.height, format: .number)
+                TextField(L("unit.cm"), value: $client.height, format: .number)
                     .keyboardType(.decimalPad)
                     .multilineTextAlignment(.trailing)
                     .frame(width: 100)

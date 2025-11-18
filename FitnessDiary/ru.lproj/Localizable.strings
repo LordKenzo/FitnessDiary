@@ -80,8 +80,12 @@
 
 // MARK: - Language Settings
 "language.english" = "English";
+"language.french" = "Français";
 "language.italian" = "Italiano";
 "language.spanish" = "Español";
+"language.german" = "Deutsch";
+"language.portuguese" = "Português";
+"language.russian" = "Русский";
 
 // MARK: - Muscle Groups
 "muscle.chest" = "Грудь";
@@ -122,6 +126,7 @@
 "unit.sets" = "подходов";
 "unit.kg" = "кг";
 "unit.lbs" = "фунтов";
+"unit.cm" = "см";
 
 // MARK: - Workout
 "workout.rpe" = "RPE";

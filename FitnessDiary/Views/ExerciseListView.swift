@@ -35,7 +35,7 @@ struct ExerciseListView: View {
                 ContentUnavailableView {
                     Label(L("exercises.no.exercises"), systemImage: "figure.strengthtraining.traditional")
                 } description: {
-                    Text("Aggiungi il tuo primo esercizio")
+                    Text(L("exercises.no.exercises.description"))
                 } actions: {
                     Button(L("exercises.add")) {
                         showingAddExercise = true

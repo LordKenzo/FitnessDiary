@@ -18,7 +18,7 @@ struct MuscleListView: View {
                 ContentUnavailableView {
                     Label(L("muscles.no.muscles"), systemImage: "figure.arms.open")
                 } description: {
-                    Text("Inizializza il database con i muscoli predefiniti o aggiungine di nuovi")
+                    Text(L("muscles.no.muscles.description"))
                 } actions: {
                     Button(L("muscles.initialize")) {
                         initializeDefaultMuscles()
