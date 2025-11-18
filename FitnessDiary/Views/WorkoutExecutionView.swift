@@ -838,7 +838,9 @@ struct WorkoutExecutionView: View {
             modelContext.delete(log)
             saveErrorMessage = error.localizedDescription
             isSaveErrorAlertPresented = true
+            #if DEBUG
             print("Failed to save workout log", error)
+            #endif
         }
     }
 
