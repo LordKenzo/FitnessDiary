@@ -5,6 +5,7 @@ import PhotosUI
 struct ProfileView: View {
     @Query private var profiles: [UserProfile]
     @State private var showingSetup = false
+    @ObservedObject private var localizationManager = LocalizationManager.shared
     
     private var profile: UserProfile? {
         profiles.first
@@ -16,11 +17,11 @@ struct ProfileView: View {
                 ProfileDetailView(profile: profile)
             } else {
                 ContentUnavailableView {
-                    Label("Nessun Profilo", systemImage: "person.circle")
+                    Label(L("profile.no.profile"), systemImage: "person.circle")
                 } description: {
-                    Text("Crea il tuo profilo per iniziare")
+                    Text(L("profile.no.profile.description"))
                 } actions: {
-                    Button("Crea Profilo") {
+                    Button(L("profile.create")) {
                         showingSetup = true
                     }
                     .buttonStyle(.borderedProminent)
@@ -42,6 +43,7 @@ struct ProfileDetailView: View {
     @Bindable var profile: UserProfile
     @State private var showingEdit = false
     @State private var showingZonesEditor = false
+    @ObservedObject private var localizationManager = LocalizationManager.shared
     
     var body: some View {
         List {
@@ -72,20 +74,20 @@ struct ProfileDetailView: View {
             }
             .listRowBackground(Color.clear)
             
-            Section("Dati Fisici") {
-                LabeledContent("Sesso", value: profile.gender.rawValue)
-                LabeledContent("Età", value: "\(profile.age) anni")
-                LabeledContent("Peso", value: String(format: "%.1f kg", profile.weight))
-                LabeledContent("Altezza", value: String(format: "%.0f cm", profile.height))
-                LabeledContent("BMI", value: String(format: "%.1f", calculateBMI()))
+            Section(L("profile.physical.data")) {
+                LabeledContent(L("profile.gender"), value: profile.gender.rawValue)
+                LabeledContent(L("profile.age"), value: "\(profile.age) \(L("profile.years"))")
+                LabeledContent(L("profile.weight"), value: String(format: "%.1f \(L("unit.kg"))", profile.weight))
+                LabeledContent(L("profile.height"), value: String(format: "%.0f cm", profile.height))
+                LabeledContent(L("profile.bmi"), value: String(format: "%.1f", calculateBMI()))
             }
 
-            Section("Massimali 1RM") {
+            Section(L("profile.one.rep.max")) {
                 NavigationLink {
                     OneRepMaxView(records: $profile.oneRepMaxRecords)
                 } label: {
                     HStack {
-                        Label("Gestisci Massimali", systemImage: "figure.strengthtraining.traditional")
+                        Label(L("profile.manage.maxes"), systemImage: "figure.strengthtraining.traditional")
                         Spacer()
                         Text("\(profile.oneRepMaxRecords.count)/5")
                             .foregroundStyle(.secondary)
@@ -95,13 +97,13 @@ struct ProfileDetailView: View {
             }
 
             Section {
-                LabeledContent("FC Massima", value: "\(profile.maxHeartRate) bpm")
-                LabeledContent("FC Calcolata", value: "\(220 - profile.age) bpm")
+                LabeledContent(L("profile.max.hr"), value: "\(profile.maxHeartRate) \(L("profile.bpm"))")
+                LabeledContent(L("profile.calculated.hr"), value: "\(220 - profile.age) \(L("profile.bpm"))")
                     .foregroundStyle(.secondary)
             } header: {
-                Text("Frequenza Cardiaca")
+                Text(L("profile.heart.rate"))
             } footer: {
-                Text("FC massima personalizzata o calcolata con formula 220 - età")
+                Text(L("profile.hr.footer"))
             }
             
             Section {
@@ -120,15 +122,15 @@ struct ProfileDetailView: View {
                 Button {
                     showingZonesEditor = true
                 } label: {
-                    Label("Personalizza Zone Cardio", systemImage: "slider.horizontal.3")
+                    Label(L("profile.customize.zones"), systemImage: "slider.horizontal.3")
                 }
             } header: {
-                Text("Zone Cardio")
+                Text(L("profile.cardio.zones"))
             }
         }
-        .navigationTitle("Profilo")
+        .navigationTitle(L("profile.title"))
         .toolbar {
-            Button("Modifica") {
+            Button(L("common.edit")) {
                 showingEdit = true
             }
         }
@@ -172,7 +174,8 @@ struct ProfileEditView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @StateObject private var healthKitManager = HealthKitManager()
-    
+    @ObservedObject private var localizationManager = LocalizationManager.shared
+
     @Bindable var profile: UserProfile
     
     @State private var name: String
@@ -198,7 +201,7 @@ struct ProfileEditView: View {
         NavigationStack {
             Form {
                 // Sezione Foto
-                Section("Foto Profilo") {
+                Section(L("profile.photo")) {
                     HStack {
                         Spacer()
                         if let image = profileImage {
@@ -215,80 +218,80 @@ struct ProfileEditView: View {
                         }
                         Spacer()
                     }
-                    
+
                     PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                        Label("Cambia Foto", systemImage: "photo")
+                        Label(L("profile.change.photo"), systemImage: "photo")
                     }
-                    
+
                     if profileImage != nil {
                         Button(role: .destructive) {
                             profileImage = nil
                         } label: {
-                            Label("Rimuovi Foto", systemImage: "trash")
+                            Label(L("profile.remove.photo"), systemImage: "trash")
                         }
                     }
                 }
                 
                 // Sezione Dati Personali
-                Section("Dati Personali") {
-                    TextField("Nome", text: $name)
-                    
-                    Picker("Sesso", selection: $gender) {
+                Section(L("profile.personal.data")) {
+                    TextField(L("profile.name"), text: $name)
+
+                    Picker(L("profile.gender"), selection: $gender) {
                         ForEach(Gender.allCases, id: \.self) { gender in
                             Text(gender.rawValue).tag(gender)
                         }
                     }
-                    
+
                     HStack {
-                        Text("Età")
+                        Text(L("profile.age"))
                         Spacer()
-                        TextField("Età", value: $age, format: .number)
+                        TextField(L("profile.age"), value: $age, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 60)
-                        Text("anni")
+                        Text(L("profile.years"))
                     }
-                    
+
                     HStack {
-                        Text("Peso")
+                        Text(L("profile.weight"))
                         Spacer()
-                        TextField("Peso", value: $weight, format: .number)
+                        TextField(L("profile.weight"), value: $weight, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 60)
-                        Text("kg")
+                        Text(L("unit.kg"))
                     }
-                    
+
                     HStack {
-                        Text("Altezza")
+                        Text(L("profile.height"))
                         Spacer()
-                        TextField("Altezza", value: $height, format: .number)
+                        TextField(L("profile.height"), value: $height, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 60)
                         Text("cm")
                     }
-                    
+
                     Button {
                         Task {
                             await importFromHealthKit()
                         }
                     } label: {
-                        Label("Aggiorna da Apple Health", systemImage: "arrow.clockwise")
+                        Label(L("profile.update.from.health"), systemImage: "arrow.clockwise")
                     }
                     .disabled(isLoadingHealthData)
                 }
             }
-            .navigationTitle("Modifica Profilo")
+            .navigationTitle(L("profile.edit"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button(L("common.cancel")) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Salva") {
+                    Button(L("common.save")) {
                         saveChanges()
                         dismiss()
                     }

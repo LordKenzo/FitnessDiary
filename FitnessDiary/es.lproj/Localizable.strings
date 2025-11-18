@@ -104,6 +104,7 @@
 "common.previous" = "Anterior";
 "common.search" = "Buscar";
 "common.filter" = "Filtrar";
+"common.select" = "Seleccionar";
 "common.loading" = "Cargando...";
 "common.error" = "Error";
 "common.success" = "Éxito";
@@ -176,8 +177,21 @@
 "clients.notes" = "Notas";
 "clients.delete.title" = "Eliminar Cliente";
 "clients.delete.message" = "¿Estás seguro de que quieres eliminar este cliente?";
+"clients.delete.confirm.message" = "¿Estás seguro de que quieres eliminar a %@? Esta acción no se puede deshacer.";
 "clients.delete.all" = "Eliminar Todos";
+"clients.delete.all.confirm" = "Eliminar Todos los Clientes";
+"clients.delete.all.confirm.message" = "¿Estás seguro de que quieres eliminar todos los %d clientes? Esta acción no se puede deshacer.";
 "clients.workouts" = "Tarjetas";
+"clients.new" = "Nuevo Cliente";
+"clients.edit" = "Editar Cliente";
+"clients.form.required" = "Datos Obligatorios";
+"clients.form.optional" = "Datos Opcionales";
+"clients.form.photo.label" = "Foto";
+"clients.form.gym" = "Gimnasio";
+"clients.form.medical.history" = "Historial Médico";
+"clients.form.gender.not.specified" = "No especificado";
+"clients.assigned.workouts" = "Tarjetas Asignadas";
+"clients.view.workouts" = "Ver Tarjetas";
 
 // MARK: - Exercises
 "exercises.title" = "Ejercicios";

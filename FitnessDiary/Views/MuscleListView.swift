@@ -6,6 +6,7 @@ struct MuscleListView: View {
     @Query(sort: \Muscle.name) private var muscles: [Muscle]
     @State private var showingAddMuscle = false
     @State private var selectedMuscle: Muscle?
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
     private var musclesByCategory: [MuscleCategory: [Muscle]] {
         Dictionary(grouping: muscles, by: { $0.category })
@@ -15,11 +16,11 @@ struct MuscleListView: View {
         List {
             if muscles.isEmpty {
                 ContentUnavailableView {
-                    Label("Nessun muscolo", systemImage: "figure.arms.open")
+                    Label(L("muscles.no.muscles"), systemImage: "figure.arms.open")
                 } description: {
                     Text("Inizializza il database con i muscoli predefiniti o aggiungine di nuovi")
                 } actions: {
-                    Button("Inizializza Database") {
+                    Button(L("muscles.initialize")) {
                         initializeDefaultMuscles()
                     }
                     .buttonStyle(.borderedProminent)
@@ -51,14 +52,14 @@ struct MuscleListView: View {
                 }
             }
         }
-        .navigationTitle("Muscoli")
+        .navigationTitle(L("muscles.title"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
                         showingAddMuscle = true
                     } label: {
-                        Label("Aggiungi Muscolo", systemImage: "plus")
+                        Label(L("muscles.add"), systemImage: "plus")
                     }
 
                     if !muscles.isEmpty {
@@ -75,7 +76,7 @@ struct MuscleListView: View {
                         Button {
                             initializeDefaultMuscles()
                         } label: {
-                            Label("Inizializza Database", systemImage: "arrow.clockwise")
+                            Label(L("muscles.initialize"), systemImage: "arrow.clockwise")
                         }
                     }
                 } label: {

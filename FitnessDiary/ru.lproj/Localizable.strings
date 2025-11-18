@@ -104,6 +104,7 @@
 "common.previous" = "Предыдущий";
 "common.search" = "Поиск";
 "common.filter" = "Фильтр";
+"common.select" = "Выбрать";
 "common.loading" = "Загрузка...";
 "common.error" = "Ошибка";
 "common.success" = "Успех";
@@ -176,8 +177,21 @@
 "clients.notes" = "Заметки";
 "clients.delete.title" = "Удалить Клиента";
 "clients.delete.message" = "Вы уверены, что хотите удалить этого клиента?";
+"clients.delete.confirm.message" = "Вы уверены, что хотите удалить %@? Это действие нельзя отменить.";
 "clients.delete.all" = "Удалить Всех";
+"clients.delete.all.confirm" = "Удалить Всех Клиентов";
+"clients.delete.all.confirm.message" = "Вы уверены, что хотите удалить всех %d клиентов? Это действие нельзя отменить.";
 "clients.workouts" = "Карточки";
+"clients.new" = "Новый Клиент";
+"clients.edit" = "Редактировать Клиента";
+"clients.form.required" = "Обязательные Данные";
+"clients.form.optional" = "Необязательные Данные";
+"clients.form.photo.label" = "Фото";
+"clients.form.gym" = "Спортзал";
+"clients.form.medical.history" = "Медицинская История";
+"clients.form.gender.not.specified" = "Не указан";
+"clients.assigned.workouts" = "Назначенные Карточки";
+"clients.view.workouts" = "Посмотреть Карточки";
 
 // MARK: - Exercises
 "exercises.title" = "Упражнения";
