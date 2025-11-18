@@ -8,21 +8,7 @@ struct MotorSchemaSelectionView: View {
         List {
             Section {
                 ForEach(MotorSchema.allCases) { schema in
-                    Button {
-                        toggleSelection(schema)
-                    } label: {
-                        HStack {
-                            Label(schema.rawValue, systemImage: schema.icon)
-                                .foregroundStyle(schema.color)
-                            Spacer()
-                            if selection.contains(schema) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.accentColor)
-                            }
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(!selection.contains(schema) && selection.count >= selectionLimit)
+                    schemaRow(schema)
                 }
             } footer: {
                 Text("Puoi selezionare al massimo \(selectionLimit) schemi motori")
@@ -40,6 +26,25 @@ struct MotorSchemaSelectionView: View {
             selection.insert(schema)
         }
     }
+
+    @ViewBuilder
+    private func schemaRow(_ schema: MotorSchema) -> some View {
+        Button {
+            toggleSelection(schema)
+        } label: {
+            HStack {
+                Label(schema.rawValue, systemImage: schema.icon)
+                    .foregroundStyle(schema.color)
+                Spacer()
+                if selection.contains(schema) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(!selection.contains(schema) && selection.count >= selectionLimit)
+    }
 }
 
 struct ExerciseTagSelectionView: View {
@@ -49,24 +54,29 @@ struct ExerciseTagSelectionView: View {
         List {
             Section {
                 ForEach(ExerciseTag.allCases) { tag in
-                    Button {
-                        toggleSelection(tag)
-                    } label: {
-                        HStack {
-                            Label(tag.rawValue, systemImage: tag.icon)
-                                .foregroundStyle(tag.color)
-                            Spacer()
-                            if selection.contains(tag) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.accentColor)
-                            }
-                        }
-                    }
-                    .buttonStyle(.plain)
+                    tagRow(tag)
                 }
             }
         }
         .navigationTitle("Tag esercizio")
+    }
+
+    @ViewBuilder
+    private func tagRow(_ tag: ExerciseTag) -> some View {
+        Button {
+            toggleSelection(tag)
+        } label: {
+            HStack {
+                Label(tag.rawValue, systemImage: tag.icon)
+                    .foregroundStyle(tag.color)
+                Spacer()
+                if selection.contains(tag) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Color.accentColor)
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private func toggleSelection(_ tag: ExerciseTag) {
