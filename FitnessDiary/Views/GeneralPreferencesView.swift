@@ -152,7 +152,7 @@ private struct AudioPreferencesCard: View {
 
     private var selectedSound: TimerSound {
         get { TimerSound(rawValue: selectedSoundRaw) ?? .classic }
-        set { selectedSoundRaw = newValue.rawValue }
+        nonmutating set { selectedSoundRaw = newValue.rawValue }
     }
 
     private func handleSoundSelection(_ sound: TimerSound) {
