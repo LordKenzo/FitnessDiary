@@ -198,6 +198,9 @@ struct ProfileEditView: View {
     }
     
     var body: some View {
+        let changePhotoLabel = L("profile.change.photo")
+        let removePhotoLabel = L("profile.remove.photo")
+
         NavigationStack {
             Form {
                 // Sezione Foto
@@ -220,14 +223,14 @@ struct ProfileEditView: View {
                     }
 
                     PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                        Label(L("profile.change.photo"), systemImage: "photo")
+                        Label(changePhotoLabel, systemImage: "photo")
                     }
 
                     if profileImage != nil {
                         Button(role: .destructive) {
                             profileImage = nil
                         } label: {
-                            Label(L("profile.remove.photo"), systemImage: "trash")
+                            Label(removePhotoLabel, systemImage: "trash")
                         }
                     }
                 }
