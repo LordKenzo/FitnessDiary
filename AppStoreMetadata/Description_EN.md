@@ -141,10 +141,10 @@ Secondary: (none)
 4+ (No objectionable content)
 
 ### Copyright
-© 2025 Francesco Lorenzini
+© 2025 Lorenzo Franceschini
 
 ### Privacy Policy URL
-https://lordkenzo.github.io/FitnessDiary/privacy-policy.html
+https://www.fittypal.com/privacy.html
 
 ### Support URL
 https://github.com/LordKenzo/FitnessDiary/issues

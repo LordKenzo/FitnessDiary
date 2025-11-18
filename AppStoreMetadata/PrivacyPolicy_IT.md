@@ -1,7 +1,7 @@
 # Informativa sulla Privacy - FittyPal
 
-**Ultimo Aggiornamento:** 18 gennaio 2025
-**Data di Entrata in Vigore:** 18 gennaio 2025
+**Ultimo Aggiornamento:** 18 novembre 2025
+**Data di Entrata in Vigore:** 18 novembre 2025
 
 ---
 
@@ -15,7 +15,7 @@ FittyPal ("noi", "nostro" o "l'app") si impegna a proteggere la tua privacy. Que
 
 ## Titolare del Trattamento
 
-**Nome:** Francesco Lorenzini
+**Nome:** Lorenzo Franceschini
 **Contatto:** support@fittypal.com
 **Sede:** Italia
 
@@ -274,5 +274,5 @@ FittyPal è progettato per rispettare completamente la tua privacy. I tuoi dati 
 
 ---
 
-**Ultimo Aggiornamento:** 18 gennaio 2025
+**Ultimo Aggiornamento:** 18 novembre 2025
 **Versione:** 1.0

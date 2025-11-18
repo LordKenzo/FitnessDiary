@@ -1,7 +1,7 @@
 # Privacy Policy - FittyPal
 
-**Last Updated:** January 18, 2025
-**Effective Date:** January 18, 2025
+**Last Updated:** November 18, 2025
+**Effective Date:** November 18, 2025
 
 ---
 
@@ -15,7 +15,7 @@ FittyPal ("we," "our," or "the app") is committed to protecting your privacy. Th
 
 ## Data Controller
 
-**Name:** Francesco Lorenzini
+**Name:** Lorenzo Franceschini
 **Contact:** support@fittypal.com
 **Location:** Italy
 
@@ -274,5 +274,5 @@ FittyPal is designed to respect your privacy completely. Your workout data is yo
 
 ---
 
-**Last Updated:** January 18, 2025
+**Last Updated:** November 18, 2025
 **Version:** 1.0
