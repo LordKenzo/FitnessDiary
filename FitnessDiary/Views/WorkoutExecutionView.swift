@@ -58,12 +58,12 @@ final class WorkoutExecutionViewModel: ObservableObject {
                 return nil
             }
         }
+
+        var previewTone: Tone? {
+            tone(for: .work)
+        }
     }
 
-    private enum Preferences {
-        static let selectedSoundKey = "timer.selectedSound"
-        static let volumeKey = "timer.soundVolume"
-    }
     struct Step: Identifiable {
         enum StepType: Equatable {
             case timed(duration: TimeInterval, isRest: Bool)
@@ -95,6 +95,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
     @Published private(set) var encouragementMessage: String
     @Published private(set) var selectedSound: TimerSound
     @Published private(set) var soundVolume: Double
+    @Published private(set) var isSoundEnabled: Bool
 
     // Inputs for reps-based work
     @Published var completedSets: Int = 0
@@ -117,17 +118,24 @@ final class WorkoutExecutionViewModel: ObservableObject {
         self.steps = steps
         self.currentStepIndex = 0
         self.currentHeartRateZone = nil
-        if let savedSound = userDefaults.string(forKey: Preferences.selectedSoundKey),
+        if let savedSound = userDefaults.string(forKey: TimerPreferenceKeys.selectedSound),
            let storedSound = TimerSound(rawValue: savedSound) {
             selectedSound = storedSound
         } else {
             selectedSound = .classic
         }
 
-        if userDefaults.object(forKey: Preferences.volumeKey) != nil {
-            soundVolume = userDefaults.double(forKey: Preferences.volumeKey)
+        if userDefaults.object(forKey: TimerPreferenceKeys.soundVolume) != nil {
+            soundVolume = userDefaults.double(forKey: TimerPreferenceKeys.soundVolume)
         } else {
             soundVolume = 0.8
+        }
+
+        if userDefaults.object(forKey: TimerPreferenceKeys.soundEnabled) != nil {
+            isSoundEnabled = userDefaults.bool(forKey: TimerPreferenceKeys.soundEnabled)
+        } else {
+            isSoundEnabled = selectedSound != .mute
+            userDefaults.set(isSoundEnabled, forKey: TimerPreferenceKeys.soundEnabled)
         }
 
         encouragementMessage = motivationEngine.defaultMessage
@@ -351,18 +359,6 @@ final class WorkoutExecutionViewModel: ObservableObject {
         }
     }
 
-    func updateSelectedSound(_ sound: TimerSound) {
-        guard selectedSound != sound else { return }
-        selectedSound = sound
-        userDefaults.set(sound.rawValue, forKey: Preferences.selectedSoundKey)
-    }
-
-    func updateSoundVolume(_ volume: Double) {
-        let clamped = min(max(volume, 0), 1)
-        soundVolume = clamped
-        userDefaults.set(clamped, forKey: Preferences.volumeKey)
-    }
-
     private func updateMotivation(for step: Step?) {
         guard let step else {
             encouragementMessage = motivationEngine.defaultMessage
@@ -383,7 +379,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
     }
 
     private func playSound(for event: MotivationEngine.Event) {
-        guard soundVolume > 0, let tone = selectedSound.tone(for: event) else { return }
+        guard isSoundEnabled, soundVolume > 0, let tone = selectedSound.tone(for: event) else { return }
         let toneData = TimerToneGenerator.makeToneData(frequency: tone.frequency, duration: tone.duration)
         guard !toneData.isEmpty else { return }
 
@@ -470,7 +466,6 @@ struct WorkoutExecutionView: View {
                                 headerSection
                                 heartRateSection
                                 currentStepSection
-                                soundControlsSection
                                 upcomingSection
                             }
                             .padding(24)
@@ -512,65 +507,6 @@ struct WorkoutExecutionView: View {
         } message: {
             Text(saveErrorMessage ?? "Si è verificato un errore inatteso. Riprova.")
         }
-    }
-
-    private var soundControlsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Label(L("timer.sound.title"), systemImage: "speaker.wave.2.fill")
-                .font(.headline)
-
-            Menu {
-                ForEach(WorkoutExecutionViewModel.TimerSound.allCases) { sound in
-                    Button {
-                        viewModel.updateSelectedSound(sound)
-                    } label: {
-                        Label {
-                            Text(localized: sound.localizationKey)
-                        } icon: {
-                            Image(systemName: sound == viewModel.selectedSound ? "checkmark" : sound.iconName)
-                        }
-                    }
-                    .disabled(sound == viewModel.selectedSound)
-                }
-            } label: {
-                HStack {
-                    Label {
-                        Text(localized: viewModel.selectedSound.localizationKey)
-                    } icon: {
-                        Image(systemName: "music.note.list")
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.vertical, 10)
-                .padding(.horizontal, 12)
-                .frame(maxWidth: .infinity)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(localized: "timer.sound.volume")
-                    Spacer()
-                    Text(String(format: "%.0f%%", viewModel.soundVolume * 100))
-                        .font(.caption)
-                        .monospacedDigit()
-                        .foregroundStyle(.secondary)
-                }
-                Slider(
-                    value: Binding(
-                        get: { viewModel.soundVolume },
-                        set: { viewModel.updateSoundVolume($0) }
-                    ),
-                    in: 0...1
-                )
-                .disabled(viewModel.selectedSound == .mute)
-            }
-        }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     @ToolbarContentBuilder
@@ -1220,49 +1156,6 @@ struct MotivationEngine {
             .map { L($0) }
             .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
         return localized.randomElement() ?? defaultMessage
-    }
-}
-
-private enum TimerToneGenerator {
-    static func makeToneData(frequency: Double, duration: TimeInterval, sampleRate: Double = 44100) -> Data {
-        guard frequency > 0, duration > 0 else { return Data() }
-        let sampleCount = Int(sampleRate * duration)
-        guard sampleCount > 0 else { return Data() }
-
-        var sampleData = Data(capacity: sampleCount * MemoryLayout<Int16>.size)
-        for index in 0..<sampleCount {
-            let sample = sin(2 * .pi * frequency * Double(index) / sampleRate)
-            var value = Int16(sample * Double(Int16.max))
-            withUnsafeBytes(of: &value) { buffer in
-                sampleData.append(contentsOf: buffer)
-            }
-        }
-
-        var data = Data()
-        data.append(contentsOf: "RIFF".utf8)
-        var chunkSize = UInt32(36 + sampleData.count).littleEndian
-        data.append(Data(bytes: &chunkSize, count: 4))
-        data.append(contentsOf: "WAVEfmt ".utf8)
-        var subchunk1Size: UInt32 = 16
-        data.append(Data(bytes: &subchunk1Size, count: 4))
-        var audioFormat: UInt16 = 1
-        data.append(Data(bytes: &audioFormat, count: 2))
-        var numChannels: UInt16 = 1
-        data.append(Data(bytes: &numChannels, count: 2))
-        var sampleRateUInt: UInt32 = UInt32(sampleRate)
-        data.append(Data(bytes: &sampleRateUInt, count: 4))
-        var byteRate: UInt32 = sampleRateUInt * UInt32(numChannels) * UInt32(2)
-        data.append(Data(bytes: &byteRate, count: 4))
-        var blockAlign: UInt16 = numChannels * 2
-        data.append(Data(bytes: &blockAlign, count: 2))
-        var bitsPerSample: UInt16 = 16
-        data.append(Data(bytes: &bitsPerSample, count: 2))
-        data.append(contentsOf: "data".utf8)
-        var subchunk2Size = UInt32(sampleData.count).littleEndian
-        data.append(Data(bytes: &subchunk2Size, count: 4))
-        data.append(sampleData)
-
-        return data
     }
 }
 

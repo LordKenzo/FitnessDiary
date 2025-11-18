@@ -70,6 +70,7 @@
 // MARK: - General Preferences
 "preferences.title" = "Préférences générales";
 "preferences.section.general" = "Préférences générales";
+"preferences.section.audio" = "Audio";
 "preferences.debug.log" = "Générer la séquence d'entraînement";
 "preferences.clone.load" = "Cloner automatiquement la charge";
 "preferences.countdown" = "Compte à rebours initial";
@@ -140,6 +141,7 @@
 // MARK: - Timer Preferences
 "timer.sound.title" = "Son du minuteur";
 "timer.sound.volume" = "Volume";
+"preferences.audio.toggle" = "Activer le son du minuteur";
 "timer.sound.option.classic" = "Bip classique";
 "timer.sound.option.soft" = "Cloche douce";
 "timer.sound.option.pulse" = "Coup énergique";

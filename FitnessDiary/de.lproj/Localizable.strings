@@ -70,6 +70,7 @@
 // MARK: - General Preferences
 "preferences.title" = "Allgemeine Einstellungen";
 "preferences.section.general" = "Allgemeine Einstellungen";
+"preferences.section.audio" = "Audio";
 "preferences.debug.log" = "Trainingssequenz generieren";
 "preferences.clone.load" = "Last automatisch klonen";
 "preferences.countdown" = "Start-Countdown";
@@ -140,6 +141,7 @@
 // MARK: - Timer Preferences
 "timer.sound.title" = "Timer-Klang";
 "timer.sound.volume" = "Lautstärke";
+"preferences.audio.toggle" = "Timer-Audio aktivieren";
 "timer.sound.option.classic" = "Klassischer Beep";
 "timer.sound.option.soft" = "Sanfte Glocke";
 "timer.sound.option.pulse" = "Power-Schlag";

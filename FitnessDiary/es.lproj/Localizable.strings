@@ -70,6 +70,7 @@
 // MARK: - General Preferences
 "preferences.title" = "Preferencias Generales";
 "preferences.section.general" = "Preferencias Generales";
+"preferences.section.audio" = "Audio";
 "preferences.debug.log" = "Generar Secuencia de Entrenamiento";
 "preferences.clone.load" = "Clonar carga automáticamente";
 "preferences.countdown" = "Cuenta regresiva inicial";
@@ -140,6 +141,7 @@
 // MARK: - Timer Preferences
 "timer.sound.title" = "Sonido del temporizador";
 "timer.sound.volume" = "Volumen";
+"preferences.audio.toggle" = "Activar audio del temporizador";
 "timer.sound.option.classic" = "Beep clásico";
 "timer.sound.option.soft" = "Campana suave";
 "timer.sound.option.pulse" = "Golpe enérgico";

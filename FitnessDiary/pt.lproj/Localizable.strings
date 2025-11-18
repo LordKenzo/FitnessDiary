@@ -70,6 +70,7 @@
 // MARK: - General Preferences
 "preferences.title" = "Preferências Gerais";
 "preferences.section.general" = "Preferências Gerais";
+"preferences.section.audio" = "Áudio";
 "preferences.debug.log" = "Gerar Sequência de Treino";
 "preferences.clone.load" = "Clonar carga automaticamente";
 "preferences.countdown" = "Contagem regressiva inicial";
@@ -140,6 +141,7 @@
 // MARK: - Timer Preferences
 "timer.sound.title" = "Som do cronômetro";
 "timer.sound.volume" = "Volume";
+"preferences.audio.toggle" = "Ativar áudio do cronômetro";
 "timer.sound.option.classic" = "Bipe clássico";
 "timer.sound.option.soft" = "Sino suave";
 "timer.sound.option.pulse" = "Golpe enérgico";

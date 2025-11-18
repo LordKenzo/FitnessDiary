@@ -70,6 +70,7 @@
 // MARK: - General Preferences
 "preferences.title" = "Общие настройки";
 "preferences.section.general" = "Общие настройки";
+"preferences.section.audio" = "Аудио";
 "preferences.debug.log" = "Генерировать последовательность тренировок";
 "preferences.clone.load" = "Автоматически клонировать нагрузку";
 "preferences.countdown" = "Начальный отсчет";
@@ -140,6 +141,7 @@
 // MARK: - Timer Preferences
 "timer.sound.title" = "Звук таймера";
 "timer.sound.volume" = "Громкость";
+"preferences.audio.toggle" = "Включить звук таймера";
 "timer.sound.option.classic" = "Классический сигнал";
 "timer.sound.option.soft" = "Мягкий звон";
 "timer.sound.option.pulse" = "Удар пульса";
