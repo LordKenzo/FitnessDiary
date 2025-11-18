@@ -118,25 +118,32 @@ final class WorkoutExecutionViewModel: ObservableObject {
         self.steps = steps
         self.currentStepIndex = 0
         self.currentHeartRateZone = nil
+
+        let initialSound: TimerSound
         if let savedSound = userDefaults.string(forKey: TimerPreferenceKeys.selectedSound),
            let storedSound = TimerSound(rawValue: savedSound) {
-            selectedSound = storedSound
+            initialSound = storedSound
         } else {
-            selectedSound = .classic
+            initialSound = .classic
         }
+        self.selectedSound = initialSound
 
+        let initialVolume: Double
         if userDefaults.object(forKey: TimerPreferenceKeys.soundVolume) != nil {
-            soundVolume = userDefaults.double(forKey: TimerPreferenceKeys.soundVolume)
+            initialVolume = userDefaults.double(forKey: TimerPreferenceKeys.soundVolume)
         } else {
-            soundVolume = 0.8
+            initialVolume = 0.8
         }
+        self.soundVolume = initialVolume
 
+        let initialSoundEnabled: Bool
         if userDefaults.object(forKey: TimerPreferenceKeys.soundEnabled) != nil {
-            isSoundEnabled = userDefaults.bool(forKey: TimerPreferenceKeys.soundEnabled)
+            initialSoundEnabled = userDefaults.bool(forKey: TimerPreferenceKeys.soundEnabled)
         } else {
-            isSoundEnabled = selectedSound != .mute
-            userDefaults.set(isSoundEnabled, forKey: TimerPreferenceKeys.soundEnabled)
+            initialSoundEnabled = initialSound != .mute
+            userDefaults.set(initialSoundEnabled, forKey: TimerPreferenceKeys.soundEnabled)
         }
+        self.isSoundEnabled = initialSoundEnabled
 
         encouragementMessage = motivationEngine.defaultMessage
         if !steps.isEmpty {
