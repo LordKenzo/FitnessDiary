@@ -34,6 +34,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 }
 
 /// Manager for handling app localization
+@MainActor
 class LocalizationManager: ObservableObject {
     static let shared = LocalizationManager()
 
@@ -74,6 +75,7 @@ class LocalizationManager: ObservableObject {
 
 /// Property wrapper for accessing localized strings with reactive updates
 @propertyWrapper
+@MainActor
 struct Localized: DynamicProperty {
     @ObservedObject private var manager = LocalizationManager.shared
 
@@ -91,12 +93,14 @@ struct Localized: DynamicProperty {
 }
 
 /// Helper function for localized strings
+@MainActor
 func L(_ key: String, comment: String = "") -> String {
     LocalizationManager.shared.localizedString(key, comment: comment)
 }
 
 /// Extension to make Text views language-reactive
 extension Text {
+    @MainActor
     init(localized key: String, comment: String = "") {
         self.init(LocalizationManager.shared.localizedString(key, comment: comment))
     }
