@@ -480,6 +480,7 @@ struct EditClientView: View {
 }
 
 // ClientPhotoPickerRow component (versione semplificata per singola foto)
+@MainActor
 struct ClientPhotoPickerRow: View {
     let title: String
     @Binding var item: PhotosPickerItem?
