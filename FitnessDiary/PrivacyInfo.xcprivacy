@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- TRACKING PUBBLICITARIO -->
+	<!-- FitnessDiary NON effettua tracking pubblicitario -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+
+	<!-- DOMINI NETWORK PER TRACKING -->
+	<!-- Array vuoto: nessun dominio tracciato -->
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+
+	<!-- COLLEZIONE DATI -->
+	<!-- Array vuoto: nessun dato raccolto per terze parti -->
+	<!-- Tutti i dati restano sul dispositivo dell'utente -->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+
+	<!-- API DI SISTEMA SENSIBILI UTILIZZATE -->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+
+		<!-- 1. USER DEFAULTS API -->
+		<!-- Utilizzato per: salvare preferenze utente (lingua, countdown timer) -->
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- CA92.1: Accesso a preferenze/impostazioni gestite dall'utente -->
+				<string>CA92.1</string>
+			</array>
+		</dict>
+
+		<!-- 2. FILE TIMESTAMP API -->
+		<!-- Utilizzato da: SwiftData per gestire data/ora creazione e modifica record -->
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- C617.1: Accesso timestamp per funzionalità app (non fingerprinting) -->
+				<string>C617.1</string>
+			</array>
+		</dict>
+
+		<!-- 3. DISK SPACE API -->
+		<!-- Utilizzato per: verificare spazio disponibile prima di salvare foto profilo/esercizi -->
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryDiskSpace</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- E174.1: Mostrare info spazio disco all'utente o evitare errori scrittura -->
+				<string>E174.1</string>
+			</array>
+		</dict>
+
+		<!-- 4. SYSTEM BOOT TIME API -->
+		<!-- Utilizzato per: timer workout e misurazioni intervalli di tempo -->
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategorySystemBootTime</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- 35F9.1: Misurare tempo trascorso per funzionalità app -->
+				<string>35F9.1</string>
+			</array>
+		</dict>
+
+	</array>
+</dict>
+</plist>
