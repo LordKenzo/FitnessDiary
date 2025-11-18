@@ -16,6 +16,7 @@ struct WorkoutCardListView: View {
     @State private var expandedFolders: Set<UUID> = []
     @ObservedObject private var localizationManager = LocalizationManager.shared
 
+    @MainActor
     enum FilterOwner: CaseIterable {
         case all
         case mine
