@@ -1,6 +1,6 @@
 import SwiftUI
 import SwiftData
-import Combine
+@preconcurrency import Combine
 import Observation
 import AVFoundation
 
@@ -137,10 +137,6 @@ final class WorkoutExecutionViewModel: ObservableObject {
         }
         startTimer()
         updateMotivation(for: currentStep)
-    }
-
-    deinit {
-        timerCancellable?.cancel()
     }
 
     var currentStep: Step? {
