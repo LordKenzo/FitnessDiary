@@ -490,6 +490,9 @@ struct ClientPhotoPickerRow: View {
     @State private var showingFullscreen = false
 
     var body: some View {
+        let deleteLabel = L("confirm.delete")
+        let selectLabel = L("common.select")
+
         HStack {
             Text(title)
 
@@ -509,12 +512,12 @@ struct ClientPhotoPickerRow: View {
                             photoData = nil
                             item = nil
                         } label: {
-                            Label(L("confirm.delete"), systemImage: "trash")
+                            Label(deleteLabel, systemImage: "trash")
                         }
                     }
             } else {
                 PhotosPicker(selection: $item, matching: .images) {
-                    Label(L("common.select"), systemImage: "photo")
+                    Label(selectLabel, systemImage: "photo")
                 }
             }
         }
