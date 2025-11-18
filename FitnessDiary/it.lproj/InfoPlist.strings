@@ -1,0 +1,17 @@
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Per connettersi al tuo heart rate monitor e monitorare il battito cardiaco durante gli allenamenti";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Per connettersi al tuo dispositivo heart rate";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Per scattare foto del profilo";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Per importare i tuoi dati di salute come peso e altezza";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Per salvare i tuoi progressi fitness";
+
+/* Privacy - Photo Library Usage Description */
+"NSPhotoLibraryUsageDescription" = "Per aggiungere foto al tuo profilo";

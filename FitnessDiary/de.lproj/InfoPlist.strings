@@ -1,0 +1,17 @@
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Um eine Verbindung zu Ihrem Herzfrequenzmesser herzustellen und Ihre Herzfrequenz während des Trainings zu überwachen";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Um eine Verbindung zu Ihrem Herzfrequenzmessgerät herzustellen";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Um Profilfotos aufzunehmen";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Um Ihre Gesundheitsdaten wie Gewicht und Größe zu importieren";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Um Ihren Fitnessfortschritt zu speichern";
+
+/* Privacy - Photo Library Usage Description */
+"NSPhotoLibraryUsageDescription" = "Um Fotos zu Ihrem Profil hinzuzufügen";
