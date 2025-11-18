@@ -244,9 +244,16 @@ struct ExerciseRow: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(exercise.name)
-                    .font(.headline)
-                
+                HStack(spacing: 6) {
+                    Text(exercise.name)
+                        .font(.headline)
+                    if exercise.isFavorite {
+                        Image(systemName: "star.fill")
+                            .font(.caption)
+                            .foregroundStyle(.yellow)
+                    }
+                }
+
                 HStack(spacing: 8) {
                     Image(systemName: exercise.trainingRole.icon)
                         .font(.caption)
@@ -261,7 +268,46 @@ struct ExerciseRow: View {
                         .font(.caption2)
                         .foregroundStyle(exercise.primaryMetabolism.color)
                 }
-                
+
+                if let referencePlane = exercise.referencePlane {
+                    HStack(spacing: 4) {
+                        Image(systemName: referencePlane.icon)
+                            .font(.caption2)
+                            .foregroundStyle(referencePlane.color)
+                        Text(referencePlane.rawValue)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if !exercise.motorSchemas.isEmpty {
+                    HStack(spacing: 4) {
+                        ForEach(exercise.motorSchemas.sorted(by: { $0.rawValue < $1.rawValue })) { schema in
+                            Image(systemName: schema.icon)
+                                .font(.caption2)
+                                .foregroundStyle(schema.color)
+                        }
+                    }
+                }
+
+                if let focusOn = exercise.focusOn, !focusOn.isEmpty {
+                    Text("Focus: \(focusOn)")
+                        .font(.caption2)
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                }
+
+                if !exercise.tags.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(exercise.tags.sorted(by: { $0.rawValue < $1.rawValue })) { tag in
+                                MetadataChip(title: tag.rawValue, systemImage: tag.icon, tint: tag.color)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+
                 // Muscoli primari
                 if !exercise.primaryMuscles.isEmpty {
                     HStack(spacing: 4) {

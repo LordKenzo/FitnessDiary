@@ -13,6 +13,8 @@ struct EditExerciseView: View {
 
     @State private var selectedPrimaryMuscles: Set<Muscle> = []
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
+    @State private var selectedMotorSchemas: Set<MotorSchema> = []
+    @State private var selectedTags: Set<ExerciseTag> = []
     @State private var photoItem1: PhotosPickerItem?
     @State private var photoItem2: PhotosPickerItem?
     @State private var photoItem3: PhotosPickerItem?
@@ -59,6 +61,81 @@ struct EditExerciseView: View {
                                 .tag(cat)
                         }
                     }
+                }
+
+                Section("Piano di riferimento e Focus") {
+                    Picker("Piano di riferimento", selection: Binding(
+                        get: { exercise.referencePlane },
+                        set: { exercise.referencePlane = $0 }
+                    )) {
+                        Text("Nessuno").tag(nil as ReferencePlane?)
+                        ForEach(ReferencePlane.allCases) { plane in
+                            Label(plane.rawValue, systemImage: plane.icon)
+                                .tag(plane as ReferencePlane?)
+                        }
+                    }
+
+                    TextField("Focus On (opzionale)", text: Binding(
+                        get: { exercise.focusOn ?? "" },
+                        set: { exercise.focusOn = $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0 }
+                    ), axis: .vertical)
+                    .lineLimit(1...3)
+
+                    Toggle("Segna come preferito", isOn: $exercise.isFavorite)
+                }
+
+                Section("Schemi Motori (max 3)") {
+                    NavigationLink {
+                        MotorSchemaSelectionView(selection: $selectedMotorSchemas)
+                    } label: {
+                        HStack {
+                            Label("Schemi Motori", systemImage: "square.grid.3x3")
+                            Spacer()
+                            Text(selectedMotorSchemas.isEmpty ? "Nessuno" : "\(selectedMotorSchemas.count)")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if !selectedMotorSchemas.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(selectedMotorSchemas.sorted(by: { $0.rawValue < $1.rawValue })) { schema in
+                                    MetadataChip(title: schema.rawValue, systemImage: schema.icon, tint: schema.color)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+                .onChange(of: selectedMotorSchemas) { _, newValue in
+                    exercise.motorSchemas = newValue.sorted(by: { $0.rawValue < $1.rawValue })
+                }
+
+                Section("Tag esercizio") {
+                    NavigationLink {
+                        ExerciseTagSelectionView(selection: $selectedTags)
+                    } label: {
+                        HStack {
+                            Label("Tag", systemImage: "tag")
+                            Spacer()
+                            Text(selectedTags.isEmpty ? "Nessuno" : "\(selectedTags.count)")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if !selectedTags.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(selectedTags.sorted(by: { $0.rawValue < $1.rawValue })) { tag in
+                                    MetadataChip(title: tag.rawValue, systemImage: tag.icon, tint: tag.color)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+                .onChange(of: selectedTags) { _, newValue in
+                    exercise.tags = newValue.sorted(by: { $0.rawValue < $1.rawValue })
                 }
 
                 Section("Attrezzo") {
@@ -237,6 +314,8 @@ struct EditExerciseView: View {
             .onAppear {
                 selectedPrimaryMuscles = Set(exercise.primaryMuscles)
                 selectedSecondaryMuscles = Set(exercise.secondaryMuscles)
+                selectedMotorSchemas = Set(exercise.motorSchemas)
+                selectedTags = Set(exercise.tags)
             }
             .sheet(isPresented: $showingAddVariant) {
                 AddVariantView(exercise: exercise, allExercises: allExercises)
