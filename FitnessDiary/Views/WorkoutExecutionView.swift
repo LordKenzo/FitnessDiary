@@ -1238,7 +1238,7 @@ private enum TimerToneGenerator {
             let sample = sin(2 * .pi * frequency * Double(index) / sampleRate)
             var value = Int16(sample * Double(Int16.max))
             withUnsafeBytes(of: &value) { buffer in
-                sampleData.append(buffer)
+                sampleData.append(contentsOf: buffer)
             }
         }
 
