@@ -1201,7 +1201,7 @@ private struct WorkoutSummaryMetricRow: View {
                     .frame(width: 36, height: 36)
                 Image(systemName: icon)
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(.accentColor)
+                    .foregroundColor(.accentColor)
             }
 
             VStack(alignment: .leading, spacing: 2) {
