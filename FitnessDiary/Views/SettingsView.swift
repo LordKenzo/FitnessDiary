@@ -12,68 +12,70 @@ import SwiftData
 struct SettingsView: View {
     let bluetoothManager: BluetoothHeartRateManager
     @Query private var profiles: [UserProfile]
+    @ObservedObject private var localizationManager = LocalizationManager.shared
+
     var body: some View {
         NavigationStack {
             List {
-                Section("Generale") {
+                Section(L("settings.section.general")) {
                     NavigationLink {
                         GeneralPreferencesView()
                     } label: {
-                        Label("Preferenze Generali", systemImage: "slider.horizontal.3")
+                        Label(L("settings.general.preferences"), systemImage: "slider.horizontal.3")
                     }
                 }
 
-                Section("Account") {
+                Section(L("settings.section.account")) {
                     NavigationLink {
                         ProfileView()
                     } label: {
-                        Label("Profilo", systemImage: "person.circle")
+                        Label(L("settings.profile"), systemImage: "person.circle")
                     }
                 }
 
-                Section("Clienti") {
+                Section(L("settings.section.clients")) {
                     NavigationLink {
                         ClientListView()
                     } label: {
-                        Label("Gestione Clienti", systemImage: "person.3")
+                        Label(L("settings.clients.management"), systemImage: "person.3")
                     }
                 }
 
-                Section("Monitoraggio") {
+                Section(L("settings.section.monitoring")) {
                     NavigationLink {
                         HeartRateMonitorView(bluetoothManager: bluetoothManager)
                     } label: {
-                        Label("Heart Rate", systemImage: "heart.circle")
+                        Label(L("settings.heart.rate"), systemImage: "heart.circle")
                     }
 
                     NavigationLink {
                         StrengthExpressionsView()
                     } label: {
-                        Label("Espressioni Forza", systemImage: "bolt.fill")
+                        Label(L("settings.strength.expressions"), systemImage: "bolt.fill")
                     }
                 }
-                
-                Section("Libreria") {
+
+                Section(L("settings.section.library")) {
                     NavigationLink {
                         MuscleListView()
                     } label: {
-                        Label("Muscoli", systemImage: "figure.arms.open")
+                        Label(L("settings.muscles"), systemImage: "figure.arms.open")
                     }
 
                     NavigationLink {
                         EquipmentListView()
                     } label: {
-                        Label("Attrezzi", systemImage: "dumbbell")
+                        Label(L("settings.equipment"), systemImage: "dumbbell")
                     }
 
                     NavigationLink {
                         ExerciseListView()
                     } label: {
-                        Label("Esercizi", systemImage: "figure.strengthtraining.traditional")
+                        Label(L("settings.exercises"), systemImage: "figure.strengthtraining.traditional")
                     }
                 }
             }
-            .navigationTitle("Impostazioni")
+            .navigationTitle(L("settings.title"))
         }
     }
 }

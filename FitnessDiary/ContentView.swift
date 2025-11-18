@@ -3,31 +3,32 @@ import SwiftData
 
 struct ContentView: View {
     @State private var bluetoothManager = BluetoothHeartRateManager()
+    @ObservedObject private var localizationManager = LocalizationManager.shared
 
     var body: some View {
         TabView {
             // Tab 1 - Dashboard
             DashboardView()
                 .tabItem {
-                    Label("Dashboard", systemImage: "house.fill")
+                    Label(L("tab.dashboard"), systemImage: "house.fill")
                 }
 
             // Tab 2 - Allenamento
             WorkoutExecutionView(bluetoothManager: bluetoothManager)
                 .tabItem {
-                    Label("Allenamento", systemImage: "stopwatch")
+                    Label(L("tab.workout"), systemImage: "stopwatch")
                 }
 
             // Tab 3 - Schede
             WorkoutCardListView()
                 .tabItem {
-                    Label("Schede", systemImage: "list.bullet.clipboard")
+                    Label(L("tab.cards"), systemImage: "list.bullet.clipboard")
                 }
 
             // Tab 4 - Settings
             SettingsView(bluetoothManager: bluetoothManager)
                 .tabItem {
-                    Label("Impostazioni", systemImage: "gearshape")
+                    Label(L("tab.settings"), systemImage: "gearshape")
                 }
         }
     }
