@@ -24,6 +24,7 @@
 
 		<!-- 1. USER DEFAULTS API -->
 		<!-- Utilizzato per: salvare preferenze utente (lingua, countdown timer) -->
+		<!-- Verificato in: LocalizationManager.swift, WorkoutDebugLogBuilder.swift -->
 		<dict>
 			<key>NSPrivacyAccessedAPIType</key>
 			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
@@ -35,7 +36,8 @@
 		</dict>
 
 		<!-- 2. FILE TIMESTAMP API -->
-		<!-- Utilizzato da: SwiftData per gestire data/ora creazione e modifica record -->
+		<!-- Utilizzato da: SwiftData framework per gestire metadati dei file persistenti -->
+		<!-- SwiftData accede internamente a timestamp per sincronizzazione dati -->
 		<dict>
 			<key>NSPrivacyAccessedAPIType</key>
 			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
@@ -43,30 +45,6 @@
 			<array>
 				<!-- C617.1: Accesso timestamp per funzionalità app (non fingerprinting) -->
 				<string>C617.1</string>
-			</array>
-		</dict>
-
-		<!-- 3. DISK SPACE API -->
-		<!-- Utilizzato per: verificare spazio disponibile prima di salvare foto profilo/esercizi -->
-		<dict>
-			<key>NSPrivacyAccessedAPIType</key>
-			<string>NSPrivacyAccessedAPICategoryDiskSpace</string>
-			<key>NSPrivacyAccessedAPITypeReasons</key>
-			<array>
-				<!-- E174.1: Mostrare info spazio disco all'utente o evitare errori scrittura -->
-				<string>E174.1</string>
-			</array>
-		</dict>
-
-		<!-- 4. SYSTEM BOOT TIME API -->
-		<!-- Utilizzato per: timer workout e misurazioni intervalli di tempo -->
-		<dict>
-			<key>NSPrivacyAccessedAPIType</key>
-			<string>NSPrivacyAccessedAPICategorySystemBootTime</string>
-			<key>NSPrivacyAccessedAPITypeReasons</key>
-			<array>
-				<!-- 35F9.1: Misurare tempo trascorso per funzionalità app -->
-				<string>35F9.1</string>
 			</array>
 		</dict>
 
