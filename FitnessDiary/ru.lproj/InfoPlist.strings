@@ -1,0 +1,17 @@
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Для подключения к монитору сердечного ритма и отслеживания пульса во время тренировок";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Для подключения к устройству мониторинга сердечного ритма";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Для создания фотографий профиля";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Для импорта данных о здоровье, таких как вес и рост";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Для сохранения прогресса фитнеса";
+
+/* Privacy - Photo Library Usage Description */
+"NSPhotoLibraryUsageDescription" = "Для добавления фотографий в профиль";
