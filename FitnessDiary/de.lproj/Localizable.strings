@@ -137,6 +137,24 @@
 "workout.notes" = "Notizen";
 "workout.mood" = "Stimmung";
 
+// MARK: - Timer Preferences
+"timer.sound.title" = "Timer-Klang";
+"timer.sound.volume" = "Lautstärke";
+"timer.sound.option.classic" = "Klassischer Beep";
+"timer.sound.option.soft" = "Sanfte Glocke";
+"timer.sound.option.pulse" = "Power-Schlag";
+"timer.sound.option.mute" = "Stumm";
+"motivation.default" = "Bleib präsent und atme vor dem nächsten Block.";
+"motivation.work.1" = "Drücke jede Wiederholung mit Absicht.";
+"motivation.work.2" = "Halte Haltung aufrecht und Core aktiv.";
+"motivation.work.3" = "Beschleunige das Tempo ohne die Kontrolle zu verlieren.";
+"motivation.set.1" = "Neue Serie: jetzt fokussieren.";
+"motivation.set.2" = "Saubere Technik ab der ersten Wiederholung.";
+"motivation.set.3" = "Halte den Rhythmus und finish stark.";
+"motivation.rest.1" = "Atme langsam und erhole dich smart.";
+"motivation.rest.2" = "Lass die Spannung los, die nächste Runde kommt gleich.";
+"motivation.rest.3" = "Trink etwas, resette und visualisiere die nächste Serie.";
+
 // MARK: - Onboarding
 "onboarding.skip" = "Überspringen";
 

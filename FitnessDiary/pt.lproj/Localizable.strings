@@ -137,6 +137,24 @@
 "workout.notes" = "Notas";
 "workout.mood" = "Humor";
 
+// MARK: - Timer Preferences
+"timer.sound.title" = "Som do cronômetro";
+"timer.sound.volume" = "Volume";
+"timer.sound.option.classic" = "Bipe clássico";
+"timer.sound.option.soft" = "Sino suave";
+"timer.sound.option.pulse" = "Golpe enérgico";
+"timer.sound.option.mute" = "Silêncio";
+"motivation.default" = "Mantenha-se presente e respire antes do próximo bloco.";
+"motivation.work.1" = "Empurre cada repetição com intenção.";
+"motivation.work.2" = "Postura alta e core ativo o tempo todo.";
+"motivation.work.3" = "Acelere o ritmo sem perder o controle.";
+"motivation.set.1" = "Nova série: foque agora.";
+"motivation.set.2" = "Técnica limpa desde a primeira repetição.";
+"motivation.set.3" = "Respeite a cadência e termine forte.";
+"motivation.rest.1" = "Respire devagar e recupere com inteligência.";
+"motivation.rest.2" = "Solte a tensão, o próximo round já vem.";
+"motivation.rest.3" = "Hidrate-se, resete e visualize a próxima série.";
+
 // MARK: - Onboarding
 "onboarding.skip" = "Pular";
 

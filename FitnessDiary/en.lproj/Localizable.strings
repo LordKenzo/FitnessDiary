@@ -137,6 +137,24 @@
 "workout.notes" = "Notes";
 "workout.mood" = "Mood";
 
+// MARK: - Timer Preferences
+"timer.sound.title" = "Timer sound";
+"timer.sound.volume" = "Volume";
+"timer.sound.option.classic" = "Classic beep";
+"timer.sound.option.soft" = "Soft bell";
+"timer.sound.option.pulse" = "Pulse hit";
+"timer.sound.option.mute" = "Mute";
+"motivation.default" = "Stay present and breathe before the next block.";
+"motivation.work.1" = "Drive through every rep with intent.";
+"motivation.work.2" = "Keep posture tall and your core active.";
+"motivation.work.3" = "Push the tempo without losing control.";
+"motivation.set.1" = "Fresh set: lock in your focus.";
+"motivation.set.2" = "Dial in technique from the first rep.";
+"motivation.set.3" = "Respect the cadence and finish strong.";
+"motivation.rest.1" = "Slow the breathing and recover smart.";
+"motivation.rest.2" = "Shake out the tension, next round soon.";
+"motivation.rest.3" = "Hydrate, reset, and visualize the next set.";
+
 // MARK: - Onboarding
 "onboarding.skip" = "Skip";
 
