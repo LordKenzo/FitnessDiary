@@ -70,6 +70,7 @@
 // MARK: - General Preferences
 "preferences.title" = "Общие настройки";
 "preferences.section.general" = "Общие настройки";
+"preferences.section.audio" = "Аудио";
 "preferences.debug.log" = "Генерировать последовательность тренировок";
 "preferences.clone.load" = "Автоматически клонировать нагрузку";
 "preferences.countdown" = "Начальный отсчет";
@@ -136,6 +137,25 @@
 "workout.duration" = "Продолжительность";
 "workout.notes" = "Заметки";
 "workout.mood" = "Настроение";
+
+// MARK: - Timer Preferences
+"timer.sound.title" = "Звук таймера";
+"timer.sound.volume" = "Громкость";
+"preferences.audio.toggle" = "Включить звук таймера";
+"timer.sound.option.classic" = "Классический сигнал";
+"timer.sound.option.soft" = "Мягкий звон";
+"timer.sound.option.pulse" = "Удар пульса";
+"timer.sound.option.mute" = "Без звука";
+"motivation.default" = "Оставайся здесь и дыши перед следующим блоком.";
+"motivation.work.1" = "Вкладывай намерение в каждое повторение.";
+"motivation.work.2" = "Держи корпус прямым и кор в тонусе.";
+"motivation.work.3" = "Ускоряй темп, не теряя контроля.";
+"motivation.set.1" = "Новая серия: собери внимание сейчас.";
+"motivation.set.2" = "Чистая техника с первого повтора.";
+"motivation.set.3" = "Держи ритм и заверши мощно.";
+"motivation.rest.1" = "Замедли дыхание и восстанавливайся с умом.";
+"motivation.rest.2" = "Сними напряжение, следующий раунд скоро.";
+"motivation.rest.3" = "Напейся воды, перезагрузись и представь следующую серию.";
 
 // MARK: - Onboarding
 "onboarding.skip" = "Пропустить";

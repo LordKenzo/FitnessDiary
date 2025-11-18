@@ -70,6 +70,7 @@
 // MARK: - General Preferences
 "preferences.title" = "Preferenze Generali";
 "preferences.section.general" = "Preferenze Generali";
+"preferences.section.audio" = "Audio";
 "preferences.debug.log" = "Genera Sequenza Allenamento";
 "preferences.clone.load" = "Clona automaticamente il carico";
 "preferences.countdown" = "Countdown iniziale";
@@ -136,6 +137,25 @@
 "workout.duration" = "Durata";
 "workout.notes" = "Note";
 "workout.mood" = "Umore";
+
+// MARK: - Timer Preferences
+"timer.sound.title" = "Suono timer";
+"timer.sound.volume" = "Volume";
+"preferences.audio.toggle" = "Abilita audio timer";
+"timer.sound.option.classic" = "Beep classico";
+"timer.sound.option.soft" = "Campanella morbida";
+"timer.sound.option.pulse" = "Colpo energico";
+"timer.sound.option.mute" = "Senza suono";
+"motivation.default" = "Rimani presente e respira prima del prossimo blocco.";
+"motivation.work.1" = "Spingi ogni ripetizione con intenzione.";
+"motivation.work.2" = "Mantieni postura alta e core attivo.";
+"motivation.work.3" = "Accelera il ritmo senza perdere controllo.";
+"motivation.set.1" = "Nuova serie: focalizzati ora.";
+"motivation.set.2" = "Tecnica pulita dalla prima ripetizione.";
+"motivation.set.3" = "Rispetta la cadenza, chiudi forte.";
+"motivation.rest.1" = "Respira lento e recupera in modo intelligente.";
+"motivation.rest.2" = "Sciogli la tensione, il prossimo round arriva subito.";
+"motivation.rest.3" = "Idratati, resetta e visualizza la prossima serie.";
 
 // MARK: - Onboarding
 "onboarding.skip" = "Skip";
