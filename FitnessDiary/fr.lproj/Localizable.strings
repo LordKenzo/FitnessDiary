@@ -130,3 +130,110 @@
 "workout.duration" = "Durée";
 "workout.notes" = "Notes";
 "workout.mood" = "Humeur";
+
+// MARK: - Onboarding
+"onboarding.skip" = "Passer";
+
+// MARK: - Profile
+"profile.title" = "Profil";
+"profile.no.profile" = "Aucun Profil";
+"profile.no.profile.description" = "Créez votre profil pour commencer";
+"profile.create" = "Créer le Profil";
+"profile.edit" = "Modifier le Profil";
+"profile.physical.data" = "Données Physiques";
+"profile.personal.data" = "Données Personnelles";
+"profile.gender" = "Sexe";
+"profile.age" = "Âge";
+"profile.weight" = "Poids";
+"profile.height" = "Taille";
+"profile.bmi" = "IMC";
+"profile.years" = "ans";
+"profile.one.rep.max" = "Maximums 1RM";
+"profile.manage.maxes" = "Gérer les Maximums";
+"profile.heart.rate" = "Fréquence Cardiaque";
+"profile.max.hr" = "FC Max";
+"profile.calculated.hr" = "FC Calculée";
+"profile.bpm" = "bpm";
+"profile.hr.footer" = "FC max personnalisée ou calculée avec la formule 220 - âge";
+"profile.cardio.zones" = "Zones Cardio";
+"profile.customize.zones" = "Personnaliser les Zones Cardio";
+"profile.photo" = "Photo de Profil";
+"profile.change.photo" = "Changer la Photo";
+"profile.remove.photo" = "Supprimer la Photo";
+"profile.name" = "Nom";
+"profile.update.from.health" = "Mettre à jour depuis Apple Health";
+
+// MARK: - Clients
+"clients.title" = "Clients";
+"clients.no.clients" = "Aucun Client";
+"clients.no.clients.description" = "Ajoutez votre premier client pour commencer";
+"clients.add" = "Ajouter un Client";
+"clients.search" = "Rechercher un client";
+"clients.first.name" = "Prénom";
+"clients.last.name" = "Nom";
+"clients.email" = "Email";
+"clients.phone" = "Téléphone";
+"clients.notes" = "Notes";
+"clients.delete.title" = "Supprimer le Client";
+"clients.delete.message" = "Êtes-vous sûr de vouloir supprimer ce client ?";
+"clients.delete.all" = "Tout Supprimer";
+"clients.workouts" = "Fiches";
+
+// MARK: - Exercises
+"exercises.title" = "Exercices";
+"exercises.no.exercises" = "Aucun exercice";
+"exercises.no.exercises.description" = "Ajoutez votre premier exercice";
+"exercises.add" = "Ajouter un Exercice";
+"exercises.search" = "Rechercher un exercice";
+"exercises.name" = "Nom";
+"exercises.description" = "Description";
+"exercises.primary.muscles" = "Muscles Primaires";
+"exercises.secondary.muscles" = "Muscles Secondaires";
+"exercises.equipment" = "Équipement";
+"exercises.category" = "Catégorie";
+"exercises.notes" = "Notes";
+
+// MARK: - Muscles
+"muscles.title" = "Muscles";
+"muscles.no.muscles" = "Aucun muscle";
+"muscles.no.muscles.description" = "Initialisez la base de données avec les muscles par défaut ou ajoutez-en de nouveaux";
+"muscles.initialize" = "Initialiser la Base de Données";
+"muscles.add" = "Ajouter un Muscle";
+"muscles.name" = "Nom";
+"muscles.category" = "Catégorie";
+
+// MARK: - Equipment
+"equipment.title" = "Équipement";
+"equipment.no.equipment" = "Aucun équipement";
+"equipment.no.equipment.description" = "Initialisez la base de données avec l'équipement par défaut ou ajoutez-en de nouveaux";
+"equipment.initialize" = "Initialiser la Base de Données";
+"equipment.add" = "Ajouter un Équipement";
+"equipment.name" = "Nom";
+
+// MARK: - Workout Cards
+"cards.title" = "Fiches";
+"cards.no.cards" = "Aucune fiche";
+"cards.no.cards.description" = "Créez votre première fiche d'entraînement";
+"cards.create" = "Créer une Fiche";
+"cards.search" = "Rechercher une fiche";
+"cards.filter.all" = "Toutes";
+"cards.filter.mine" = "Mienne";
+"cards.filter.client" = "Client";
+"cards.name" = "Nom";
+"cards.description" = "Description";
+"cards.add.block" = "Ajouter un Bloc";
+"cards.add.folder" = "Ajouter un Dossier";
+"cards.no.folder" = "Sans Dossier";
+
+// MARK: - Folders
+"folders.title" = "Dossiers";
+"folders.name" = "Nom du Dossier";
+"folders.color" = "Couleur";
+"folders.edit" = "Modifier le Dossier";
+"folders.create" = "Créer un Dossier";
+
+// MARK: - Confirmation Dialogs
+"confirm.delete" = "Supprimer";
+"confirm.cancel" = "Annuler";
+"confirm.save" = "Enregistrer";
+"confirm.discard" = "Abandonner";

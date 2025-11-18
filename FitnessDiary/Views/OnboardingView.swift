@@ -9,6 +9,8 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @ObservedObject private var localizationManager = LocalizationManager.shared
+
     // Array di immagini per lo splash screen
     let onboardingImages = [
         "onboarding1", // Sostituisci con i nomi delle tue immagini
@@ -52,7 +54,7 @@ struct OnboardingView: View {
                 Button(action: {
                     isPresented = false
                 }) {
-                    Text("Skip")
+                    Text(localized: "onboarding.skip")
                         .font(.title3.weight(.semibold))
                         .foregroundColor(.white)
                         .padding(.top, 20)

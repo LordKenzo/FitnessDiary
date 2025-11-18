@@ -130,3 +130,110 @@
 "workout.duration" = "Продолжительность";
 "workout.notes" = "Заметки";
 "workout.mood" = "Настроение";
+
+// MARK: - Onboarding
+"onboarding.skip" = "Пропустить";
+
+// MARK: - Profile
+"profile.title" = "Профиль";
+"profile.no.profile" = "Нет Профиля";
+"profile.no.profile.description" = "Создайте свой профиль для начала";
+"profile.create" = "Создать Профиль";
+"profile.edit" = "Редактировать Профиль";
+"profile.physical.data" = "Физические Данные";
+"profile.personal.data" = "Личные Данные";
+"profile.gender" = "Пол";
+"profile.age" = "Возраст";
+"profile.weight" = "Вес";
+"profile.height" = "Рост";
+"profile.bmi" = "ИМТ";
+"profile.years" = "лет";
+"profile.one.rep.max" = "Максимумы 1ПМ";
+"profile.manage.maxes" = "Управление Максимумами";
+"profile.heart.rate" = "Частота Пульса";
+"profile.max.hr" = "Макс ЧСС";
+"profile.calculated.hr" = "Расчётная ЧСС";
+"profile.bpm" = "уд/мин";
+"profile.hr.footer" = "Пользовательская максимальная ЧСС или рассчитанная по формуле 220 - возраст";
+"profile.cardio.zones" = "Кардио Зоны";
+"profile.customize.zones" = "Настроить Кардио Зоны";
+"profile.photo" = "Фото Профиля";
+"profile.change.photo" = "Изменить Фото";
+"profile.remove.photo" = "Удалить Фото";
+"profile.name" = "Имя";
+"profile.update.from.health" = "Обновить из Apple Health";
+
+// MARK: - Clients
+"clients.title" = "Клиенты";
+"clients.no.clients" = "Нет Клиентов";
+"clients.no.clients.description" = "Добавьте своего первого клиента для начала";
+"clients.add" = "Добавить Клиента";
+"clients.search" = "Поиск клиента";
+"clients.first.name" = "Имя";
+"clients.last.name" = "Фамилия";
+"clients.email" = "Email";
+"clients.phone" = "Телефон";
+"clients.notes" = "Заметки";
+"clients.delete.title" = "Удалить Клиента";
+"clients.delete.message" = "Вы уверены, что хотите удалить этого клиента?";
+"clients.delete.all" = "Удалить Всех";
+"clients.workouts" = "Карточки";
+
+// MARK: - Exercises
+"exercises.title" = "Упражнения";
+"exercises.no.exercises" = "Нет упражнений";
+"exercises.no.exercises.description" = "Добавьте своё первое упражнение";
+"exercises.add" = "Добавить Упражнение";
+"exercises.search" = "Поиск упражнения";
+"exercises.name" = "Название";
+"exercises.description" = "Описание";
+"exercises.primary.muscles" = "Основные Мышцы";
+"exercises.secondary.muscles" = "Вспомогательные Мышцы";
+"exercises.equipment" = "Оборудование";
+"exercises.category" = "Категория";
+"exercises.notes" = "Заметки";
+
+// MARK: - Muscles
+"muscles.title" = "Мышцы";
+"muscles.no.muscles" = "Нет мышц";
+"muscles.no.muscles.description" = "Инициализируйте базу данных стандартными мышцами или добавьте новые";
+"muscles.initialize" = "Инициализировать Базу Данных";
+"muscles.add" = "Добавить Мышцу";
+"muscles.name" = "Название";
+"muscles.category" = "Категория";
+
+// MARK: - Equipment
+"equipment.title" = "Оборудование";
+"equipment.no.equipment" = "Нет оборудования";
+"equipment.no.equipment.description" = "Инициализируйте базу данных стандартным оборудованием или добавьте новое";
+"equipment.initialize" = "Инициализировать Базу Данных";
+"equipment.add" = "Добавить Оборудование";
+"equipment.name" = "Название";
+
+// MARK: - Workout Cards
+"cards.title" = "Карточки";
+"cards.no.cards" = "Нет карточек";
+"cards.no.cards.description" = "Создайте свою первую карточку тренировки";
+"cards.create" = "Создать Карточку";
+"cards.search" = "Поиск карточки";
+"cards.filter.all" = "Все";
+"cards.filter.mine" = "Мои";
+"cards.filter.client" = "Клиент";
+"cards.name" = "Название";
+"cards.description" = "Описание";
+"cards.add.block" = "Добавить Блок";
+"cards.add.folder" = "Добавить Папку";
+"cards.no.folder" = "Без Папки";
+
+// MARK: - Folders
+"folders.title" = "Папки";
+"folders.name" = "Название Папки";
+"folders.color" = "Цвет";
+"folders.edit" = "Редактировать Папку";
+"folders.create" = "Создать Папку";
+
+// MARK: - Confirmation Dialogs
+"confirm.delete" = "Удалить";
+"confirm.cancel" = "Отмена";
+"confirm.save" = "Сохранить";
+"confirm.discard" = "Отменить";

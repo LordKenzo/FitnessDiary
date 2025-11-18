@@ -130,3 +130,110 @@
 "workout.duration" = "Duration";
 "workout.notes" = "Notes";
 "workout.mood" = "Mood";
+
+// MARK: - Onboarding
+"onboarding.skip" = "Skip";
+
+// MARK: - Profile
+"profile.title" = "Profile";
+"profile.no.profile" = "No Profile";
+"profile.no.profile.description" = "Create your profile to get started";
+"profile.create" = "Create Profile";
+"profile.edit" = "Edit Profile";
+"profile.physical.data" = "Physical Data";
+"profile.personal.data" = "Personal Data";
+"profile.gender" = "Gender";
+"profile.age" = "Age";
+"profile.weight" = "Weight";
+"profile.height" = "Height";
+"profile.bmi" = "BMI";
+"profile.years" = "years";
+"profile.one.rep.max" = "1RM Maxes";
+"profile.manage.maxes" = "Manage Maxes";
+"profile.heart.rate" = "Heart Rate";
+"profile.max.hr" = "Max HR";
+"profile.calculated.hr" = "Calculated HR";
+"profile.bpm" = "bpm";
+"profile.hr.footer" = "Custom max HR or calculated with formula 220 - age";
+"profile.cardio.zones" = "Cardio Zones";
+"profile.customize.zones" = "Customize Cardio Zones";
+"profile.photo" = "Profile Photo";
+"profile.change.photo" = "Change Photo";
+"profile.remove.photo" = "Remove Photo";
+"profile.name" = "Name";
+"profile.update.from.health" = "Update from Apple Health";
+
+// MARK: - Clients
+"clients.title" = "Clients";
+"clients.no.clients" = "No Clients";
+"clients.no.clients.description" = "Add your first client to get started";
+"clients.add" = "Add Client";
+"clients.search" = "Search client";
+"clients.first.name" = "First Name";
+"clients.last.name" = "Last Name";
+"clients.email" = "Email";
+"clients.phone" = "Phone";
+"clients.notes" = "Notes";
+"clients.delete.title" = "Delete Client";
+"clients.delete.message" = "Are you sure you want to delete this client?";
+"clients.delete.all" = "Delete All";
+"clients.workouts" = "Workout Cards";
+
+// MARK: - Exercises
+"exercises.title" = "Exercises";
+"exercises.no.exercises" = "No exercises";
+"exercises.no.exercises.description" = "Add your first exercise";
+"exercises.add" = "Add Exercise";
+"exercises.search" = "Search exercise";
+"exercises.name" = "Name";
+"exercises.description" = "Description";
+"exercises.primary.muscles" = "Primary Muscles";
+"exercises.secondary.muscles" = "Secondary Muscles";
+"exercises.equipment" = "Equipment";
+"exercises.category" = "Category";
+"exercises.notes" = "Notes";
+
+// MARK: - Muscles
+"muscles.title" = "Muscles";
+"muscles.no.muscles" = "No muscles";
+"muscles.no.muscles.description" = "Initialize the database with default muscles or add new ones";
+"muscles.initialize" = "Initialize Database";
+"muscles.add" = "Add Muscle";
+"muscles.name" = "Name";
+"muscles.category" = "Category";
+
+// MARK: - Equipment
+"equipment.title" = "Equipment";
+"equipment.no.equipment" = "No equipment";
+"equipment.no.equipment.description" = "Initialize the database with default equipment or add new ones";
+"equipment.initialize" = "Initialize Database";
+"equipment.add" = "Add Equipment";
+"equipment.name" = "Name";
+
+// MARK: - Workout Cards
+"cards.title" = "Cards";
+"cards.no.cards" = "No cards";
+"cards.no.cards.description" = "Create your first workout card";
+"cards.create" = "Create Card";
+"cards.search" = "Search card";
+"cards.filter.all" = "All";
+"cards.filter.mine" = "Mine";
+"cards.filter.client" = "Client";
+"cards.name" = "Name";
+"cards.description" = "Description";
+"cards.add.block" = "Add Block";
+"cards.add.folder" = "Add Folder";
+"cards.no.folder" = "No Folder";
+
+// MARK: - Folders
+"folders.title" = "Folders";
+"folders.name" = "Folder Name";
+"folders.color" = "Color";
+"folders.edit" = "Edit Folder";
+"folders.create" = "Create Folder";
+
+// MARK: - Confirmation Dialogs
+"confirm.delete" = "Delete";
+"confirm.cancel" = "Cancel";
+"confirm.save" = "Save";
+"confirm.discard" = "Discard";
