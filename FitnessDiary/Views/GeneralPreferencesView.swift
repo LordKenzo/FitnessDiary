@@ -148,6 +148,9 @@ private struct AudioPreferencesCard: View {
         }
         .padding()
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .onDisappear {
+            stopPreview()
+        }
     }
 
     private var selectedSound: TimerSound {

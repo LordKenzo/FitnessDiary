@@ -328,7 +328,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
     private func handleTick() {
         if isCountdownActive {
             guard countdownRemainingSeconds > 0 else { return }
-            if countdownRemainingSeconds == 5 {
+            if countdownRemainingSeconds <= 5 {
                 playSound(for: .work)
             }
             countdownRemainingSeconds -= 1
@@ -405,7 +405,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
 
     private func triggerFiveSecondCueIfNeeded(for duration: TimeInterval, isRest: Bool) {
         let remainingSeconds = Int(max(duration - stepElapsedTime, 0).rounded(.down))
-        guard remainingSeconds == 5 else { return }
+        guard remainingSeconds > 0, remainingSeconds <= 5 else { return }
         playSound(for: isRest ? .rest : .work)
     }
 }
