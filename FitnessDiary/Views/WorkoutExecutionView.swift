@@ -328,6 +328,9 @@ final class WorkoutExecutionViewModel: ObservableObject {
     private func handleTick() {
         if isCountdownActive {
             guard countdownRemainingSeconds > 0 else { return }
+            if countdownRemainingSeconds == 5 {
+                playSound(for: .work)
+            }
             countdownRemainingSeconds -= 1
             if countdownRemainingSeconds == 0 {
                 isCountdownActive = false
@@ -344,7 +347,8 @@ final class WorkoutExecutionViewModel: ObservableObject {
         }
 
         switch currentStep?.type {
-        case let .timed(duration, _):
+        case let .timed(duration, isRest):
+            triggerFiveSecondCueIfNeeded(for: duration, isRest: isRest)
             stepElapsedTime += 1
             if stepElapsedTime >= duration {
                 skipToNextStep()
@@ -382,7 +386,6 @@ final class WorkoutExecutionViewModel: ObservableObject {
 
     private func applyMotivation(event: MotivationEngine.Event) {
         encouragementMessage = motivationEngine.message(for: event)
-        playSound(for: event)
     }
 
     private func playSound(for event: MotivationEngine.Event) {
@@ -398,6 +401,12 @@ final class WorkoutExecutionViewModel: ObservableObject {
         } catch {
             print("Failed to play timer tone", error)
         }
+    }
+
+    private func triggerFiveSecondCueIfNeeded(for duration: TimeInterval, isRest: Bool) {
+        let remainingSeconds = Int(max(duration - stepElapsedTime, 0).rounded(.down))
+        guard remainingSeconds == 5 else { return }
+        playSound(for: isRest ? .rest : .work)
     }
 }
 
