@@ -884,6 +884,11 @@ struct WorkoutExecutionView: View {
 
     private var userProfile: UserProfile? { profiles.first }
 
+    private var summaryMetrics: WorkoutSummaryMetrics {
+        guard let card = viewModel.activeCard else { return .empty }
+        return WorkoutSummaryMetrics(card: card, userProfile: userProfile)
+    }
+
     private var activeHeartRateZone: HeartRateZone? {
         heartRateZone(for: bluetoothManager.currentHeartRate)
     }
@@ -1019,16 +1024,45 @@ struct WorkoutExecutionView: View {
     }
 
     private var completionSummarySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(viewModel.activeCard?.name ?? viewModel.sessionTitle)
-                .font(.title3)
-                .fontWeight(.semibold)
-            Label("Durata", systemImage: "clock")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            Text(format(seconds: viewModel.generalElapsedTime))
-                .font(.system(.title, design: .rounded))
-                .monospacedDigit()
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(viewModel.activeCard?.name ?? viewModel.sessionTitle)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                Text("Riepilogo allenamento")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(spacing: 12) {
+                WorkoutSummaryMetricRow(
+                    icon: "clock",
+                    title: "Durata totale",
+                    value: format(seconds: viewModel.generalElapsedTime)
+                )
+
+                if summaryMetrics.hasTonnage {
+                    WorkoutSummaryMetricRow(
+                        icon: "dumbbell.fill",
+                        title: "Tonnellaggio stimato",
+                        value: "\(formatTonnage(summaryMetrics.tonnage)) kg"
+                    )
+                }
+
+                if summaryMetrics.hasCardioDuration {
+                    WorkoutSummaryMetricRow(
+                        icon: "figure.run",
+                        title: "Durata cardio",
+                        value: format(seconds: summaryMetrics.cardioDuration)
+                    )
+                }
+            }
+
+            if !summaryMetrics.hasTonnage {
+                Text("Inserisci i carichi nelle serie per stimare il tonnellaggio totale.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
@@ -1143,6 +1177,100 @@ struct WorkoutExecutionView: View {
         return formatter.string(from: seconds) ?? "00:00"
     }
 
+    private func formatTonnage(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = value >= 1000 ? 0 : 1
+        formatter.groupingSeparator = Locale.current.groupingSeparator
+        formatter.usesGroupingSeparator = true
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.0f", value)
+    }
+
+}
+
+private struct WorkoutSummaryMetricRow: View {
+    let icon: String
+    let title: String
+    let value: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.accentColor.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                Image(systemName: icon)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(.accentColor)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.headline)
+                    .monospacedDigit()
+            }
+
+            Spacer()
+        }
+    }
+}
+
+private struct WorkoutSummaryMetrics {
+    let tonnage: Double
+    let cardioDuration: TimeInterval
+
+    static let empty = WorkoutSummaryMetrics(tonnage: 0, cardioDuration: 0)
+
+    init(tonnage: Double, cardioDuration: TimeInterval) {
+        self.tonnage = tonnage
+        self.cardioDuration = cardioDuration
+    }
+
+    init(card: WorkoutCard, userProfile: UserProfile?) {
+        var accumulatedTonnage: Double = 0
+        var accumulatedCardio: TimeInterval = 0
+
+        for block in card.blocks {
+            for item in block.exerciseItems {
+                for set in item.sets {
+                    switch set.setType {
+                    case .reps:
+                        guard let reps = set.reps, reps > 0,
+                              let weight = WorkoutSummaryMetrics.resolveWeight(for: set, exercise: item.exercise, userProfile: userProfile) else {
+                            continue
+                        }
+                        accumulatedTonnage += Double(reps) * weight
+                    case .duration:
+                        accumulatedCardio += set.duration ?? 0
+                    }
+                }
+            }
+        }
+
+        self.init(tonnage: accumulatedTonnage, cardioDuration: accumulatedCardio)
+    }
+
+    var hasTonnage: Bool { tonnage > 0 }
+    var hasCardioDuration: Bool { cardioDuration > 0 }
+
+    private static func resolveWeight(for set: WorkoutSet, exercise: Exercise?, userProfile: UserProfile?) -> Double? {
+        switch set.actualLoadType {
+        case .absolute:
+            return set.weight
+        case .percentage:
+            guard let percentage = set.percentageOfMax,
+                  let exercise,
+                  let big5 = exercise.big5Exercise,
+                  let profile = userProfile,
+                  let oneRepMax = profile.getOneRepMax(for: big5) else {
+                return nil
+            }
+            return (percentage / 100.0) * oneRepMax
+        }
+    }
 }
 
 @MainActor
