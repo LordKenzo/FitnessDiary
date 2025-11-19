@@ -60,7 +60,6 @@ struct MuscleSelectionView: View {
         }
         .appScreenBackground()
     }
-}
 
     private func toggleMuscle(_ muscle: Muscle) {
         if selectedMuscles.contains(muscle) {
