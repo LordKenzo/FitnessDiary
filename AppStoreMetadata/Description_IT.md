@@ -182,7 +182,7 @@ Se non hai un cardiofrequenzimetro Bluetooth, puoi comunque testare tutte le alt
 
 **Conteggio Caratteri:**
 - Nome App: 28 caratteri ✓
-- Sottotitolo: 27 caratteri ✓
+- Sottotitolo: 24 caratteri ✓
 - Parole Chiave: 97 caratteri ✓
 - Descrizione: 3,912 caratteri ✓
 - Note di Rilascio: 968 caratteri ✓

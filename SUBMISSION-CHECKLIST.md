@@ -1,6 +1,6 @@
 # 🚀 FittyPal - App Store Submission Checklist
 
-**Status:** ✅ **READY FOR SUBMISSION**
+**Status:** ✅ **CODE READY** | ⏳ **Submission requires 4 remaining tasks (4-6 hours)**
 
 Last Updated: 2025-11-19
 
@@ -26,7 +26,7 @@ Last Updated: 2025-11-19
 ### 2. App Store Metadata - 100% DONE ✓
 
 - [x] App name: "FittyPal - Workout Tracker" (28 chars)
-- [x] Italian subtitle: "Allenamento & Heart Rate" (27 chars)
+- [x] Italian subtitle: "Allenamento & Heart Rate" (24 chars)
 - [x] English subtitle: "Fitness & Heart Rate Zones" (28 chars)
 - [x] Keywords optimized (97-99 chars)
 - [x] Descriptions written (IT + EN, ~3,900 chars each)

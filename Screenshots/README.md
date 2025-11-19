@@ -18,7 +18,9 @@ This folder contains all App Store screenshots organized by device type.
 5. Place in this folder
 
 ### `iPhone-6.7/`
-**Processed screenshots for iPhone 6.7" display**
+
+Processed screenshots for iPhone 6.7" display
+
 - Resolution: 1290 x 2796 pixels
 - Device: iPhone 15 Pro Max, 14 Pro Max, 13 Pro Max
 - With device frame and background
@@ -28,7 +30,9 @@ This folder contains all App Store screenshots organized by device type.
 **Recommended:** 5 screenshots
 
 ### `iPhone-6.5/`
-**Processed screenshots for iPhone 6.5" display**
+
+Processed screenshots for iPhone 6.5" display
+
 - Resolution: 1242 x 2688 pixels
 - Device: iPhone 11 Pro Max, XS Max
 - With device frame and background
@@ -38,7 +42,9 @@ This folder contains all App Store screenshots organized by device type.
 **Recommended:** 5 screenshots
 
 ### `iPad-12.9/`
-**Processed screenshots for iPad Pro 12.9" display**
+
+Processed screenshots for iPad Pro 12.9" display
+
 - Resolution: 2048 x 2732 pixels
 - Device: iPad Pro 12.9" (3rd gen and later)
 - With device frame and background
@@ -92,7 +98,7 @@ Create these 5 screenshots (in order):
 **Step 1:** Take raw screenshots → Save to `Raw/`
 
 **Step 2:** Process with screenshots.pro:
-1. Go to https://screenshots.pro
+1. Go to [screenshots.pro](https://screenshots.pro)
 2. Upload raw screenshots
 3. Select device: iPhone 15 Pro Max (Space Black)
 4. Add background: Gradient matching app theme
@@ -129,7 +135,7 @@ Before uploading to App Store Connect:
 ## 📊 File Naming Convention
 
 Use consistent naming:
-```
+```text
 01-workout-execution.png
 02-workout-cards.png
 03-exercise-library.png
@@ -146,12 +152,12 @@ This order matches the recommended sequence for App Store presentation.
 **Detailed Guide:** See `../AppStoreMetadata/Screenshot-Guide.md`
 
 **Tools:**
-- screenshots.pro - https://screenshots.pro
-- Previewed - https://previewed.app
+- [screenshots.pro](https://screenshots.pro)
+- [Previewed](https://previewed.app)
 - Xcode Simulator - Built-in
 
 **Apple Guidelines:**
-https://developer.apple.com/app-store/product-page/
+[App Store Product Page Guidelines](https://developer.apple.com/app-store/product-page/)
 
 ---
 

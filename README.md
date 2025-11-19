@@ -25,7 +25,7 @@ Porta i tuoi allenamenti al livello successivo.
 
 ## 📁 Project Structure
 
-```
+```text
 FitnessDiary/
 ├── AppStoreMetadata/        # All App Store submission materials
 │   ├── App-Review-Notes.md           # Complete reviewer guide
@@ -106,9 +106,9 @@ FitnessDiary/
 
 **Lorenzo Franceschini**
 
-- Support: support@fittypal.com
-- GitHub: https://github.com/LordKenzo/FitnessDiary
-- Website: https://www.fittypal.com
+- Support: [support@fittypal.com](mailto:support@fittypal.com)
+- GitHub: [LordKenzo/FitnessDiary](https://github.com/LordKenzo/FitnessDiary)
+- Website: [fittypal.com](https://www.fittypal.com)
 
 ---
 

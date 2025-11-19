@@ -141,7 +141,7 @@ All content is pre-formatted to fit App Store limits:
 | Field | Limit | English | Italian |
 |-------|-------|---------|---------|
 | App Name | 30 | 28 ✓ | 28 ✓ |
-| Subtitle | 30 | 28 ✓ | 27 ✓ |
+| Subtitle | 30 | 28 ✓ | 24 ✓ |
 | Keywords | 100 | 99 ✓ | 97 ✓ |
 | Description | 4000 | 3,847 ✓ | 3,912 ✓ |
 | Release Notes | 4000 | 896 ✓ | 968 ✓ |
