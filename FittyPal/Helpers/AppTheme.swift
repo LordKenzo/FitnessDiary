@@ -44,9 +44,9 @@ enum AppTheme {
         default:
             return LinearGradient(
                 colors: [
-                    Color(red: 255/255, green: 244/255, blue: 233/255),
-                    Color(red: 255/255, green: 226/255, blue: 199/255),
-                    Color(red: 255/255, green: 205/255, blue: 178/255)
+                    Color(red: 235/255, green: 251/255, blue: 249/255),
+                    Color(red: 205/255, green: 243/255, blue: 235/255),
+                    Color(red: 165/255, green: 227/255, blue: 215/255)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing

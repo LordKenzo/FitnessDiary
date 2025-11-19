@@ -70,7 +70,8 @@ struct ExerciseListView: View {
                                 } label: {
                                     Label(L("common.edit"), systemImage: "pencil")
                                 }
-
+                                .tint(.blue)
+                                
                                 Button(role: .destructive) {
                                     deleteExercise(exercise)
                                 } label: {
