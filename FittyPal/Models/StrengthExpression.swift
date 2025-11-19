@@ -19,6 +19,21 @@ enum StrengthExpressionType: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    var displayName: String {
+        switch self {
+        case .maxStrength:
+            return "Forza\nMax"
+        case .maxDynamicStrength:
+            return "Dinamica\nMax"
+        case .speedStrength:
+            return "Forza\nRapida"
+        case .resistantStrength:
+            return "Forza\nResist."
+        case .hypertrophy:
+            return "Ipertrofia"
+        }
+    }
+
     var icon: String {
         switch self {
         case .maxStrength:
