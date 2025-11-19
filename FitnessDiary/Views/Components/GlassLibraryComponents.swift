@@ -44,7 +44,7 @@ struct GlassSectionCard<Content: View>: View {
 
 struct GlassListRow<Trailing: View>: View {
     let title: String
-    var subtitle: String? = nil
+    var subtitle: String?
     var iconName: String
     var iconTint: Color = .accentColor
     @ViewBuilder var trailing: () -> Trailing
