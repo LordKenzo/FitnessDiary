@@ -14,7 +14,7 @@ extension Muscle: Hashable {
 }
 
 struct AddExerciseView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.modelContexat) private var modelContext
     @Environment(\.dismiss) private var dismiss
     let muscles: [Muscle]
     let equipment: [Equipment]

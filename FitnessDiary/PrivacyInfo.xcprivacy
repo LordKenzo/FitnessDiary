@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- TRACKING PUBBLICITARIO -->
+	<!-- FitnessDiary NON effettua tracking pubblicitario -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+
+	<!-- DOMINI NETWORK PER TRACKING -->
+	<!-- Array vuoto: nessun dominio tracciato -->
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+
+	<!-- COLLEZIONE DATI -->
+	<!-- Array vuoto: nessun dato raccolto per terze parti -->
+	<!-- Tutti i dati restano sul dispositivo dell'utente -->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+
+	<!-- API DI SISTEMA SENSIBILI UTILIZZATE -->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+
+		<!-- 1. USER DEFAULTS API -->
+		<!-- Utilizzato per: salvare preferenze utente (lingua, countdown timer) -->
+		<!-- Verificato in: LocalizationManager.swift, WorkoutDebugLogBuilder.swift -->
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- CA92.1: Accesso a preferenze/impostazioni gestite dall'utente -->
+				<string>CA92.1</string>
+			</array>
+		</dict>
+
+		<!-- 2. FILE TIMESTAMP API -->
+		<!-- Utilizzato da: SwiftData framework per gestire metadati dei file persistenti -->
+		<!-- SwiftData accede internamente a timestamp per sincronizzazione dati -->
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<!-- C617.1: Accesso timestamp per funzionalità app (non fingerprinting) -->
+				<string>C617.1</string>
+			</array>
+		</dict>
+
+	</array>
+</dict>
+</plist>
