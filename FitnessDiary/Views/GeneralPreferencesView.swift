@@ -93,25 +93,12 @@ struct GeneralPreferencesView: View {
                     step: 1
                 )
             }
-
-            Divider()
-
-            VStack(spacing: 4) {
-                Text(versionText)
-                    .font(.footnote)
-                    .foregroundStyle(AppTheme.subtleText(for: colorScheme))
-                Text(localized: "preferences.made.by")
-                    .font(.footnote.weight(.semibold))
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
+         
         }
         .dashboardCardStyle()
 }
 
-    private var versionText: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
-        return String(format: L("preferences.version"), version)
-    }
+
 
     private var appColorTheme: AppColorTheme {
         get { AppColorTheme(rawValue: appColorThemeRaw) ?? .vibrant }

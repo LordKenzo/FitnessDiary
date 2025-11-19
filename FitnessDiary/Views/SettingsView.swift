@@ -93,9 +93,19 @@ struct SettingsView: View {
                                 }
                             }
                         }
+                        
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 24)
+                    VStack(spacing: 4) {
+                        Text(versionText)
+                            .font(.footnote)
+                        Text(localized: "preferences.made.by")
+                            .font(.footnote.weight(.semibold))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 2)
+                    .padding(.bottom, 10)
                 }
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
@@ -104,8 +114,14 @@ struct SettingsView: View {
             }
         }
     }
+    private var versionText: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        return String(format: L("preferences.version"), version)
+    }
 
 }
+
+
 
 private struct SettingsSectionCard<Content: View>: View {
     let title: String
