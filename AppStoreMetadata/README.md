@@ -64,7 +64,7 @@ Copy from **Description_EN.md** or **Description_IT.md**:
 
 #### App Icon
 Upload the 1024x1024 PNG icon from:
-`FitnessDiary/Assets.xcassets/AppIcon.appiconset/appstore1024.png`
+`FittyPal/Assets.xcassets/AppIcon.appiconset/appstore1024.png`
 
 ### Step 4: Host Privacy Policy
 
@@ -141,12 +141,10 @@ All content is pre-formatted to fit App Store limits:
 | Field | Limit | English | Italian |
 |-------|-------|---------|---------|
 | App Name | 30 | 28 ✓ | 28 ✓ |
-| Subtitle | 30 | 28 ✓ | 35 ⚠️ |
+| Subtitle | 30 | 28 ✓ | 24 ✓ |
 | Keywords | 100 | 99 ✓ | 97 ✓ |
 | Description | 4000 | 3,847 ✓ | 3,912 ✓ |
 | Release Notes | 4000 | 896 ✓ | 968 ✓ |
-
-**Note:** Italian subtitle is 5 chars too long. Shorten to "Allenamento & Heart Rate" (27 chars).
 
 ---
 

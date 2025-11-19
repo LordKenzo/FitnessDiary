@@ -399,7 +399,9 @@ final class WorkoutExecutionViewModel: ObservableObject {
             audioPlayer?.prepareToPlay()
             audioPlayer?.play()
         } catch {
+            #if DEBUG
             print("Failed to play timer tone", error)
+            #endif
         }
     }
 

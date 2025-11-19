@@ -1,0 +1,70 @@
+FittyPal - App Review Notes (For App Store Connect Form)
+================================================================
+
+OVERVIEW
+--------
+FittyPal is a privacy-focused workout tracking app that operates 100% offline.
+All data is stored locally using SwiftData. No account required, no servers, no tracking.
+
+QUICK TEST (5 minutes)
+----------------------
+1. Launch app → Complete 3-screen onboarding
+2. Create profile:
+   - Name: "Test Reviewer"
+   - Age: 30, Gender: Male, Weight: 70kg, Height: 175cm
+   - Skip Health import (optional) - just tap Save
+3. Go to "Cards" tab → Tap "+" → Create "Test Workout"
+4. Add exercises from pre-populated library (Bench Press, Squat, etc.)
+   - Configure: 3 sets x 10 reps, 60 sec rest
+5. Go to "Workout" tab → Start workout → Complete 2-3 sets
+6. End workout → Fill mood/RPE → Save
+7. Check "History" tab to verify workout was logged
+
+OPTIONAL FEATURES
+-----------------
+• Bluetooth Heart Rate: Tap heart icon during workout (requires BLE HR monitor)
+  - Grant Bluetooth permission when prompted
+  - Works with standard devices: Polar, Garmin, Wahoo
+  - App is FULLY FUNCTIONAL without HR monitor
+
+• Apple Health: Tap "Import from Health" in profile setup
+  - Grant permissions for: Weight, Height, Age, Biological Sex
+  - Can be denied - app works perfectly without Health integration
+
+PERMISSIONS
+-----------
+All permissions are OPTIONAL and requested at point of use:
+• Bluetooth - Connect to heart rate monitors
+• HealthKit - Import weight/height/age
+• Photos - Profile pictures and exercise images
+• Camera - Take photos
+
+PRIVACY
+-------
+• Zero network calls - 100% offline
+• No cloud sync, no servers, no analytics
+• Complete Privacy Manifest (PrivacyInfo.xcprivacy)
+• GDPR compliant
+
+TECHNICAL
+---------
+• iOS 17.0+ (SwiftData requirement)
+• Swift 6.0, SwiftUI
+• 7 languages: IT, EN, ES, FR, PT, RU, DE
+• Category: Health & Fitness
+• Age: 4+
+
+DEMO ACCOUNT
+------------
+Not applicable - no account system. Create test profile during onboarding (Step 2).
+
+CONTACT
+-------
+Developer: Lorenzo Franceschini
+Email: support@fittypal.com
+Privacy: https://www.fittypal.com/privacy-policy.html
+
+If you don't have a Bluetooth heart rate monitor, you can skip that test -
+the app is designed to work completely standalone.
+
+Thank you for reviewing FittyPal!

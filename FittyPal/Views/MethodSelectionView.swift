@@ -113,6 +113,8 @@ struct MethodRow: View {
 
 #Preview {
     MethodSelectionView { method in
+        #if DEBUG
         print("Selected: \(method.rawValue)")
+        #endif
     }
 }

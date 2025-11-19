@@ -247,7 +247,9 @@ private struct AudioPreferencesCard: View {
             previewPlayer?.prepareToPlay()
             previewPlayer?.play()
         } catch {
+            #if DEBUG
             print("Failed to play preview: \(error)")
+            #endif
         }
     }
 }
