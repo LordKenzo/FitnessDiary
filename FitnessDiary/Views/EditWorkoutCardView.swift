@@ -13,6 +13,7 @@ struct EditWorkoutCardView: View {
 
     @State private var name: String
     @State private var description: String
+    @State private var targetExpression: StrengthExpressionType?
     @State private var selectedFolders: [WorkoutFolder]
     @State private var isAssignedToMe: Bool
     @State private var selectedClients: [Client]
@@ -29,6 +30,7 @@ struct EditWorkoutCardView: View {
         _selectedFolders = State(initialValue: card.folders)
         _isAssignedToMe = State(initialValue: card.isAssignedToMe)
         _selectedClients = State(initialValue: card.assignedTo)
+        _targetExpression = State(initialValue: card.targetExpression)
 
         // Converti i blocchi esistenti in WorkoutBlockData
         _workoutBlocks = State(initialValue: card.blocks.sorted(by: { $0.order < $1.order }).map { block in
@@ -73,8 +75,7 @@ struct EditWorkoutCardView: View {
                             )
                         },
                         notes: exerciseItem.notes,
-                        restTime: exerciseItem.restTime,
-                        targetExpression: exerciseItem.targetExpression
+                        restTime: exerciseItem.restTime
                     )
                 }
             )
@@ -88,6 +89,23 @@ struct EditWorkoutCardView: View {
                     TextField("Nome scheda", text: $name)
                     TextField("Descrizione (opzionale)", text: $description, axis: .vertical)
                         .lineLimit(2...4)
+                }
+
+                Section("Obiettivo della scheda") {
+                    Picker("Focus", selection: $targetExpression) {
+                        Text("Nessuno").tag(nil as StrengthExpressionType?)
+                        ForEach(StrengthExpressionType.allCases) { type in
+                            HStack {
+                                Image(systemName: type.icon)
+                                    .foregroundStyle(type.color)
+                                Text(type.rawValue)
+                            }
+                            .tag(type as StrengthExpressionType?)
+                        }
+                    }
+                } footer: {
+                    Text("Imposta un target unico per guidare carichi, ripetizioni e recuperi di tutti gli esercizi della scheda.")
+                        .font(.caption)
                 }
 
                 Section("Organizzazione") {
@@ -136,7 +154,8 @@ struct EditWorkoutCardView: View {
                     ForEach(workoutBlocks.indices, id: \.self) { index in
                         NavigationLink {
                             EditWorkoutBlockView(
-                                blockData: $workoutBlocks[index]
+                                blockData: $workoutBlocks[index],
+                                cardTargetExpression: targetExpression
                             )
                         } label: {
                             WorkoutBlockRow(
@@ -260,6 +279,7 @@ struct EditWorkoutCardView: View {
     private func saveChanges() {
         card.name = name
         card.cardDescription = description.isEmpty ? nil : description
+        card.targetExpression = targetExpression
         card.folders = selectedFolders
         card.isAssignedToMe = isAssignedToMe
         card.assignedTo = selectedClients

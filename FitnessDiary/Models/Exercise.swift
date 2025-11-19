@@ -19,6 +19,13 @@ final class Exercise: Identifiable {
     var primaryMetabolism: PrimaryMetabolism
     var category: ExerciseCategory
 
+    // Schemi motori e piano di riferimento
+    var motorSchemas: [MotorSchema]
+    var referencePlane: ReferencePlane?
+    var focusOn: String?
+    var tags: [ExerciseTag]
+    var isFavorite: Bool
+
     // URL YouTube
     var youtubeURL: String?
 
@@ -44,6 +51,11 @@ final class Exercise: Identifiable {
         primaryMetabolism: PrimaryMetabolism = .mixed,
         category: ExerciseCategory = .training,
         youtubeURL: String? = nil,
+        motorSchemas: [MotorSchema] = [],
+        referencePlane: ReferencePlane? = nil,
+        focusOn: String? = nil,
+        tags: [ExerciseTag] = [],
+        isFavorite: Bool = false,
         primaryMuscles: [Muscle] = [],
         secondaryMuscles: [Muscle] = [],
         equipment: Equipment? = nil,
@@ -60,6 +72,11 @@ final class Exercise: Identifiable {
         self.primaryMetabolism = primaryMetabolism
         self.category = category
         self.youtubeURL = youtubeURL
+        self.motorSchemas = motorSchemas
+        self.referencePlane = referencePlane
+        self.focusOn = focusOn
+        self.tags = tags
+        self.isFavorite = isFavorite
         self.primaryMuscles = primaryMuscles
         self.secondaryMuscles = secondaryMuscles
         self.equipment = equipment
@@ -200,6 +217,146 @@ enum ExerciseCategory: String, Codable, CaseIterable {
         case .mobility: return .teal
         case .breathing: return .cyan
         case .other: return .gray
+        }
+    }
+}
+
+// MARK: - Schemi Motori
+enum MotorSchema: String, Codable, CaseIterable, Identifiable {
+    case pushHorizontal = "Spinta Orizzontale"
+    case pushVertical = "Spinta Verticale"
+    case pullHorizontal = "Trazione Orizzontale"
+    case pullVertical = "Trazione Verticale"
+    case hinge = "Hip Hinge"
+    case squat = "Squat"
+    case lunge = "Affondo"
+    case rotation = "Torsione"
+    case gait = "Camminata/Corsa"
+    case coreStability = "Core Stability"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .pushHorizontal: return "arrow.left.arrow.right"
+        case .pushVertical: return "arrow.up.arrow.down"
+        case .pullHorizontal: return "rectangle.portrait.and.arrow.right"
+        case .pullVertical: return "arrow.down.to.line"
+        case .hinge: return "figure.strengthtraining.functional"
+        case .squat: return "figure.strengthtraining.traditional"
+        case .lunge: return "figure.walk.motion"
+        case .rotation: return "arrow.triangle.2.circlepath"
+        case .gait: return "figure.run"
+        case .coreStability: return "shield.lefthalf.filled"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .pushHorizontal, .pushVertical: return .orange
+        case .pullHorizontal, .pullVertical: return .blue
+        case .hinge, .squat, .lunge: return .green
+        case .rotation: return .purple
+        case .gait: return .teal
+        case .coreStability: return .pink
+        }
+    }
+
+    // MARK: - Codable compatibility helpers
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+
+        switch rawValue {
+        case "Rotazione":
+            self = .rotation
+        case "Portata":
+            // "Portata" (carry) has been removed; treat legacy values as locomotion
+            self = .gait
+        default:
+            guard let schema = MotorSchema(rawValue: rawValue) else {
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Schema motorio non supportato: \(rawValue)"
+                )
+            }
+            self = schema
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+}
+
+// MARK: - Piani di riferimento
+enum ReferencePlane: String, Codable, CaseIterable, Identifiable {
+    case sagittal = "Sagittale"
+    case frontal = "Frontale"
+    case transverse = "Trasversale"
+    case multiplanar = "Multiplanare"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .sagittal: return "rectangle.split.2x1"
+        case .frontal: return "rectangle.split.1x2"
+        case .transverse: return "circle.grid.2x2"
+        case .multiplanar: return "square.grid.3x3"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .sagittal: return .blue
+        case .frontal: return .orange
+        case .transverse: return .purple
+        case .multiplanar: return .green
+        }
+    }
+}
+
+// MARK: - Tag esercizi
+enum ExerciseTag: String, Codable, CaseIterable, Identifiable {
+    case strength = "Forza"
+    case power = "Potenza"
+    case hypertrophy = "Ipertrofia"
+    case endurance = "Resistenza"
+    case mobility = "Mobilità"
+    case rehab = "Riabilitazione"
+    case core = "Core"
+    case balance = "Equilibrio"
+    case cardio = "Cardio"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .strength: return "dumbbell.fill"
+        case .power: return "bolt.fill"
+        case .hypertrophy: return "figure.strengthtraining.traditional"
+        case .endurance: return "figure.run"
+        case .mobility: return "figure.flexibility"
+        case .rehab: return "cross.case"
+        case .core: return "circle.hexagongrid"
+        case .balance: return "gyroscope"
+        case .cardio: return "heart.fill"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .strength: return .red
+        case .power: return .yellow
+        case .hypertrophy: return .orange
+        case .endurance: return .green
+        case .mobility: return .teal
+        case .rehab: return .pink
+        case .core: return .indigo
+        case .balance: return .mint
+        case .cardio: return .purple
         }
     }
 }

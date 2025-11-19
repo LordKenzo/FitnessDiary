@@ -884,6 +884,11 @@ struct WorkoutExecutionView: View {
 
     private var userProfile: UserProfile? { profiles.first }
 
+    private var summaryMetrics: WorkoutSummaryMetrics {
+        guard let card = viewModel.activeCard else { return .empty }
+        return WorkoutSummaryMetrics(card: card, userProfile: userProfile)
+    }
+
     private var activeHeartRateZone: HeartRateZone? {
         heartRateZone(for: bluetoothManager.currentHeartRate)
     }
@@ -1019,16 +1024,69 @@ struct WorkoutExecutionView: View {
     }
 
     private var completionSummarySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(viewModel.activeCard?.name ?? viewModel.sessionTitle)
-                .font(.title3)
-                .fontWeight(.semibold)
-            Label("Durata", systemImage: "clock")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            Text(format(seconds: viewModel.generalElapsedTime))
-                .font(.system(.title, design: .rounded))
-                .monospacedDigit()
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(viewModel.activeCard?.name ?? viewModel.sessionTitle)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                Text("Riepilogo allenamento")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(spacing: 12) {
+                WorkoutSummaryMetricRow(
+                    icon: "clock",
+                    title: "Durata totale",
+                    value: format(seconds: viewModel.generalElapsedTime)
+                )
+
+                if summaryMetrics.hasTonnage {
+                    WorkoutSummaryMetricRow(
+                        icon: "dumbbell.fill",
+                        title: "Tonnellaggio stimato",
+                        value: "\(formatTonnage(summaryMetrics.tonnage)) kg"
+                    )
+                }
+
+                if summaryMetrics.hasCardioDuration {
+                    WorkoutSummaryMetricRow(
+                        icon: "figure.run",
+                        title: "Durata cardio",
+                        value: format(seconds: summaryMetrics.cardioDuration)
+                    )
+                }
+
+                if summaryMetrics.exerciseCount > 0 {
+                    WorkoutSummaryMetricRow(
+                        icon: "list.number",
+                        title: "Esercizi completati",
+                        value: "\(summaryMetrics.exerciseCount)"
+                    )
+                }
+
+                if summaryMetrics.upperBodyCount > 0 {
+                    WorkoutSummaryMetricRow(
+                        icon: "figure.strengthtraining.traditional",
+                        title: "Parte alta",
+                        value: "\(summaryMetrics.upperBodyCount)"
+                    )
+                }
+
+                if summaryMetrics.lowerBodyCount > 0 {
+                    WorkoutSummaryMetricRow(
+                        icon: "figure.step.training",
+                        title: "Parte bassa",
+                        value: "\(summaryMetrics.lowerBodyCount)"
+                    )
+                }
+            }
+
+            if !summaryMetrics.hasTonnage {
+                Text("Inserisci i carichi nelle serie per stimare il tonnellaggio totale.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
@@ -1143,6 +1201,45 @@ struct WorkoutExecutionView: View {
         return formatter.string(from: seconds) ?? "00:00"
     }
 
+    private func formatTonnage(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = value >= 1000 ? 0 : 1
+        formatter.groupingSeparator = Locale.current.groupingSeparator
+        formatter.usesGroupingSeparator = true
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.0f", value)
+    }
+
+}
+
+private struct WorkoutSummaryMetricRow: View {
+    let icon: String
+    let title: String
+    let value: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.accentColor.opacity(0.15))
+                    .frame(width: 36, height: 36)
+                Image(systemName: icon)
+                    .font(.body.weight(.semibold))
+                    .foregroundColor(.accentColor)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(value)
+                    .font(.headline)
+                    .monospacedDigit()
+            }
+
+            Spacer()
+        }
+    }
 }
 
 @MainActor
@@ -1254,14 +1351,14 @@ private enum WorkoutExecutionStepFactory {
                     )
                 )
             case .simple, .method:
-                result.append(contentsOf: stepsForExercises(in: block))
+                result.append(contentsOf: stepsForExercises(in: block, cardTarget: card.targetExpression))
             }
         }
 
         return result
     }
 
-    private static func stepsForExercises(in block: WorkoutBlock) -> [WorkoutExecutionViewModel.Step] {
+    private static func stepsForExercises(in block: WorkoutBlock, cardTarget: StrengthExpressionType?) -> [WorkoutExecutionViewModel.Step] {
         var steps: [WorkoutExecutionViewModel.Step] = []
         let exercises = block.exerciseItems.sorted { $0.order < $1.order }
 
@@ -1271,7 +1368,7 @@ private enum WorkoutExecutionStepFactory {
 
             let title = exercise.exercise?.name ?? "Esercizio"
             let subtitle = exercise.notes ?? setDescription(for: firstSet, totalSets: sets.count, restTime: exercise.restTime ?? block.globalRestTime)
-            let highlight = exercise.targetExpression?.rawValue ?? "Focus sulla tecnica"
+            let highlight = cardTarget?.rawValue ?? "Focus sulla tecnica"
 
             switch firstSet.setType {
             case .duration:

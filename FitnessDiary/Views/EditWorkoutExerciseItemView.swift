@@ -10,6 +10,7 @@ struct EditWorkoutExerciseItemView: View {
     let isInMethod: Bool // se true, nasconde il tempo di recupero (gestito dal blocco)
     var methodValidation: LoadProgressionValidation? // validazione da applicare se in un metodo
     var methodType: MethodType? // tipo di metodo (per gestire cluster set)
+    let cardTargetExpression: StrengthExpressionType?
 
     @State private var notes: String
     @State private var restMinutes: Int
@@ -27,7 +28,7 @@ struct EditWorkoutExerciseItemView: View {
     }
 
     private var targetParameters: StrengthExpressionParameters? {
-        guard let targetType = exerciseItemData.targetExpression else { return nil }
+        guard let targetType = cardTargetExpression else { return nil }
         return strengthParameters.first(where: { $0.type == targetType })
     }
 
@@ -45,12 +46,13 @@ struct EditWorkoutExerciseItemView: View {
         return exerciseItemData.validateLoadProgression(for: validation)
     }
 
-    init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false, methodValidation: LoadProgressionValidation? = nil, methodType: MethodType? = nil) {
+    init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false, methodValidation: LoadProgressionValidation? = nil, methodType: MethodType? = nil, cardTargetExpression: StrengthExpressionType? = nil) {
         self._exerciseItemData = exerciseItemData
         self.exercises = exercises
         self.isInMethod = isInMethod
         self.methodValidation = methodValidation
         self.methodType = methodType
+        self.cardTargetExpression = cardTargetExpression
         _notes = State(initialValue: exerciseItemData.wrappedValue.notes ?? "")
 
         let restTime = exerciseItemData.wrappedValue.restTime ?? 60
@@ -64,7 +66,7 @@ struct EditWorkoutExerciseItemView: View {
 
             // Target expression solo per metodi repsOnly (non per EMOM, AMRAP, Circuit, Tabata)
             if methodType?.supportedSetType != .durationOnly {
-                targetExpressionSection
+                targetInfoSection
             }
 
             if !isInMethod {
@@ -113,22 +115,23 @@ struct EditWorkoutExerciseItemView: View {
         }
     }
 
-    private var targetExpressionSection: some View {
-        Section {
-            Picker("Obiettivo", selection: $exerciseItemData.targetExpression) {
-                Text("Nessuno").tag(nil as StrengthExpressionType?)
-                ForEach(StrengthExpressionType.allCases) { type in
+    private var targetInfoSection: some View {
+        Section("Obiettivo di scheda") {
+            if let params = targetParameters {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label(params.type.rawValue, systemImage: params.type.icon)
+                        .foregroundStyle(params.type.color)
                     HStack {
-                        Image(systemName: type.icon)
-                            .foregroundStyle(type.color)
-                        Text(type.rawValue)
+                        MetricPill(title: "Carico", value: "\(Int(params.loadPercentageMin))%-\(Int(params.loadPercentageMax))%")
+                        MetricPill(title: "Rip", value: "\(params.repsMin)-\(params.repsMax)")
+                        MetricPill(title: "Serie", value: "\(params.setsMin)-\(params.setsMax)")
                     }
-                    .tag(type as StrengthExpressionType?)
                 }
+            } else {
+                Text("Imposta il target della scheda nella schermata principale per attivare gli alert sui parametri.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-        } footer: {
-            Text("Seleziona un obiettivo per ricevere feedback intelligenti sui parametri (carico, reps, recupero).")
-                .font(.caption)
         }
     }
 
@@ -157,7 +160,7 @@ struct EditWorkoutExerciseItemView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.yellow)
-                    Text("Il tempo di recupero consigliato per \(params.type.rawValue) è \(params.restTimeMinFormatted)-\(params.restTimeMaxFormatted)")
+                    Text("Il recupero consigliato per \(params.type.rawValue) è \(params.restTimeMinFormatted)-\(params.restTimeMaxFormatted)")
                         .font(.caption)
                         .foregroundStyle(.yellow)
                 }
@@ -308,11 +311,30 @@ struct EditWorkoutExerciseItemView: View {
         }
     }
 
-    private func applyCloneLoadIfNeeded() {
+private func applyCloneLoadIfNeeded() {
         guard cloneLoadEnabled else { return }
         for set in exerciseItemData.sets where set.weight != nil || set.percentageOfMax != nil {
             exerciseItemData.sets.cloneLoadIfNeeded(from: set)
         }
+    }
+}
+
+private struct MetricPill: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.caption)
+                .fontWeight(.semibold)
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .background(Color(.tertiarySystemFill), in: Capsule())
     }
 }
 

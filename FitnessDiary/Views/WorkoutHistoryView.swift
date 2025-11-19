@@ -23,7 +23,11 @@ struct WorkoutHistoryView: View {
                 }
             } else {
                 ForEach(logs) { log in
-                    WorkoutHistoryRow(log: log, formatter: dateFormatter)
+                    NavigationLink {
+                        WorkoutSessionDetailView(log: log)
+                    } label: {
+                        WorkoutHistoryRow(log: log, formatter: dateFormatter)
+                    }
                 }
                 .onDelete(perform: deleteLogs)
             }

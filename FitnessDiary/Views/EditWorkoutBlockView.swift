@@ -6,6 +6,7 @@ struct EditWorkoutBlockView: View {
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
 
     @Binding var blockData: WorkoutBlockData
+    let cardTargetExpression: StrengthExpressionType?
 
     @State private var globalSets: Int
     @State private var globalRestMinutes: Int
@@ -20,8 +21,9 @@ struct EditWorkoutBlockView: View {
     @State private var tabataRecoveryMinutes: Int
     @State private var tabataRecoverySeconds: Int
 
-    init(blockData: Binding<WorkoutBlockData>) {
+    init(blockData: Binding<WorkoutBlockData>, cardTargetExpression: StrengthExpressionType? = nil) {
         self._blockData = blockData
+        self.cardTargetExpression = cardTargetExpression
         _globalSets = State(initialValue: blockData.wrappedValue.globalSets)
         let restTime = blockData.wrappedValue.globalRestTime ?? 60
         _globalRestMinutes = State(initialValue: Int(restTime) / 60)
@@ -212,7 +214,8 @@ struct EditWorkoutBlockView: View {
                                 exercises: exercises,
                                 isInMethod: blockData.blockType == .method,
                                 methodValidation: blockData.methodType?.loadProgressionValidation,
-                                methodType: blockData.methodType
+                                methodType: blockData.methodType,
+                                cardTargetExpression: cardTargetExpression
                             )
                         } label: {
                             WorkoutExerciseItemRow(
@@ -629,7 +632,7 @@ struct WorkoutExerciseItemRow: View {
     )
 
     NavigationStack {
-        EditWorkoutBlockView(blockData: $blockData)
+        EditWorkoutBlockView(blockData: $blockData, cardTargetExpression: .hypertrophy)
     }
     .modelContainer(for: [Exercise.self])
 }
