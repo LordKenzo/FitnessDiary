@@ -5,6 +5,7 @@ struct GeneralPreferencesView: View {
     @AppStorage("debugWorkoutLogEnabled") private var debugWorkoutLogEnabled = false
     @AppStorage("workoutCountdownSeconds") private var workoutCountdownSeconds = 10
     @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
+    @AppStorage("appColorTheme") private var appColorThemeRaw = AppColorTheme.vibrant.rawValue
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @Environment(\.colorScheme) private var colorScheme
 
@@ -51,6 +52,22 @@ struct GeneralPreferencesView: View {
                 .pickerStyle(.menu)
             }
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L("preferences.theme.title"))
+                    .font(.subheadline.weight(.semibold))
+
+                Picker("", selection: Binding(
+                    get: { appColorTheme },
+                    set: { appColorTheme = $0 }
+                )) {
+                    ForEach(AppColorTheme.allCases) { theme in
+                        Text(localized: theme.localizationKey)
+                            .tag(theme)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
             Toggle(L("preferences.debug.log"), isOn: $debugWorkoutLogEnabled)
                 .tint(.blue)
 
@@ -89,11 +106,16 @@ struct GeneralPreferencesView: View {
             .frame(maxWidth: .infinity, alignment: .center)
         }
         .dashboardCardStyle()
-    }
+}
 
     private var versionText: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
         return String(format: L("preferences.version"), version)
+    }
+
+    private var appColorTheme: AppColorTheme {
+        get { AppColorTheme(rawValue: appColorThemeRaw) ?? .vibrant }
+        nonmutating set { appColorThemeRaw = newValue.rawValue }
     }
 }
 

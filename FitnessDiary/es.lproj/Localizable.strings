@@ -77,6 +77,9 @@
 "preferences.section.audio" = "Audio";
 "preferences.debug.log" = "Generar Secuencia de Entrenamiento";
 "preferences.clone.load" = "Clonar carga automáticamente";
+"preferences.theme.title" = "Apariencia";
+"preferences.theme.light" = "Claro";
+"preferences.theme.vibrant" = "Colorido";
 "preferences.countdown" = "Cuenta regresiva inicial";
 "preferences.countdown.seconds" = "%d seg";
 "preferences.language" = "Idioma";

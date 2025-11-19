@@ -1,5 +1,30 @@
 import SwiftUI
 
+enum AppColorTheme: String, CaseIterable, Identifiable {
+    case light
+    case vibrant
+
+    var id: String { rawValue }
+
+    var localizationKey: String {
+        switch self {
+        case .light:
+            return "preferences.theme.light"
+        case .vibrant:
+            return "preferences.theme.vibrant"
+        }
+    }
+
+    var colorScheme: ColorScheme {
+        switch self {
+        case .light:
+            return .light
+        case .vibrant:
+            return .dark
+        }
+    }
+}
+
 /// Centralized palette that keeps the new visual identity consistent across views.
 /// The theme mirrors the marketing site by providing paired light/dark gradients
 /// and semitransparent surfaces that can be reused throughout the app.

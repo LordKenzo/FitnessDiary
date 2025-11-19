@@ -4,6 +4,7 @@ import SwiftData
 struct ContentView: View {
     @State private var bluetoothManager = BluetoothHeartRateManager()
     @ObservedObject private var localizationManager = LocalizationManager.shared
+    @AppStorage("appColorTheme") private var appColorThemeRaw = AppColorTheme.vibrant.rawValue
 
     var body: some View {
         ZStack {
@@ -31,6 +32,11 @@ struct ContentView: View {
                     }
             }
         }
+        .preferredColorScheme(appColorTheme.colorScheme)
+    }
+
+    private var appColorTheme: AppColorTheme {
+        AppColorTheme(rawValue: appColorThemeRaw) ?? .vibrant
     }
 }
 
