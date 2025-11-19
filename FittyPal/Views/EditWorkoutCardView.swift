@@ -325,7 +325,7 @@ struct EditWorkoutCardView: View {
                 title: "Assegnata a clienti",
                 isEmpty: selectedClients.isEmpty,
                 emptyText: "Nessun cliente selezionato",
-                badges: selectedClients.prefix(2).map { ($0.name, Color.green) },
+                badges: selectedClients.prefix(2).map { ($0.fullName, Color.green) },
                 extraCount: selectedClients.count > 2 ? selectedClients.count - 2 : 0
             )
         }
