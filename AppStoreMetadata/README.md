@@ -64,7 +64,7 @@ Copy from **Description_EN.md** or **Description_IT.md**:
 
 #### App Icon
 Upload the 1024x1024 PNG icon from:
-`FitnessDiary/Assets.xcassets/AppIcon.appiconset/appstore1024.png`
+`FittyPal/Assets.xcassets/AppIcon.appiconset/appstore1024.png`
 
 ### Step 4: Host Privacy Policy
 

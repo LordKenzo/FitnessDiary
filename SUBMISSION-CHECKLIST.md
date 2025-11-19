@@ -183,7 +183,7 @@ Navigate to: App Information section
 - Result: **4+**
 
 **App Store Icon:**
-- Upload: `FitnessDiary/Assets.xcassets/AppIcon.appiconset/appstore1024.png`
+- Upload: `FittyPal/Assets.xcassets/AppIcon.appiconset/appstore1024.png`
 
 #### 3.3 Pricing and Availability
 - Price: **Free**

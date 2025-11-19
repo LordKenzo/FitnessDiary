@@ -26,7 +26,7 @@ Porta i tuoi allenamenti al livello successivo.
 ## 📁 Project Structure
 
 ```text
-FitnessDiary/
+FittyPal/
 ├── AppStoreMetadata/        # All App Store submission materials
 │   ├── App-Review-Notes.md           # Complete reviewer guide
 │   ├── App-Review-Notes-SHORT.txt    # Quick test guide (copy to ASC)
@@ -45,13 +45,14 @@ FitnessDiary/
 ├── Documentation/           # Examples, diagrams, reference materials
 │   └── example-screenshot.png
 │
-├── FitnessDiary/            # iOS app source code
+├── FittyPal/                # iOS app source code (Xcode project)
 │   ├── Models/              # SwiftData models
 │   ├── Views/               # SwiftUI views
 │   ├── Services/            # HealthKit, Bluetooth managers
 │   ├── Helpers/             # Utilities, themes, localization
 │   └── Assets.xcassets/     # Images, icons, colors
 │
+├── FittyPal.xcodeproj/      # Xcode project file
 ├── SUBMISSION-CHECKLIST.md  # Complete App Store submission checklist
 └── README.md                # This file
 ```
