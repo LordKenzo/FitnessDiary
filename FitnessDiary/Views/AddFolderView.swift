@@ -17,11 +17,11 @@ struct AddFolderView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Informazioni") {
-                    TextField("Nome folder", text: $name)
+                Section(L("folders.section.info")) {
+                    TextField(L("folders.name"), text: $name)
                 }
 
-                Section("Colore") {
+                Section(L("folders.section.color")) {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 16) {
                         ForEach(availableColors, id: \.description) { color in
                             Circle()
@@ -39,16 +39,16 @@ struct AddFolderView: View {
                     .padding(.vertical, 8)
                 }
             }
-            .navigationTitle("Nuovo Folder")
+            .navigationTitle(L("folders.create"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button(L("common.cancel")) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Salva") {
+                    Button(L("common.save")) {
                         saveFolder()
                     }
                     .disabled(name.isEmpty)

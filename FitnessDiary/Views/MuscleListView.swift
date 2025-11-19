@@ -67,7 +67,7 @@ struct MuscleListView: View {
                         Button(role: .destructive) {
                             deleteAllMuscles()
                         } label: {
-                            Label("Elimina Tutti", systemImage: "trash")
+                            Label(L("muscles.delete.all"), systemImage: "trash")
                         }
                     }
 
@@ -168,9 +168,9 @@ struct AddMuscleView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Nome muscolo", text: $name)
+                    TextField(L("muscles.name"), text: $name)
 
-                    Picker("Categoria", selection: $selectedCategory) {
+                    Picker(L("muscles.category"), selection: $selectedCategory) {
                         ForEach(MuscleCategory.allCases, id: \.self) { category in
                             Label(category.rawValue, systemImage: category.icon)
                                 .tag(category)
@@ -178,17 +178,17 @@ struct AddMuscleView: View {
                     }
                 }
             }
-            .navigationTitle("Nuovo Muscolo")
+            .navigationTitle(L("muscles.new.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button(L("common.cancel")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Salva") {
+                    Button(L("common.save")) {
                         saveMuscle()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -214,9 +214,9 @@ struct EditMuscleView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Nome muscolo", text: $muscle.name)
+                    TextField(L("muscles.name"), text: $muscle.name)
 
-                    Picker("Categoria", selection: $muscle.category) {
+                    Picker(L("muscles.category"), selection: $muscle.category) {
                         ForEach(MuscleCategory.allCases, id: \.self) { category in
                             Label(category.rawValue, systemImage: category.icon)
                                 .tag(category)
@@ -225,16 +225,16 @@ struct EditMuscleView: View {
                 }
 
                 Section {
-                    Button("Elimina Muscolo", role: .destructive) {
+                    Button(L("muscles.delete.action"), role: .destructive) {
                         deleteMuscle()
                     }
                 }
             }
-            .navigationTitle("Modifica Muscolo")
+            .navigationTitle(L("muscles.edit.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Fatto") {
+                    Button(L("common.done")) {
                         dismiss()
                     }
                 }

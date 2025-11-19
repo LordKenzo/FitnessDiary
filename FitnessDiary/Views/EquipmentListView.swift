@@ -15,11 +15,11 @@ struct EquipmentListView: View {
         List {
             if equipment.isEmpty {
                 ContentUnavailableView {
-                    Label("Nessun attrezzo", systemImage: "dumbbell")
+                    Label(L("equipment.no.equipment"), systemImage: "dumbbell")
                 } description: {
-                    Text("Inizializza il database con gli attrezzi predefiniti o aggiungine di nuovi")
+                    Text(L("equipment.no.equipment.description"))
                 } actions: {
-                    Button("Inizializza Database") {
+                    Button(L("equipment.initialize")) {
                         initializeDefaultEquipment()
                     }
                     .buttonStyle(.borderedProminent)
@@ -51,14 +51,14 @@ struct EquipmentListView: View {
                 }
             }
         }
-        .navigationTitle("Attrezzi")
+        .navigationTitle(L("equipment.title"))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
                         showingAddEquipment = true
                     } label: {
-                        Label("Aggiungi Attrezzo", systemImage: "plus")
+                        Label(L("equipment.add"), systemImage: "plus")
                     }
 
                     if !equipment.isEmpty {
@@ -66,7 +66,7 @@ struct EquipmentListView: View {
                         Button(role: .destructive) {
                             deleteAllEquipment()
                         } label: {
-                            Label("Elimina Tutti", systemImage: "trash")
+                            Label(L("equipment.delete.all"), systemImage: "trash")
                         }
                     }
 
@@ -75,7 +75,7 @@ struct EquipmentListView: View {
                         Button {
                             initializeDefaultEquipment()
                         } label: {
-                            Label("Inizializza Database", systemImage: "arrow.clockwise")
+                            Label(L("equipment.initialize"), systemImage: "arrow.clockwise")
                         }
                     }
                 } label: {
@@ -182,9 +182,9 @@ struct AddEquipmentView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Nome attrezzo", text: $name)
+                    TextField(L("equipment.name"), text: $name)
 
-                    Picker("Categoria", selection: $selectedCategory) {
+                    Picker(L("equipment.category"), selection: $selectedCategory) {
                         ForEach(EquipmentCategory.allCases, id: \.self) { category in
                             Label(category.rawValue, systemImage: category.icon)
                                 .tag(category)
@@ -192,17 +192,17 @@ struct AddEquipmentView: View {
                     }
                 }
             }
-            .navigationTitle("Nuovo Attrezzo")
+            .navigationTitle(L("equipment.new.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button(L("common.cancel")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Salva") {
+                    Button(L("common.save")) {
                         saveEquipment()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -228,9 +228,9 @@ struct EditEquipmentView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Nome attrezzo", text: $equipment.name)
+                    TextField(L("equipment.name"), text: $equipment.name)
 
-                    Picker("Categoria", selection: $equipment.category) {
+                    Picker(L("equipment.category"), selection: $equipment.category) {
                         ForEach(EquipmentCategory.allCases, id: \.self) { category in
                             Label(category.rawValue, systemImage: category.icon)
                                 .tag(category)
@@ -239,16 +239,16 @@ struct EditEquipmentView: View {
                 }
 
                 Section {
-                    Button("Elimina Attrezzo", role: .destructive) {
+                    Button(L("equipment.delete.action"), role: .destructive) {
                         deleteEquipment()
                     }
                 }
             }
-            .navigationTitle("Modifica Attrezzo")
+            .navigationTitle(L("equipment.edit.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Fatto") {
+                    Button(L("common.done")) {
                         dismiss()
                     }
                 }

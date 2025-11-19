@@ -7,7 +7,7 @@ struct MethodSelectionView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Serie Multiple") {
+                Section(L("methods.section.multi.sets")) {
                     ForEach([MethodType.superset, .triset, .giantSet], id: \.self) { method in
                         MethodRow(method: method) {
                             onSelect(method)
@@ -16,7 +16,7 @@ struct MethodSelectionView: View {
                     }
                 }
 
-                Section("Intensità e Volume") {
+                Section(L("methods.section.intensity.volume")) {
                     ForEach([MethodType.dropset, .pyramidAscending, .pyramidDescending], id: \.self) { method in
                         MethodRow(method: method) {
                             onSelect(method)
@@ -25,7 +25,7 @@ struct MethodSelectionView: View {
                     }
                 }
 
-                Section("Potenza e Forza") {
+                Section(L("methods.section.power.strength")) {
                     ForEach([MethodType.contrastTraining, .complexTraining], id: \.self) { method in
                         MethodRow(method: method) {
                             onSelect(method)
@@ -34,7 +34,7 @@ struct MethodSelectionView: View {
                     }
                 }
 
-                Section("Densità e Timing") {
+                Section(L("methods.section.density.timing")) {
                     ForEach([MethodType.rest_pause, .cluster, .emom], id: \.self) { method in
                         MethodRow(method: method) {
                             onSelect(method)
@@ -43,7 +43,7 @@ struct MethodSelectionView: View {
                     }
                 }
 
-                Section("Condizionamento") {
+                Section(L("methods.section.conditioning")) {
                     ForEach([MethodType.amrap, .circuit, .tabata], id: \.self) { method in
                         MethodRow(method: method) {
                             onSelect(method)
@@ -52,11 +52,11 @@ struct MethodSelectionView: View {
                     }
                 }
             }
-            .navigationTitle("Seleziona Metodo")
+            .navigationTitle(L("methods.select"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button(L("common.cancel")) {
                         dismiss()
                     }
                 }
@@ -89,7 +89,7 @@ struct MethodRow: View {
 
                         // Min exercises badge
                         if method.minExercises > 1 {
-                            Text("\(method.minExercises)+ es.")
+                            Text(String(format: L("methods.min.exercises.badge"), method.minExercises))
                                 .font(.caption)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 2)

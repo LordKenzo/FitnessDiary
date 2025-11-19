@@ -29,9 +29,9 @@ struct ExerciseFiltersView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
-                    FilterSection(title: "Metabolismo primario") {
+                    FilterSection(title: L("filters.primary.metabolism")) {
                         chipGrid {
-                            FilterChip(title: "Tutti", systemImage: nil, isSelected: filterPrimaryMetabolism == nil) {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterPrimaryMetabolism == nil) {
                                 filterPrimaryMetabolism = nil
                             }
                             ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
@@ -42,9 +42,9 @@ struct ExerciseFiltersView: View {
                         }
                     }
 
-                    FilterSection(title: "Struttura biomeccanica") {
+                    FilterSection(title: L("filters.biomechanical.structure")) {
                         chipGrid {
-                            FilterChip(title: "Tutte", systemImage: nil, isSelected: filterBiomechanicalStructure == nil) {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterBiomechanicalStructure == nil) {
                                 filterBiomechanicalStructure = nil
                             }
                             ForEach(BiomechanicalStructure.allCases, id: \.self) { structure in
@@ -55,9 +55,9 @@ struct ExerciseFiltersView: View {
                         }
                     }
 
-                    FilterSection(title: "Ruolo nell'allenamento") {
+                    FilterSection(title: L("filters.training.role")) {
                         chipGrid {
-                            FilterChip(title: "Tutti", systemImage: nil, isSelected: filterTrainingRole == nil) {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterTrainingRole == nil) {
                                 filterTrainingRole = nil
                             }
                             ForEach(TrainingRole.allCases, id: \.self) { role in
@@ -68,9 +68,9 @@ struct ExerciseFiltersView: View {
                         }
                     }
 
-                    FilterSection(title: "Categoria") {
+                    FilterSection(title: L("filters.category")) {
                         chipGrid {
-                            FilterChip(title: "Tutte", systemImage: nil, isSelected: filterCategory == nil) {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterCategory == nil) {
                                 filterCategory = nil
                             }
                             ForEach(ExerciseCategory.allCases, id: \.self) { category in
@@ -81,9 +81,9 @@ struct ExerciseFiltersView: View {
                         }
                     }
 
-                    FilterSection(title: "Piano di riferimento") {
+                    FilterSection(title: L("filters.reference.plane")) {
                         chipGrid {
-                            FilterChip(title: "Tutti", systemImage: nil, isSelected: filterReferencePlane == nil) {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterReferencePlane == nil) {
                                 filterReferencePlane = nil
                             }
                             ForEach(ReferencePlane.allCases, id: \.self) { plane in
@@ -94,9 +94,9 @@ struct ExerciseFiltersView: View {
                         }
                     }
 
-                    FilterSection(title: "Schemi motori") {
+                    FilterSection(title: L("filters.motor.schemas")) {
                         chipGrid {
-                            FilterChip(title: "Tutti", systemImage: nil, isSelected: filterMotorSchemas.isEmpty) {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterMotorSchemas.isEmpty) {
                                 filterMotorSchemas.removeAll()
                             }
                             ForEach(MotorSchema.allCases) { schema in
@@ -112,9 +112,9 @@ struct ExerciseFiltersView: View {
                         .accessibilityElement(children: .contain)
                     }
 
-                    FilterSection(title: "Tag") {
+                    FilterSection(title: L("filters.tags")) {
                         chipGrid {
-                            FilterChip(title: "Tutti", systemImage: nil, isSelected: filterTags.isEmpty) {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterTags.isEmpty) {
                                 filterTags.removeAll()
                             }
                             ForEach(ExerciseTag.allCases) { tag in
@@ -129,13 +129,13 @@ struct ExerciseFiltersView: View {
                         }
                     }
 
-                    FilterSection(title: "Muscolo primario") {
+                    FilterSection(title: L("filters.primary.muscle")) {
                         VStack(alignment: .leading, spacing: 12) {
-                            TextField("Cerca muscolo", text: $muscleSearchText)
+                            TextField(L("muscles.search"), text: $muscleSearchText)
                                 .textFieldStyle(.roundedBorder)
 
                             Button(action: { filterPrimaryMuscle = nil }) {
-                                Label("Tutti i muscoli", systemImage: filterPrimaryMuscle == nil ? "checkmark.circle.fill" : "figure.strengthtraining.traditional")
+                                Label(L("muscles.all"), systemImage: filterPrimaryMuscle == nil ? "checkmark.circle.fill" : "figure.strengthtraining.traditional")
                                     .labelStyle(.titleAndIcon)
                             }
                             .buttonStyle(.bordered)
@@ -156,8 +156,8 @@ struct ExerciseFiltersView: View {
                         }
                     }
 
-                    FilterSection(title: "Preferiti") {
-                        Toggle("Mostra solo preferiti", isOn: $filterFavoritesOnly)
+                    FilterSection(title: L("filters.favorites")) {
+                        Toggle(L("filters.favorites.only"), isOn: $filterFavoritesOnly)
                             .toggleStyle(SwitchToggleStyle(tint: .yellow))
                     }
                 }
@@ -165,13 +165,13 @@ struct ExerciseFiltersView: View {
                 .padding(.top, 24)
                 .padding(.bottom, 32)
             }
-            .navigationTitle("Filtri esercizi")
+            .navigationTitle(L("exercises.filters.title"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Chiudi") { dismiss() }
+                    Button(L("common.close")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Reset") { onClearAll() }
+                    Button(L("common.reset")) { onClearAll() }
                 }
             }
         }
