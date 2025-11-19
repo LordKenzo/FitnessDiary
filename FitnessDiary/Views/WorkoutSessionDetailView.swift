@@ -4,30 +4,30 @@ import SwiftData
 struct WorkoutSessionDetailView: View {
     let log: WorkoutSessionLog
     @Query private var profiles: [UserProfile]
-
+    
     private var userProfile: UserProfile? { profiles.first }
     private var analytics: WorkoutSummaryMetrics? {
         guard let card = log.card else { return nil }
         return WorkoutSummaryMetrics(card: card, userProfile: userProfile)
     }
-
+    
     private var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: log.date)
     }
-
+    
     private var durationText: String {
         let minutes = Int(log.durationSeconds) / 60
         let seconds = Int(log.durationSeconds) % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
-
+    
     var body: some View {
         List {
             heroSection
-
+            
             if let analytics {
                 metricsSection(analytics: analytics)
                 distributionSection(analytics: analytics)
@@ -35,7 +35,7 @@ struct WorkoutSessionDetailView: View {
             } else {
                 missingAnalyticsSection
             }
-
+            
             if !log.notes.isEmpty {
                 Section("Note") {
                     Text(log.notes)
@@ -48,7 +48,7 @@ struct WorkoutSessionDetailView: View {
         .navigationTitle(log.cardName)
         .navigationBarTitleDisplayMode(.inline)
     }
-
+    
     private var heroSection: some View {
         Section {
             VStack(alignment: .leading, spacing: 12) {
@@ -73,12 +73,12 @@ struct WorkoutSessionDetailView: View {
             .padding(.vertical, 8)
         }
     }
-
+    
     @ViewBuilder
     private func metricsSection(analytics: WorkoutSummaryMetrics) -> some View {
         Section("Metriche principali") {
             WorkoutDetailMetricRow(icon: "clock", title: "Durata", value: durationText)
-
+            
             if analytics.hasTonnage {
                 WorkoutDetailMetricRow(
                     icon: "dumbbell.fill",
@@ -86,7 +86,7 @@ struct WorkoutSessionDetailView: View {
                     value: "\(formatTonnage(analytics.tonnage)) kg"
                 )
             }
-
+            
             if analytics.hasCardioDuration {
                 WorkoutDetailMetricRow(
                     icon: "figure.run",
@@ -94,7 +94,7 @@ struct WorkoutSessionDetailView: View {
                     value: formatDuration(analytics.cardioDuration)
                 )
             }
-
+            
             if analytics.exerciseCount > 0 {
                 WorkoutDetailMetricRow(
                     icon: "list.number",
@@ -104,7 +104,7 @@ struct WorkoutSessionDetailView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private func distributionSection(analytics: WorkoutSummaryMetrics) -> some View {
         if analytics.upperBodyCount > 0 || analytics.lowerBodyCount > 0 {
@@ -126,7 +126,7 @@ struct WorkoutSessionDetailView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private func exerciseSection(analytics: WorkoutSummaryMetrics) -> some View {
         if !analytics.exerciseBreakdown.isEmpty {
@@ -144,7 +144,7 @@ struct WorkoutSessionDetailView: View {
                                 .padding(.horizontal, 8)
                                 .background(Color(.tertiarySystemFill), in: Capsule())
                         }
-
+                        
                         HStack(spacing: 12) {
                             if breakdown.tonnage > 0 {
                                 Label("\(formatTonnage(breakdown.tonnage)) kg", systemImage: "scalemass")
@@ -164,7 +164,7 @@ struct WorkoutSessionDetailView: View {
             }
         }
     }
-
+    
     private var missingAnalyticsSection: some View {
         Section {
             ContentUnavailableView(
@@ -174,7 +174,7 @@ struct WorkoutSessionDetailView: View {
             )
         }
     }
-
+    
     private func formatDuration(_ seconds: TimeInterval) -> String {
         let minutes = Int(seconds) / 60
         let secs = Int(seconds) % 60
@@ -183,7 +183,7 @@ struct WorkoutSessionDetailView: View {
         }
         return "\(secs)s"
     }
-
+    
     private func formatTonnage(_ value: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
@@ -198,7 +198,7 @@ private struct WorkoutDetailMetricRow: View {
     let icon: String
     let title: String
     let value: String
-
+    
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
@@ -225,14 +225,14 @@ private struct WorkoutDetailMetricRow: View {
 private struct WorkoutSessionDetailPreview: View {
     private let container: ModelContainer
     private let log: WorkoutSessionLog
-
+    
     init() {
         let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
         container = try! ModelContainer(
-            for: [WorkoutSessionLog.self, WorkoutCard.self, Exercise.self],
+            for: WorkoutSessionLog.self, WorkoutCard.self, Exercise.self,
             configurations: configuration
         )
-
+        
         let exercise = Exercise(name: "Panca Piana", category: .training)
         let set = WorkoutSet(
             order: 0,
@@ -263,13 +263,13 @@ private struct WorkoutSessionDetailPreview: View {
             rpe: 7,
             durationSeconds: 3600
         )
-
+        
         container.mainContext.insert(exercise)
         container.mainContext.insert(card)
         container.mainContext.insert(log)
         self.log = log
     }
-
+    
     var body: some View {
         NavigationStack {
             WorkoutSessionDetailView(log: log)
