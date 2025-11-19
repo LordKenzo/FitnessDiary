@@ -1056,6 +1056,30 @@ struct WorkoutExecutionView: View {
                         value: format(seconds: summaryMetrics.cardioDuration)
                     )
                 }
+
+                if summaryMetrics.exerciseCount > 0 {
+                    WorkoutSummaryMetricRow(
+                        icon: "list.number",
+                        title: "Esercizi completati",
+                        value: "\(summaryMetrics.exerciseCount)"
+                    )
+                }
+
+                if summaryMetrics.upperBodyCount > 0 {
+                    WorkoutSummaryMetricRow(
+                        icon: "figure.strengthtraining.traditional",
+                        title: "Parte alta",
+                        value: "\(summaryMetrics.upperBodyCount)"
+                    )
+                }
+
+                if summaryMetrics.lowerBodyCount > 0 {
+                    WorkoutSummaryMetricRow(
+                        icon: "figure.step.training",
+                        title: "Parte bassa",
+                        value: "\(summaryMetrics.lowerBodyCount)"
+                    )
+                }
             }
 
             if !summaryMetrics.hasTonnage {
@@ -1218,61 +1242,6 @@ private struct WorkoutSummaryMetricRow: View {
     }
 }
 
-private struct WorkoutSummaryMetrics {
-    let tonnage: Double
-    let cardioDuration: TimeInterval
-
-    static let empty = WorkoutSummaryMetrics(tonnage: 0, cardioDuration: 0)
-
-    init(tonnage: Double, cardioDuration: TimeInterval) {
-        self.tonnage = tonnage
-        self.cardioDuration = cardioDuration
-    }
-
-    init(card: WorkoutCard, userProfile: UserProfile?) {
-        var accumulatedTonnage: Double = 0
-        var accumulatedCardio: TimeInterval = 0
-
-        for block in card.blocks {
-            for item in block.exerciseItems {
-                for set in item.sets {
-                    switch set.setType {
-                    case .reps:
-                        guard let reps = set.reps, reps > 0,
-                              let weight = WorkoutSummaryMetrics.resolveWeight(for: set, exercise: item.exercise, userProfile: userProfile) else {
-                            continue
-                        }
-                        accumulatedTonnage += Double(reps) * weight
-                    case .duration:
-                        accumulatedCardio += set.duration ?? 0
-                    }
-                }
-            }
-        }
-
-        self.init(tonnage: accumulatedTonnage, cardioDuration: accumulatedCardio)
-    }
-
-    var hasTonnage: Bool { tonnage > 0 }
-    var hasCardioDuration: Bool { cardioDuration > 0 }
-
-    private static func resolveWeight(for set: WorkoutSet, exercise: Exercise?, userProfile: UserProfile?) -> Double? {
-        switch set.actualLoadType {
-        case .absolute:
-            return set.weight
-        case .percentage:
-            guard let percentage = set.percentageOfMax,
-                  let exercise,
-                  let big5 = exercise.big5Exercise,
-                  let profile = userProfile,
-                  let oneRepMax = profile.getOneRepMax(for: big5) else {
-                return nil
-            }
-            return (percentage / 100.0) * oneRepMax
-        }
-    }
-}
-
 @MainActor
 struct MotivationEngine {
     enum Event {
@@ -1382,14 +1351,14 @@ private enum WorkoutExecutionStepFactory {
                     )
                 )
             case .simple, .method:
-                result.append(contentsOf: stepsForExercises(in: block))
+                result.append(contentsOf: stepsForExercises(in: block, cardTarget: card.targetExpression))
             }
         }
 
         return result
     }
 
-    private static func stepsForExercises(in block: WorkoutBlock) -> [WorkoutExecutionViewModel.Step] {
+    private static func stepsForExercises(in block: WorkoutBlock, cardTarget: StrengthExpressionType?) -> [WorkoutExecutionViewModel.Step] {
         var steps: [WorkoutExecutionViewModel.Step] = []
         let exercises = block.exerciseItems.sorted { $0.order < $1.order }
 
@@ -1399,7 +1368,7 @@ private enum WorkoutExecutionStepFactory {
 
             let title = exercise.exercise?.name ?? "Esercizio"
             let subtitle = exercise.notes ?? setDescription(for: firstSet, totalSets: sets.count, restTime: exercise.restTime ?? block.globalRestTime)
-            let highlight = exercise.targetExpression?.rawValue ?? "Focus sulla tecnica"
+            let highlight = cardTarget?.rawValue ?? "Focus sulla tecnica"
 
             switch firstSet.setType {
             case .duration:

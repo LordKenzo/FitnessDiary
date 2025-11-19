@@ -10,16 +10,13 @@ final class WorkoutExerciseItem: Identifiable {
     var sets: [WorkoutSet]
     var notes: String?
     var restTime: TimeInterval? // tempo di recupero tra le serie in secondi
-    var targetExpression: StrengthExpressionType? // obiettivo di forza (opzionale)
-
-    init(order: Int, exercise: Exercise? = nil, sets: [WorkoutSet] = [], notes: String? = nil, restTime: TimeInterval? = nil, targetExpression: StrengthExpressionType? = nil) {
+    init(order: Int, exercise: Exercise? = nil, sets: [WorkoutSet] = [], notes: String? = nil, restTime: TimeInterval? = nil) {
         self.id = UUID()
         self.order = order
         self.exercise = exercise
         self.sets = sets
         self.notes = notes
         self.restTime = restTime
-        self.targetExpression = targetExpression
     }
 
     // Helper per formattare il tempo di recupero

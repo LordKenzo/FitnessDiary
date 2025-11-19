@@ -7,6 +7,7 @@ final class WorkoutCard: Identifiable {
     var name: String
     var cardDescription: String?
     var createdDate: Date
+    var targetExpression: StrengthExpressionType?
     @Relationship(deleteRule: .nullify)
     var folders: [WorkoutFolder] // array di folder (una scheda può stare in più folder)
     var isAssignedToMe: Bool // toggle separato per assegnazione a me stesso
@@ -15,11 +16,12 @@ final class WorkoutCard: Identifiable {
     @Relationship(deleteRule: .cascade)
     var blocks: [WorkoutBlock] // array di blocchi (esercizi singoli o metodologie)
 
-    init(name: String, description: String? = nil, folders: [WorkoutFolder] = [], isAssignedToMe: Bool = true, assignedTo: [Client] = [], blocks: [WorkoutBlock] = []) {
+    init(name: String, description: String? = nil, targetExpression: StrengthExpressionType? = nil, folders: [WorkoutFolder] = [], isAssignedToMe: Bool = true, assignedTo: [Client] = [], blocks: [WorkoutBlock] = []) {
         self.id = UUID()
         self.name = name
         self.cardDescription = description
         self.createdDate = Date()
+        self.targetExpression = targetExpression
         self.folders = folders
         self.isAssignedToMe = isAssignedToMe
         self.assignedTo = assignedTo
