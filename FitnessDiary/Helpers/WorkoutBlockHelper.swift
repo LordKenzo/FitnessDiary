@@ -88,8 +88,7 @@ class WorkoutBlockHelper {
                 order: itemData.order,
                 exercise: itemData.exercise,
                 notes: itemData.notes,
-                restTime: itemData.restTime,
-                targetExpression: itemData.targetExpression
+                restTime: itemData.restTime
             )
 
             for setData in itemData.sets {

@@ -16,6 +16,11 @@ struct AddExerciseView: View {
     @State private var primaryMetabolism: PrimaryMetabolism = .mixed
     @State private var category: ExerciseCategory = .training
     @State private var youtubeURL = ""
+    @State private var selectedMotorSchemas: Set<MotorSchema> = []
+    @State private var referencePlane: ReferencePlane?
+    @State private var focusOn = ""
+    @State private var selectedTags: Set<ExerciseTag> = []
+    @State private var isFavorite = false
     @State private var selectedPrimaryMuscles: Set<Muscle> = []
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
     @State private var selectedEquipment: Equipment?
@@ -64,6 +69,69 @@ struct AddExerciseView: View {
                         ForEach(ExerciseCategory.allCases, id: \.self) { cat in
                             Label(cat.rawValue, systemImage: cat.icon)
                                 .tag(cat)
+                        }
+                    }
+                }
+
+                Section("Piano di riferimento e Focus") {
+                    Picker("Piano di riferimento", selection: $referencePlane) {
+                        Text("Nessuno").tag(nil as ReferencePlane?)
+                        ForEach(ReferencePlane.allCases) { plane in
+                            Label(plane.rawValue, systemImage: plane.icon)
+                                .tag(plane as ReferencePlane?)
+                        }
+                    }
+
+                    TextField("Focus On (opzionale)", text: $focusOn, axis: .vertical)
+                        .lineLimit(1...3)
+
+                    Toggle("Segna come preferito", isOn: $isFavorite)
+                }
+
+                Section("Schemi Motori (max 3)") {
+                    NavigationLink {
+                        MotorSchemaSelectionView(selection: $selectedMotorSchemas)
+                    } label: {
+                        HStack {
+                            Label("Schemi Motori", systemImage: "square.grid.3x3")
+                            Spacer()
+                            Text(selectedMotorSchemas.isEmpty ? "Nessuno" : "\(selectedMotorSchemas.count)")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if !selectedMotorSchemas.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(selectedMotorSchemas.sorted(by: { $0.rawValue < $1.rawValue })) { schema in
+                                    MetadataChip(title: schema.rawValue, systemImage: schema.icon, tint: schema.color)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+
+                Section("Tag esercizio") {
+                    NavigationLink {
+                        ExerciseTagSelectionView(selection: $selectedTags)
+                    } label: {
+                        HStack {
+                            Label("Tag", systemImage: "tag")
+                            Spacer()
+                            Text(selectedTags.isEmpty ? "Nessuno" : "\(selectedTags.count)")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if !selectedTags.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(selectedTags.sorted(by: { $0.rawValue < $1.rawValue })) { tag in
+                                    MetadataChip(title: tag.rawValue, systemImage: tag.icon, tint: tag.color)
+                                }
+                            }
+                            .padding(.vertical, 4)
                         }
                     }
                 }
@@ -198,6 +266,11 @@ struct AddExerciseView: View {
             primaryMetabolism: primaryMetabolism,
             category: category,
             youtubeURL: youtubeURL.isEmpty ? nil : youtubeURL,
+            motorSchemas: selectedMotorSchemas.sorted(by: { $0.rawValue < $1.rawValue }),
+            referencePlane: referencePlane,
+            focusOn: focusOn.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : focusOn.trimmingCharacters(in: .whitespacesAndNewlines),
+            tags: selectedTags.sorted(by: { $0.rawValue < $1.rawValue }),
+            isFavorite: isFavorite,
             primaryMuscles: Array(selectedPrimaryMuscles),
             secondaryMuscles: Array(selectedSecondaryMuscles),
             equipment: selectedEquipment

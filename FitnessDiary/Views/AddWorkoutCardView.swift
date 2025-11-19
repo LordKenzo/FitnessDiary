@@ -12,6 +12,7 @@ struct AddWorkoutCardView: View {
 
     @State private var name = ""
     @State private var description = ""
+    @State private var targetExpression: StrengthExpressionType? = nil
     @State private var selectedFolders: [WorkoutFolder] = []
     @State private var isAssignedToMe = true
     @State private var selectedClients: [Client] = []
@@ -26,6 +27,23 @@ struct AddWorkoutCardView: View {
                     TextField("Nome scheda", text: $name)
                     TextField("Descrizione (opzionale)", text: $description, axis: .vertical)
                         .lineLimit(2...4)
+                }
+
+                Section("Obiettivo della scheda") {
+                    Picker("Focus", selection: $targetExpression) {
+                        Text("Nessuno").tag(nil as StrengthExpressionType?)
+                        ForEach(StrengthExpressionType.allCases) { type in
+                            HStack {
+                                Image(systemName: type.icon)
+                                    .foregroundStyle(type.color)
+                                Text(type.rawValue)
+                            }
+                            .tag(type as StrengthExpressionType?)
+                        }
+                    }
+                } footer: {
+                    Text("Il target definisce i range consigliati per carichi, ripetizioni e recuperi su tutta la scheda.")
+                        .font(.caption)
                 }
 
                 Section("Organizzazione") {
@@ -74,7 +92,8 @@ struct AddWorkoutCardView: View {
                     ForEach(workoutBlocks.indices, id: \.self) { index in
                         NavigationLink {
                             EditWorkoutBlockView(
-                                blockData: $workoutBlocks[index]
+                                blockData: $workoutBlocks[index],
+                                cardTargetExpression: targetExpression
                             )
                         } label: {
                             WorkoutBlockRow(
@@ -187,6 +206,7 @@ struct AddWorkoutCardView: View {
         let newCard = WorkoutCard(
             name: name,
             description: description.isEmpty ? nil : description,
+            targetExpression: targetExpression,
             folders: selectedFolders,
             isAssignedToMe: isAssignedToMe,
             assignedTo: selectedClients
