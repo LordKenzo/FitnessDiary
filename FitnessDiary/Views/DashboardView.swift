@@ -5,6 +5,7 @@ struct DashboardView: View {
     private let calendar = Calendar.current
     @Query private var storedSessionLogs: [WorkoutSessionLog]
     @ObservedObject private var localizationManager = LocalizationManager.shared
+    @Environment(\.colorScheme) private var colorScheme
 
     init() {}
 
@@ -47,7 +48,7 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
+                VStack(alignment: .leading, spacing: 32) {
                     heroHeader
 
                     metricGrid
@@ -60,90 +61,109 @@ struct DashboardView: View {
 
                     placeholderInsights
                 }
-                .padding(20)
+                .padding(.horizontal, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 40)
             }
-            .background(Color(.systemGroupedBackground))
+            .scrollIndicators(.hidden)
+            .background(Color.clear)
             .navigationTitle(L("dashboard.title"))
-            .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
     }
 
     private var heroHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(localized: "dashboard.greeting")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .font(.headline)
+                    .foregroundStyle(Color.white.opacity(0.8))
                 Text(heroHeadline)
                     .font(.largeTitle.bold())
+                    .foregroundStyle(.white)
             }
 
             if let latest = sessionLogs.first {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
                     Text(localized: "dashboard.last.session")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
-                    HStack(alignment: .center, spacing: 12) {
+                        .foregroundStyle(Color.white.opacity(0.7))
+                    HStack(alignment: .center, spacing: 14) {
                         Text(latest.mood.emoji)
-                            .font(.largeTitle)
-                        VStack(alignment: .leading, spacing: 4) {
+                            .font(.system(size: 44))
+                        VStack(alignment: .leading, spacing: 6) {
                             Text(latest.cardName)
                                 .font(.headline)
+                                .foregroundStyle(.white)
                             Text(dateFormatter.string(from: latest.date))
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.white.opacity(0.75))
                             Text(latest.notes.isEmpty ? L("dashboard.no.notes") : "\"\(latest.notes)\"")
                                 .font(.footnote.italic())
+                                .foregroundStyle(Color.white.opacity(0.65))
                                 .lineLimit(2)
-                                .foregroundStyle(.secondary)
                         }
                         Spacer()
                         if let rpe = latest.rpe {
-                            VStack(spacing: 2) {
+                            VStack(spacing: 4) {
                                 Text(localized: "workout.rpe")
                                     .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.white.opacity(0.7))
                                 Text("\(rpe)")
                                     .font(.headline)
+                                    .foregroundStyle(.white)
                             }
-                            .padding(8)
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 14)
+                            .background(Color.white.opacity(0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
                 }
-                Divider()
+                .transition(.opacity)
             } else {
                 Text(localized: "dashboard.empty.sessions")
                     .font(.callout)
-                    .foregroundStyle(.secondary)
-                Divider()
+                    .foregroundStyle(Color.white.opacity(0.7))
             }
 
-            HStack(alignment: .bottom, spacing: 16) {
-                VStack(alignment: .leading, spacing: 6) {
+            Divider()
+                .overlay(Color.white.opacity(0.2))
+
+            HStack(alignment: .bottom, spacing: 20) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(localized: "dashboard.weekly.goal")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.white.opacity(0.7))
                     Text(String(format: L("dashboard.sessions.count"), sessionsThisWeek, weeklyGoal))
-                        .font(.headline)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
                     ProgressView(value: min(weeklyProgress, 1))
-                        .tint(.blue)
+                        .tint(.white)
+                        .scaleEffect(x: 1, y: 1.1, anchor: .center)
                 }
                 Spacer()
-                VStack(alignment: .trailing) {
+                VStack(alignment: .trailing, spacing: 6) {
                     Text(localized: "dashboard.streak")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.white.opacity(0.7))
                     Text(String(format: L("dashboard.streak.days"), currentStreak))
-                        .font(.title2.bold())
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(.white)
                 }
             }
         }
-        .padding()
-        .background(.background)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: .black.opacity(0.05), radius: 10, y: 5)
+        .padding(24)
+        .background(
+            AppTheme.heroGradient(for: colorScheme)
+                .opacity(colorScheme == .dark ? 1 : 0.95)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 36, style: .continuous)
+                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
+        .shadow(color: AppTheme.shadow(for: colorScheme), radius: 30, y: 18)
     }
 
     private var metricGrid: some View {
@@ -152,112 +172,108 @@ struct DashboardView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Image(systemName: card.icon)
                         .font(.title2)
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.white.opacity(0.85))
                     Text(card.value)
-                        .font(.title.bold())
+                        .font(.system(size: 32, weight: .bold))
                         .foregroundStyle(.white)
                     Text(card.title)
                         .font(.headline)
-                        .foregroundStyle(.white.opacity(0.9))
+                        .foregroundStyle(.white.opacity(0.95))
                     Text(card.subtitle)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.7))
                 }
                 .padding()
-                .frame(maxWidth: .infinity, minHeight: 140, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: 150, alignment: .leading)
                 .background(card.gradient)
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+                .shadow(color: card.shadow, radius: 18, y: 12)
             }
         }
     }
 
     private var trendSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             sectionHeader(title: L("section.weekly.trend"), subtitle: L("section.weekly.trend.subtitle"))
             ActivitySparkline(values: weeklyTrend)
                 .frame(height: 120)
         }
-        .padding()
-        .background(.background)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: .black.opacity(0.04), radius: 8, y: 4)
+        .dashboardCardStyle()
     }
 
     private var focusSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             sectionHeader(title: L("section.focus.muscles"), subtitle: L("section.focus.muscles.subtitle"))
             FlowLayout(tags: focusMuscles)
         }
-        .padding()
-        .background(.background)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: .black.opacity(0.04), radius: 8, y: 4)
+        .dashboardCardStyle()
     }
 
     private var quickActionsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 18) {
             sectionHeader(title: L("section.quick.actions"), subtitle: L("section.quick.actions.subtitle"))
             ForEach(Array(quickActions.enumerated()), id: \.element.id) { index, action in
                 Button {
                     // Future integration point
                 } label: {
-                    HStack {
-                        Image(systemName: action.icon)
-                            .font(.title3)
-                            .foregroundStyle(.white)
-                            .frame(width: 44, height: 44)
-                            .background(action.tint)
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    HStack(spacing: 14) {
+                        LinearGradient(colors: [action.tint.opacity(0.9), action.tint.opacity(0.6)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            .mask {
+                                Image(systemName: action.icon)
+                                    .font(.system(size: 24, weight: .bold))
+                            }
+                            .frame(width: 52, height: 52)
+                            .background(action.tint.opacity(colorScheme == .dark ? 0.25 : 0.15))
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         VStack(alignment: .leading, spacing: 4) {
                             Text(action.title)
                                 .font(.headline)
                             Text(localized: "quick.action.coming.soon")
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
                         }
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.footnote.bold())
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(AppTheme.subtleText(for: colorScheme))
                     }
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 10)
                 }
                 .buttonStyle(.plain)
                 if index < quickActions.count - 1 {
                     Divider()
+                        .overlay(AppTheme.stroke(for: colorScheme))
                 }
             }
         }
-        .padding()
-        .background(.background)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: .black.opacity(0.04), radius: 8, y: 4)
+        .dashboardCardStyle()
     }
 
     private var placeholderInsights: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             sectionHeader(title: L("section.future.insights"), subtitle: L("section.future.insights.subtitle"))
             Text(localized: "section.future.insights.description")
                 .font(.callout)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .background(AppTheme.chipBackground(for: colorScheme))
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
-        .padding()
-        .background(.background)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: .black.opacity(0.04), radius: 8, y: 4)
+        .dashboardCardStyle()
     }
 
     private func sectionHeader(title: String, subtitle: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.headline)
             Text(subtitle)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
         }
     }
 
@@ -394,6 +410,19 @@ private struct MetricCard: Identifiable {
         }
         return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
     }
+
+    var shadow: Color {
+        switch icon {
+        case "calendar.circle":
+            return .blue.opacity(0.45)
+        case "dumbbell":
+            return .orange.opacity(0.45)
+        case "chart.bar.fill":
+            return .purple.opacity(0.45)
+        default:
+            return .green.opacity(0.45)
+        }
+    }
 }
 
 private struct QuickAction: Identifiable {
@@ -440,6 +469,7 @@ private struct ActivitySparkline: View {
 private struct FlowLayout: View {
     let tags: [String]
     private let columns = [GridItem(.adaptive(minimum: 100), spacing: 12)]
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
@@ -448,7 +478,7 @@ private struct FlowLayout: View {
                     .font(.subheadline.weight(.medium))
                     .padding(.vertical, 8)
                     .padding(.horizontal, 12)
-                    .background(Color(.secondarySystemBackground))
+                    .background(AppTheme.chipBackground(for: colorScheme))
                     .clipShape(Capsule())
             }
         }

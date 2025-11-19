@@ -6,30 +6,30 @@ struct ContentView: View {
     @ObservedObject private var localizationManager = LocalizationManager.shared
 
     var body: some View {
-        TabView {
-            // Tab 1 - Dashboard
-            DashboardView()
-                .tabItem {
-                    Label(L("tab.dashboard"), systemImage: "house.fill")
-                }
+        ZStack {
+            AppBackgroundView()
 
-            // Tab 2 - Allenamento
-            WorkoutExecutionView(bluetoothManager: bluetoothManager)
-                .tabItem {
-                    Label(L("tab.workout"), systemImage: "stopwatch")
-                }
+            TabView {
+                DashboardView()
+                    .tabItem {
+                        Label(L("tab.dashboard"), systemImage: "house.fill")
+                    }
 
-            // Tab 3 - Schede
-            WorkoutCardListView()
-                .tabItem {
-                    Label(L("tab.cards"), systemImage: "list.bullet.clipboard")
-                }
+                WorkoutExecutionView(bluetoothManager: bluetoothManager)
+                    .tabItem {
+                        Label(L("tab.workout"), systemImage: "stopwatch")
+                    }
 
-            // Tab 4 - Settings
-            SettingsView(bluetoothManager: bluetoothManager)
-                .tabItem {
-                    Label(L("tab.settings"), systemImage: "gearshape")
-                }
+                WorkoutCardListView()
+                    .tabItem {
+                        Label(L("tab.cards"), systemImage: "list.bullet.clipboard")
+                    }
+
+                SettingsView(bluetoothManager: bluetoothManager)
+                    .tabItem {
+                        Label(L("tab.settings"), systemImage: "gearshape")
+                    }
+            }
         }
     }
 }
