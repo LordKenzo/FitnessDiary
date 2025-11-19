@@ -44,50 +44,37 @@ struct ExerciseListView: View {
     }
     
     var body: some View {
-        List {
-            if exercises.isEmpty {
-                GlassEmptyStateCard(
-                    systemImage: "figure.strengthtraining.traditional",
-                    title: L("exercises.no.exercises"),
-                    description: L("exercises.no.exercises.description")
-                ) {
-                    Button(L("exercises.add")) {
-                        showingAddExercise = true
+        ScrollView {
+            LazyVStack(spacing: 18, pinnedViews: []) {
+                if exercises.isEmpty {
+                    GlassEmptyStateCard(
+                        systemImage: "figure.strengthtraining.traditional",
+                        title: L("exercises.no.exercises"),
+                        description: L("exercises.no.exercises.description")
+                    ) {
+                        Button(L("exercises.add")) {
+                            showingAddExercise = true
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
-                    .buttonStyle(.borderedProminent)
-                }
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 9, leading: 20, bottom: 9, trailing: 20))
-            } else {
-                ForEach(filteredExercises) { exercise in
-                    ExerciseRow(exercise: exercise)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            quickLookExercise = exercise
-                        }
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 9, leading: 20, bottom: 9, trailing: 20))
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button {
-                                editingExercise = exercise
-                            } label: {
-                                Label(L("common.edit"), systemImage: "pencil")
+                } else {
+                    ForEach(filteredExercises) { exercise in
+                        ExerciseRow(exercise: exercise)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                quickLookExercise = exercise
                             }
-                            .tint(.blue)
-
-                            Button(role: .destructive) {
-                                deleteExercise(exercise)
-                            } label: {
-                                Label(L("common.delete"), systemImage: "trash")
+                            .overlay(alignment: .topTrailing) {
+                                menuButton(for: exercise)
+                                    .padding(18)
                             }
-                        }
+                    }
                 }
             }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
         .searchable(text: $searchText, prompt: L("exercises.search"))
         .safeAreaInset(edge: .top) {
             if isAnyFilterActive() {
@@ -166,7 +153,26 @@ struct ExerciseListView: View {
         }
         modelContext.delete(exercise)
     }
-    
+
+    @ViewBuilder
+    private func menuButton(for exercise: Exercise) -> some View {
+        Menu {
+            Button(L("common.edit")) {
+                editingExercise = exercise
+            }
+
+            Button(role: .destructive) {
+                deleteExercise(exercise)
+            } label: {
+                Label(L("common.delete"), systemImage: "trash")
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.title3)
+                .foregroundStyle(.secondary)
+        }
+    }
+
     private func removeAllFilters() {
         filterPrimaryMetabolism = nil
         filterBiomechanicalStructure = nil
