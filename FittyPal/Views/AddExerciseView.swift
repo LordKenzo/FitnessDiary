@@ -104,20 +104,12 @@ struct AddExerciseView: View {
                     .fontWeight(.semibold)
                     .textFieldStyle(.plain)
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
 
                 TextField("Descrizione (opzionale)", text: $description, axis: .vertical)
                     .font(.subheadline)
                     .textFieldStyle(.plain)
                     .lineLimit(3...6)
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
             }
         }
     }
@@ -133,10 +125,6 @@ struct AddExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 Picker("Ruolo nell'Allenamento", selection: $trainingRole) {
                     ForEach(TrainingRole.allCases, id: \.self) { role in
@@ -146,10 +134,6 @@ struct AddExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 Picker("Metabolismo Primario", selection: $primaryMetabolism) {
                     ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
@@ -159,10 +143,6 @@ struct AddExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 Picker("Categoria", selection: $category) {
                     ForEach(ExerciseCategory.allCases, id: \.self) { cat in
@@ -172,10 +152,6 @@ struct AddExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
             }
         }
     }
@@ -192,27 +168,15 @@ struct AddExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 TextField("Focus On (opzionale)", text: $focusOn, axis: .vertical)
                     .font(.subheadline)
                     .textFieldStyle(.plain)
                     .lineLimit(1...3)
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
 
                 Toggle("Segna come preferito", isOn: $isFavorite)
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
             }
         }
     }
@@ -302,10 +266,6 @@ struct AddExerciseView: View {
             }
             .pickerStyle(.menu)
             .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
-            )
         }
     }
 
@@ -424,10 +384,6 @@ struct AddExerciseView: View {
                 .keyboardType(.URL)
                 .autocapitalization(.none)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
         }
     }
 

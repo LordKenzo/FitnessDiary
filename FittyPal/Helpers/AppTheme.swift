@@ -90,6 +90,16 @@ enum AppTheme {
         }
     }
 
+    /// Lightweight background for text fields - minimal opacity for better typing performance
+    static func fieldBackground(for scheme: ColorScheme) -> Color {
+        switch scheme {
+        case .dark:
+            return Color.white.opacity(0.02)
+        default:
+            return Color.black.opacity(0.02)
+        }
+    }
+
     static func stroke(for scheme: ColorScheme) -> Color {
         switch scheme {
         case .dark:
