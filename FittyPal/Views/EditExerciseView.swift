@@ -22,285 +22,44 @@ struct EditExerciseView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Informazioni Base") {
-                    TextField("Nome esercizio", text: $exercise.name)
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Informazioni Base
+                    informationSection
 
-                    TextField("Descrizione (opzionale)", text: Binding(
-                        get: { exercise.exerciseDescription ?? "" },
-                        set: { exercise.exerciseDescription = $0.isEmpty ? nil : $0 }
-                    ), axis: .vertical)
-                        .lineLimit(3...6)
+                    // Tassonomia
+                    taxonomySection
+
+                    // Piano e Focus
+                    planeAndFocusSection
+
+                    // Schemi Motori
+                    motorSchemasSection
+
+                    // Tag
+                    tagsSection
+
+                    // Attrezzo
+                    equipmentSection
+
+                    // Muscoli
+                    musclesSection
+
+                    // Foto
+                    photosSection
+
+                    // Varianti
+                    variantsSection
+
+                    // Video
+                    videoSection
+
+                    // Delete Button
+                    deleteSection
                 }
-
-                Section("Tassonomia") {
-                    Picker("Struttura Biomeccanica", selection: $exercise.biomechanicalStructure) {
-                        ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
-                            Label(type.rawValue, systemImage: type.icon)
-                                .tag(type)
-                        }
-                    }
-
-                    Picker("Ruolo nell'Allenamento", selection: $exercise.trainingRole) {
-                        ForEach(TrainingRole.allCases, id: \.self) { role in
-                            Label(role.rawValue, systemImage: role.icon)
-                                .tag(role)
-                        }
-                    }
-
-                    Picker("Metabolismo Primario", selection: $exercise.primaryMetabolism) {
-                        ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
-                            Label(metabolism.rawValue, systemImage: metabolism.icon)
-                                .tag(metabolism)
-                        }
-                    }
-
-                    Picker("Categoria", selection: $exercise.category) {
-                        ForEach(ExerciseCategory.allCases, id: \.self) { cat in
-                            Label(cat.rawValue, systemImage: cat.icon)
-                                .tag(cat)
-                        }
-                    }
-                }
-
-                Section("Piano di riferimento e Focus") {
-                    Picker("Piano di riferimento", selection: Binding(
-                        get: { exercise.referencePlane },
-                        set: { exercise.referencePlane = $0 }
-                    )) {
-                        Text("Nessuno").tag(nil as ReferencePlane?)
-                        ForEach(ReferencePlane.allCases) { plane in
-                            Label(plane.rawValue, systemImage: plane.icon)
-                                .tag(plane as ReferencePlane?)
-                        }
-                    }
-
-                    TextField("Focus On (opzionale)", text: Binding(
-                        get: { exercise.focusOn ?? "" },
-                        set: { exercise.focusOn = $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0 }
-                    ), axis: .vertical)
-                    .lineLimit(1...3)
-
-                    Toggle("Segna come preferito", isOn: $exercise.isFavorite)
-                }
-
-                Section("Schemi Motori (max 3)") {
-                    NavigationLink {
-                        MotorSchemaSelectionView(selection: $selectedMotorSchemas)
-                    } label: {
-                        HStack {
-                            Label("Schemi Motori", systemImage: "square.grid.3x3")
-                            Spacer()
-                            Text(selectedMotorSchemas.isEmpty ? "Nessuno" : "\(selectedMotorSchemas.count)")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
-                    if !selectedMotorSchemas.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack {
-                                ForEach(selectedMotorSchemas.sorted(by: { $0.rawValue < $1.rawValue })) { schema in
-                                    MetadataChip(title: schema.rawValue, systemImage: schema.icon, tint: schema.color)
-                                }
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                }
-                .onChange(of: selectedMotorSchemas) { _, newValue in
-                    exercise.motorSchemas = newValue.sorted(by: { $0.rawValue < $1.rawValue })
-                }
-
-                Section("Tag esercizio") {
-                    NavigationLink {
-                        ExerciseTagSelectionView(selection: $selectedTags)
-                    } label: {
-                        HStack {
-                            Label("Tag", systemImage: "tag")
-                            Spacer()
-                            Text(selectedTags.isEmpty ? "Nessuno" : "\(selectedTags.count)")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
-                    if !selectedTags.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack {
-                                ForEach(selectedTags.sorted(by: { $0.rawValue < $1.rawValue })) { tag in
-                                    MetadataChip(title: tag.rawValue, systemImage: tag.icon, tint: tag.color)
-                                }
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                }
-                .onChange(of: selectedTags) { _, newValue in
-                    exercise.tags = newValue.sorted(by: { $0.rawValue < $1.rawValue })
-                }
-
-                Section("Attrezzo") {
-                    Picker("Seleziona attrezzo (opzionale)", selection: $exercise.equipment) {
-                        Text("Nessuno").tag(nil as Equipment?)
-                        ForEach(equipment) { item in
-                            Label(item.name, systemImage: item.category.icon)
-                                .tag(item as Equipment?)
-                        }
-                    }
-                }
-
-                Section {
-                    NavigationLink {
-                        MuscleSelectionView(
-                            muscles: muscles,
-                            selectedMuscles: $selectedPrimaryMuscles,
-                            title: "Muscoli Primari"
-                        )
-                    } label: {
-                        HStack {
-                            Label("Muscoli Primari", systemImage: "star.fill")
-                            Spacer()
-                            if selectedPrimaryMuscles.isEmpty {
-                                Text("Nessuno")
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                Text("\(selectedPrimaryMuscles.count)")
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-
-                    if !selectedPrimaryMuscles.isEmpty {
-                        Text(selectedPrimaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .onChange(of: selectedPrimaryMuscles) { _, newValue in
-                    exercise.primaryMuscles = Array(newValue)
-                }
-
-                Section {
-                    NavigationLink {
-                        MuscleSelectionView(
-                            muscles: muscles,
-                            selectedMuscles: $selectedSecondaryMuscles,
-                            title: "Muscoli Secondari"
-                        )
-                    } label: {
-                        HStack {
-                            Label("Muscoli Secondari", systemImage: "star.leadinghalf.filled")
-                            Spacer()
-                            if selectedSecondaryMuscles.isEmpty {
-                                Text("Nessuno")
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                Text("\(selectedSecondaryMuscles.count)")
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-
-                    if !selectedSecondaryMuscles.isEmpty {
-                        Text(selectedSecondaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .onChange(of: selectedSecondaryMuscles) { _, newValue in
-                    exercise.secondaryMuscles = Array(newValue)
-                }
-
-                Section("Foto (Max 3)") {
-                    PhotoEditorRow(
-                        title: "Foto 1",
-                        item: $photoItem1,
-                        currentData: $exercise.photo1Data,
-                        allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
-                        photoIndex: 0
-                    )
-                    PhotoEditorRow(
-                        title: "Foto 2",
-                        item: $photoItem2,
-                        currentData: $exercise.photo2Data,
-                        allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
-                        photoIndex: 1
-                    )
-                    PhotoEditorRow(
-                        title: "Foto 3",
-                        item: $photoItem3,
-                        currentData: $exercise.photo3Data,
-                        allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
-                        photoIndex: 2
-                    )
-                }
-
-                Section {
-                    if exercise.variants.isEmpty {
-                        Text("Nessuna variante")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(exercise.variants) { variant in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(variant.name)
-                                        .font(.body)
-                                    if let equipment = variant.equipment {
-                                        Text(equipment.name)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer()
-                                Button(role: .destructive) {
-                                    removeVariant(variant)
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .foregroundStyle(.red)
-                                }
-                                .buttonStyle(.borderless)
-                            }
-                        }
-                    }
-
-                    Button {
-                        showingAddVariant = true
-                    } label: {
-                        Label("Aggiungi Variante", systemImage: "plus.circle")
-                    }
-                    .disabled(exercise.variants.count >= 10)
-                } header: {
-                    HStack {
-                        Text("Varianti (\(exercise.variants.count)/10)")
-                        Spacer()
-                        if !exercise.variants.isEmpty {
-                            Text("Bidirezionale")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-
-                Section("Video") {
-                    TextField("URL YouTube (opzionale)", text: Binding(
-                        get: { exercise.youtubeURL ?? "" },
-                        set: { exercise.youtubeURL = $0.isEmpty ? nil : $0 }
-                    ))
-                    .keyboardType(.URL)
-                    .autocapitalization(.none)
-
-                    if let urlString = exercise.youtubeURL,
-                       let url = URL(string: urlString) {
-                        Link(destination: url) {
-                            Label("Apri Video", systemImage: "play.rectangle.fill")
-                        }
-                    }
-                }
-
-                Section {
-                    Button("Elimina Esercizio", role: .destructive) {
-                        deleteExercise()
-                    }
-                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 24)
             }
             .navigationTitle("Modifica Esercizio")
             .navigationBarTitleDisplayMode(.inline)
@@ -309,6 +68,7 @@ struct EditExerciseView: View {
                     Button("Fatto") {
                         dismiss()
                     }
+                    .fontWeight(.semibold)
                 }
             }
             .onAppear {
@@ -322,6 +82,465 @@ struct EditExerciseView: View {
             }
         }
         .appScreenBackground()
+    }
+
+    // MARK: - Sections
+    private var informationSection: some View {
+        SectionCard(title: "Informazioni Base") {
+            VStack(spacing: 12) {
+                TextField("Nome esercizio", text: $exercise.name)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .textFieldStyle(.plain)
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white.opacity(0.05))
+                    )
+
+                TextField("Descrizione (opzionale)", text: Binding(
+                    get: { exercise.exerciseDescription ?? "" },
+                    set: { exercise.exerciseDescription = $0.isEmpty ? nil : $0 }
+                ), axis: .vertical)
+                    .font(.subheadline)
+                    .textFieldStyle(.plain)
+                    .lineLimit(3...6)
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white.opacity(0.05))
+                    )
+            }
+        }
+    }
+
+    private var taxonomySection: some View {
+        SectionCard(title: "Tassonomia") {
+            VStack(spacing: 12) {
+                Picker("Struttura Biomeccanica", selection: $exercise.biomechanicalStructure) {
+                    ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
+                        Label(type.rawValue, systemImage: type.icon)
+                            .tag(type)
+                    }
+                }
+                .pickerStyle(.menu)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.05))
+                )
+
+                Picker("Ruolo nell'Allenamento", selection: $exercise.trainingRole) {
+                    ForEach(TrainingRole.allCases, id: \.self) { role in
+                        Label(role.rawValue, systemImage: role.icon)
+                            .tag(role)
+                    }
+                }
+                .pickerStyle(.menu)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.05))
+                )
+
+                Picker("Metabolismo Primario", selection: $exercise.primaryMetabolism) {
+                    ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
+                        Label(metabolism.rawValue, systemImage: metabolism.icon)
+                            .tag(metabolism)
+                    }
+                }
+                .pickerStyle(.menu)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.05))
+                )
+
+                Picker("Categoria", selection: $exercise.category) {
+                    ForEach(ExerciseCategory.allCases, id: \.self) { cat in
+                        Label(cat.rawValue, systemImage: cat.icon)
+                            .tag(cat)
+                    }
+                }
+                .pickerStyle(.menu)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.05))
+                )
+            }
+        }
+    }
+
+    private var planeAndFocusSection: some View {
+        SectionCard(title: "Piano di riferimento e Focus") {
+            VStack(spacing: 12) {
+                Picker("Piano di riferimento", selection: Binding(
+                    get: { exercise.referencePlane },
+                    set: { exercise.referencePlane = $0 }
+                )) {
+                    Text("Nessuno").tag(nil as ReferencePlane?)
+                    ForEach(ReferencePlane.allCases) { plane in
+                        Label(plane.rawValue, systemImage: plane.icon)
+                            .tag(plane as ReferencePlane?)
+                    }
+                }
+                .pickerStyle(.menu)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.05))
+                )
+
+                TextField("Focus On (opzionale)", text: Binding(
+                    get: { exercise.focusOn ?? "" },
+                    set: { exercise.focusOn = $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0 }
+                ), axis: .vertical)
+                    .font(.subheadline)
+                    .textFieldStyle(.plain)
+                    .lineLimit(1...3)
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white.opacity(0.05))
+                    )
+
+                Toggle("Segna come preferito", isOn: $exercise.isFavorite)
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white.opacity(0.05))
+                    )
+            }
+        }
+    }
+
+    private var motorSchemasSection: some View {
+        SectionCard(title: "Schemi Motori (max 3)") {
+            VStack(spacing: 12) {
+                NavigationLink {
+                    MotorSchemaSelectionView(selection: $selectedMotorSchemas)
+                } label: {
+                    HStack {
+                        Label("Schemi Motori", systemImage: "square.grid.3x3")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Text(selectedMotorSchemas.isEmpty ? "Nessuno" : "\(selectedMotorSchemas.count)")
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white.opacity(0.05))
+                    )
+                }
+                .buttonStyle(.plain)
+
+                if !selectedMotorSchemas.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(selectedMotorSchemas.sorted(by: { $0.rawValue < $1.rawValue })) { schema in
+                                MetadataChip(title: schema.rawValue, systemImage: schema.icon, tint: schema.color)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .onChange(of: selectedMotorSchemas) { _, newValue in
+            exercise.motorSchemas = newValue.sorted(by: { $0.rawValue < $1.rawValue })
+        }
+    }
+
+    private var tagsSection: some View {
+        SectionCard(title: "Tag esercizio") {
+            VStack(spacing: 12) {
+                NavigationLink {
+                    ExerciseTagSelectionView(selection: $selectedTags)
+                } label: {
+                    HStack {
+                        Label("Tag", systemImage: "tag")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Text(selectedTags.isEmpty ? "Nessuno" : "\(selectedTags.count)")
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white.opacity(0.05))
+                    )
+                }
+                .buttonStyle(.plain)
+
+                if !selectedTags.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(selectedTags.sorted(by: { $0.rawValue < $1.rawValue })) { tag in
+                                MetadataChip(title: tag.rawValue, systemImage: tag.icon, tint: tag.color)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .onChange(of: selectedTags) { _, newValue in
+            exercise.tags = newValue.sorted(by: { $0.rawValue < $1.rawValue })
+        }
+    }
+
+    private var equipmentSection: some View {
+        SectionCard(title: "Attrezzo") {
+            Picker("Seleziona attrezzo (opzionale)", selection: $exercise.equipment) {
+                Text("Nessuno").tag(nil as Equipment?)
+                ForEach(equipment) { item in
+                    Label(item.name, systemImage: item.category.icon)
+                        .tag(item as Equipment?)
+                }
+            }
+            .pickerStyle(.menu)
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.white.opacity(0.05))
+            )
+        }
+    }
+
+    private var musclesSection: some View {
+        VStack(spacing: 20) {
+            SectionCard(title: "Muscoli Primari") {
+                VStack(spacing: 12) {
+                    NavigationLink {
+                        MuscleSelectionView(
+                            muscles: muscles,
+                            selectedMuscles: $selectedPrimaryMuscles,
+                            title: "Muscoli Primari"
+                        )
+                    } label: {
+                        HStack {
+                            Label("Muscoli Primari", systemImage: "star.fill")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text(selectedPrimaryMuscles.isEmpty ? "Nessuno" : "\(selectedPrimaryMuscles.count)")
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.white.opacity(0.05))
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    if !selectedPrimaryMuscles.isEmpty {
+                        Text(selectedPrimaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            .onChange(of: selectedPrimaryMuscles) { _, newValue in
+                exercise.primaryMuscles = Array(newValue)
+            }
+
+            SectionCard(title: "Muscoli Secondari") {
+                VStack(spacing: 12) {
+                    NavigationLink {
+                        MuscleSelectionView(
+                            muscles: muscles,
+                            selectedMuscles: $selectedSecondaryMuscles,
+                            title: "Muscoli Secondari"
+                        )
+                    } label: {
+                        HStack {
+                            Label("Muscoli Secondari", systemImage: "star.leadinghalf.filled")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text(selectedSecondaryMuscles.isEmpty ? "Nessuno" : "\(selectedSecondaryMuscles.count)")
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.white.opacity(0.05))
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    if !selectedSecondaryMuscles.isEmpty {
+                        Text(selectedSecondaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            .onChange(of: selectedSecondaryMuscles) { _, newValue in
+                exercise.secondaryMuscles = Array(newValue)
+            }
+        }
+    }
+
+    private var photosSection: some View {
+        SectionCard(title: "Foto (Max 3)") {
+            VStack(spacing: 12) {
+                PhotoEditorRow(
+                    title: "Foto 1",
+                    item: $photoItem1,
+                    currentData: $exercise.photo1Data,
+                    allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
+                    photoIndex: 0
+                )
+                PhotoEditorRow(
+                    title: "Foto 2",
+                    item: $photoItem2,
+                    currentData: $exercise.photo2Data,
+                    allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
+                    photoIndex: 1
+                )
+                PhotoEditorRow(
+                    title: "Foto 3",
+                    item: $photoItem3,
+                    currentData: $exercise.photo3Data,
+                    allPhotos: [exercise.photo1Data, exercise.photo2Data, exercise.photo3Data],
+                    photoIndex: 2
+                )
+            }
+        }
+    }
+
+    private var variantsSection: some View {
+        SectionCard(title: "Varianti (\(exercise.variants.count)/10)") {
+            VStack(spacing: 12) {
+                if exercise.variants.isEmpty {
+                    Text("Nessuna variante")
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                } else {
+                    ForEach(exercise.variants) { variant in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(variant.name)
+                                    .font(.body)
+                                    .fontWeight(.medium)
+                                if let equipment = variant.equipment {
+                                    Text(equipment.name)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer()
+                            Button(role: .destructive) {
+                                removeVariant(variant)
+                            } label: {
+                                Image(systemName: "trash.circle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(.red)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.white.opacity(0.05))
+                        )
+                    }
+                }
+
+                Button {
+                    showingAddVariant = true
+                } label: {
+                    HStack {
+                        Spacer()
+                        Label("Aggiungi Variante", systemImage: "plus.circle")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.blue.opacity(0.15))
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(exercise.variants.count >= 10)
+            }
+        }
+    }
+
+    private var videoSection: some View {
+        SectionCard(title: "Video") {
+            VStack(spacing: 12) {
+                TextField("URL YouTube (opzionale)", text: Binding(
+                    get: { exercise.youtubeURL ?? "" },
+                    set: { exercise.youtubeURL = $0.isEmpty ? nil : $0 }
+                ))
+                .font(.subheadline)
+                .textFieldStyle(.plain)
+                .keyboardType(.URL)
+                .autocapitalization(.none)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.05))
+                )
+
+                if let urlString = exercise.youtubeURL,
+                   let url = URL(string: urlString) {
+                    Link(destination: url) {
+                        HStack {
+                            Spacer()
+                            Label("Apri Video", systemImage: "play.rectangle.fill")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            Spacer()
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color.red.opacity(0.15))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var deleteSection: some View {
+        Button(role: .destructive) {
+            deleteExercise()
+        } label: {
+            HStack {
+                Spacer()
+                Label("Elimina Esercizio", systemImage: "trash")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.red.opacity(0.15))
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private func removeVariant(_ variant: Exercise) {
