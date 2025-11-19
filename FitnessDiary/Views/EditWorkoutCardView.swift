@@ -103,9 +103,12 @@ struct EditWorkoutCardView: View {
                             .tag(type as StrengthExpressionType?)
                         }
                     }
-                } footer: {
+                    
+                    // Simula il footer
                     Text("Imposta un target unico per guidare carichi, ripetizioni e recuperi di tutti gli esercizi della scheda.")
                         .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 8)
                 }
 
                 Section("Organizzazione") {

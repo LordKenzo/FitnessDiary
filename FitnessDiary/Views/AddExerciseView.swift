@@ -2,13 +2,22 @@ import SwiftUI
 import SwiftData
 import PhotosUI
 
-struct AddExerciseView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
+// Estensione per rendere Muscle conforme a Hashable
+extension Muscle: Hashable {
+    public static func == (lhs: Muscle, rhs: Muscle) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
 
+struct AddExerciseView: View {
+    @Environment(\.modelContexat) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     let muscles: [Muscle]
     let equipment: [Equipment]
-
     @State private var name = ""
     @State private var description = ""
     @State private var biomechanicalStructure: BiomechanicalStructure = .multiJoint
@@ -24,25 +33,21 @@ struct AddExerciseView: View {
     @State private var selectedPrimaryMuscles: Set<Muscle> = []
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
     @State private var selectedEquipment: Equipment?
-
     @State private var photoItem1: PhotosPickerItem?
     @State private var photoItem2: PhotosPickerItem?
     @State private var photoItem3: PhotosPickerItem?
-
     @State private var photoData1: Data?
     @State private var photoData2: Data?
     @State private var photoData3: Data?
-
+    
     var body: some View {
         NavigationStack {
             Form {
                 Section("Informazioni Base") {
                     TextField("Nome esercizio", text: $name)
-
                     TextField("Descrizione (opzionale)", text: $description, axis: .vertical)
                         .lineLimit(3...6)
                 }
-
                 Section("Tassonomia") {
                     Picker("Struttura Biomeccanica", selection: $biomechanicalStructure) {
                         ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
@@ -50,21 +55,18 @@ struct AddExerciseView: View {
                                 .tag(type)
                         }
                     }
-
                     Picker("Ruolo nell'Allenamento", selection: $trainingRole) {
                         ForEach(TrainingRole.allCases, id: \.self) { role in
                             Label(role.rawValue, systemImage: role.icon)
                                 .tag(role)
                         }
                     }
-
                     Picker("Metabolismo Primario", selection: $primaryMetabolism) {
                         ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
                             Label(metabolism.rawValue, systemImage: metabolism.icon)
                                 .tag(metabolism)
                         }
                     }
-
                     Picker("Categoria", selection: $category) {
                         ForEach(ExerciseCategory.allCases, id: \.self) { cat in
                             Label(cat.rawValue, systemImage: cat.icon)
@@ -72,7 +74,6 @@ struct AddExerciseView: View {
                         }
                     }
                 }
-
                 Section("Piano di riferimento e Focus") {
                     Picker("Piano di riferimento", selection: $referencePlane) {
                         Text("Nessuno").tag(nil as ReferencePlane?)
@@ -81,13 +82,10 @@ struct AddExerciseView: View {
                                 .tag(plane as ReferencePlane?)
                         }
                     }
-
                     TextField("Focus On (opzionale)", text: $focusOn, axis: .vertical)
                         .lineLimit(1...3)
-
                     Toggle("Segna come preferito", isOn: $isFavorite)
                 }
-
                 Section("Schemi Motori (max 3)") {
                     NavigationLink {
                         MotorSchemaSelectionView(selection: $selectedMotorSchemas)
@@ -99,7 +97,6 @@ struct AddExerciseView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-
                     if !selectedMotorSchemas.isEmpty {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack {
@@ -111,7 +108,6 @@ struct AddExerciseView: View {
                         }
                     }
                 }
-
                 Section("Tag esercizio") {
                     NavigationLink {
                         ExerciseTagSelectionView(selection: $selectedTags)
@@ -123,7 +119,6 @@ struct AddExerciseView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-
                     if !selectedTags.isEmpty {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack {
@@ -135,7 +130,6 @@ struct AddExerciseView: View {
                         }
                     }
                 }
-
                 Section("Attrezzo") {
                     Picker("Seleziona attrezzo (opzionale)", selection: $selectedEquipment) {
                         Text("Nessuno").tag(nil as Equipment?)
@@ -145,7 +139,6 @@ struct AddExerciseView: View {
                         }
                     }
                 }
-
                 Section {
                     NavigationLink {
                         MuscleSelectionView(
@@ -166,14 +159,12 @@ struct AddExerciseView: View {
                             }
                         }
                     }
-
                     if !selectedPrimaryMuscles.isEmpty {
                         Text(selectedPrimaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
-
                 Section {
                     NavigationLink {
                         MuscleSelectionView(
@@ -194,14 +185,12 @@ struct AddExerciseView: View {
                             }
                         }
                     }
-
                     if !selectedSecondaryMuscles.isEmpty {
                         Text(selectedSecondaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
-
                 Section("Foto (Max 3)") {
                     PhotoPickerRow(
                         title: "Foto 1",
@@ -228,7 +217,6 @@ struct AddExerciseView: View {
                         photoData3: photoData3
                     )
                 }
-
                 Section("Video") {
                     TextField("URL YouTube (opzionale)", text: $youtubeURL)
                         .keyboardType(.URL)
@@ -243,7 +231,6 @@ struct AddExerciseView: View {
                         dismiss()
                     }
                 }
-
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Salva") {
                         saveExercise()
@@ -253,7 +240,7 @@ struct AddExerciseView: View {
             }
         }
     }
-
+    
     private func saveExercise() {
         let exercise = Exercise(
             name: name,
@@ -342,7 +329,6 @@ struct PhotoPickerRow: View {
         }
         .fullScreenCover(isPresented: $showingFullscreen) {
             let allPhotos = [photoData1, photoData2, photoData3].compactMap { $0 }
-
             if allPhotos.count > 1, let currentPhotoData = photoData, let currentIndex = allPhotos.firstIndex(of: currentPhotoData) {
                 MultiPhotoFullscreenView(photos: allPhotos, initialIndex: currentIndex)
             } else if let data = photoData {

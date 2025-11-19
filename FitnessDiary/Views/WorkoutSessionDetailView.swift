@@ -203,7 +203,7 @@ private struct WorkoutDetailMetricRow: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .frame(width: 24)
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(.tint)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.caption)
@@ -218,62 +218,4 @@ private struct WorkoutDetailMetricRow: View {
     }
 }
 
-#Preview("Workout detail") {
-    WorkoutSessionDetailPreview()
-}
 
-private struct WorkoutSessionDetailPreview: View {
-    private let container: ModelContainer
-    private let log: WorkoutSessionLog
-
-    init() {
-        let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
-        container = try! ModelContainer(
-            for: [WorkoutSessionLog.self, WorkoutCard.self, Exercise.self],
-            configurations: configuration
-        )
-
-        let exercise = Exercise(name: "Panca Piana", category: .training)
-        let set = WorkoutSet(
-            order: 0,
-            setType: .reps,
-            reps: 8,
-            weight: 80,
-            duration: nil,
-            notes: nil,
-            loadType: .absolute,
-            percentageOfMax: nil
-        )
-        let item = WorkoutExerciseItem(order: 0, exercise: exercise, sets: [set])
-        let block = WorkoutBlock(
-            order: 0,
-            blockType: .simple,
-            methodType: nil,
-            globalSets: 3,
-            globalRestTime: 120,
-            notes: nil,
-            exerciseItems: [item]
-        )
-        let card = WorkoutCard(name: "Forza A", blocks: [block])
-        let log = WorkoutSessionLog(
-            card: card,
-            cardName: card.name,
-            notes: "Ottime sensazioni",
-            mood: .happy,
-            rpe: 7,
-            durationSeconds: 3600
-        )
-
-        container.mainContext.insert(exercise)
-        container.mainContext.insert(card)
-        container.mainContext.insert(log)
-        self.log = log
-    }
-
-    var body: some View {
-        NavigationStack {
-            WorkoutSessionDetailView(log: log)
-        }
-        .modelContainer(container)
-    }
-}
