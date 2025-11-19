@@ -107,51 +107,18 @@ struct EditExerciseView: View {
     }
 
     private var taxonomySection: some View {
-        SectionCard(title: "Tassonomia") {
-            VStack(spacing: 12) {
-                Picker("Struttura Biomeccanica", selection: $exercise.biomechanicalStructure) {
-                    ForEach(BiomechanicalStructure.allCases, id: \.self) { type in
-                        Label(type.rawValue, systemImage: type.icon)
-                            .tag(type)
-                    }
-                }
-                .pickerStyle(.menu)
-                .padding(12)
-
-                Picker("Ruolo nell'Allenamento", selection: $exercise.trainingRole) {
-                    ForEach(TrainingRole.allCases, id: \.self) { role in
-                        Label(role.rawValue, systemImage: role.icon)
-                            .tag(role)
-                    }
-                }
-                .pickerStyle(.menu)
-                .padding(12)
-
-                Picker("Metabolismo Primario", selection: $exercise.primaryMetabolism) {
-                    ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
-                        Label(metabolism.rawValue, systemImage: metabolism.icon)
-                            .tag(metabolism)
-                    }
-                }
-                .pickerStyle(.menu)
-                .padding(12)
-
-                Picker("Categoria", selection: $exercise.category) {
-                    ForEach(ExerciseCategory.allCases, id: \.self) { cat in
-                        Label(cat.rawValue, systemImage: cat.icon)
-                            .tag(cat)
-                    }
-                }
-                .pickerStyle(.menu)
-                .padding(12)
-            }
-        }
+        ExerciseTaxonomySection(
+            biomechanicalStructure: $exercise.biomechanicalStructure,
+            trainingRole: $exercise.trainingRole,
+            primaryMetabolism: $exercise.primaryMetabolism,
+            category: $exercise.category
+        )
     }
 
     private var planeAndFocusSection: some View {
         SectionCard(title: "Piano di riferimento e Focus") {
             VStack(spacing: 12) {
-                Picker("Piano di riferimento", selection: Binding(
+                LabeledPicker(label: "Piano di riferimento", selection: Binding(
                     get: { exercise.referencePlane },
                     set: { exercise.referencePlane = $0 }
                 )) {
@@ -161,8 +128,6 @@ struct EditExerciseView: View {
                             .tag(plane as ReferencePlane?)
                     }
                 }
-                .pickerStyle(.menu)
-                .padding(12)
 
                 TextField("Focus On (opzionale)", text: Binding(
                     get: { exercise.focusOn ?? "" },
@@ -252,17 +217,7 @@ struct EditExerciseView: View {
     }
 
     private var equipmentSection: some View {
-        SectionCard(title: "Attrezzo") {
-            Picker("Seleziona attrezzo (opzionale)", selection: $exercise.equipment) {
-                Text("Nessuno").tag(nil as Equipment?)
-                ForEach(equipment) { item in
-                    Label(item.name, systemImage: item.category.icon)
-                        .tag(item as Equipment?)
-                }
-            }
-            .pickerStyle(.menu)
-            .padding(12)
-        }
+        EquipmentPickerSection(selectedEquipment: $exercise.equipment, equipment: equipment)
     }
 
     private var musclesSection: some View {
