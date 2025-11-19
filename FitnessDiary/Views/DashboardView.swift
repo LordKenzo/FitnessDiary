@@ -417,12 +417,14 @@ private struct MetricCard: Identifiable {
         switch icon {
         case "calendar.circle":
             return .blue.opacity(0.45)
-        case "dumbbell":
-            return .orange.opacity(0.45)
-        case "chart.bar.fill":
-            return .purple.opacity(0.45)
-        default:
+        case "clock.fill":
             return .green.opacity(0.45)
+        case "waveform.path.ecg":
+            return .orange.opacity(0.45)
+        case "face.smiling":
+            return .yellow.opacity(0.45)
+        default:
+            return .gray.opacity(0.45)
         }
     }
 }
