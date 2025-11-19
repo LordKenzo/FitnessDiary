@@ -41,12 +41,9 @@ struct AddWorkoutCardView: View {
                             .tag(type as StrengthExpressionType?)
                         }
                     }
-                    
-                    // Simulazione del footer
+                } footer: {
                     Text("Il target definisce i range consigliati per carichi, ripetizioni e recuperi su tutta la scheda.")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 8)
                 }
 
                 Section("Organizzazione") {
