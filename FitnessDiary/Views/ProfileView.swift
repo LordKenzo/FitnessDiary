@@ -333,7 +333,9 @@ struct ProfileEditView: View {
                 self.gender = gender
             }
         } catch {
+            #if DEBUG
             print("Errore importazione HealthKit: \(error)")
+            #endif
         }
     }
     
