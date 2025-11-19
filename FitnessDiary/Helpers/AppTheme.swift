@@ -34,9 +34,9 @@ enum AppTheme {
         case .dark:
             return LinearGradient(
                 colors: [
-                    Color(red: 15/255, green: 18/255, blue: 33/255),
-                    Color(red: 27/255, green: 32/255, blue: 65/255),
-                    Color(red: 50/255, green: 33/255, blue: 68/255)
+                    Color(red: 19/255, green: 6/255, blue: 27/255),
+                    Color(red: 49/255, green: 12/255, blue: 56/255),
+                    Color(red: 94/255, green: 22/255, blue: 72/255)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -44,8 +44,9 @@ enum AppTheme {
         default:
             return LinearGradient(
                 colors: [
-                    Color(red: 247/255, green: 249/255, blue: 255/255),
-                    Color(red: 255/255, green: 249/255, blue: 242/255)
+                    Color(red: 255/255, green: 244/255, blue: 233/255),
+                    Color(red: 255/255, green: 226/255, blue: 199/255),
+                    Color(red: 255/255, green: 205/255, blue: 178/255)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -129,22 +130,40 @@ struct AppBackgroundView: View {
     private var blobLayer: some View {
         ZStack {
             Circle()
-                .fill(Color.pink.opacity(colorScheme == .dark ? 0.25 : 0.35))
-                .frame(width: 320)
-                .blur(radius: 120)
-                .offset(x: -140, y: -250)
-
-            Circle()
-                .fill(Color.blue.opacity(colorScheme == .dark ? 0.20 : 0.25))
-                .frame(width: 380)
+                .fill(blobColor(primary: true))
+                .frame(width: 360)
                 .blur(radius: 140)
-                .offset(x: 160, y: -180)
+                .offset(x: -150, y: -260)
 
             Circle()
-                .fill(Color.orange.opacity(colorScheme == .dark ? 0.18 : 0.25))
+                .fill(blobColor())
                 .frame(width: 420)
                 .blur(radius: 160)
-                .offset(x: 60, y: 220)
+                .offset(x: 170, y: -160)
+
+            Circle()
+                .fill(blobAccent())
+                .frame(width: 460)
+                .blur(radius: 180)
+                .offset(x: 40, y: 240)
+        }
+    }
+
+    private func blobColor(primary: Bool = false) -> Color {
+        if colorScheme == .dark {
+            return Color(red: primary ? 255/255 : 226/255, green: primary ? 102/255 : 70/255, blue: primary ? 196/255 : 125/255)
+                .opacity(primary ? 0.32 : 0.22)
+        } else {
+            return Color(red: primary ? 255/255 : 255/255, green: primary ? 189/255 : 214/255, blue: primary ? 148/255 : 186/255)
+                .opacity(primary ? 0.35 : 0.25)
+        }
+    }
+
+    private func blobAccent() -> Color {
+        if colorScheme == .dark {
+            return Color(red: 255/255, green: 92/255, blue: 125/255).opacity(0.24)
+        } else {
+            return Color(red: 255/255, green: 170/255, blue: 120/255).opacity(0.28)
         }
     }
 }
