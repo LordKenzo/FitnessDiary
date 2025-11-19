@@ -139,7 +139,7 @@ struct ExerciseQuickLookView: View {
 
     @ViewBuilder
     private var descriptionSection: some View {
-        if let description = exercise.description, !description.isEmpty {
+        if let description = exercise.exerciseDescription, !description.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Descrizione")
                     .font(.caption)
