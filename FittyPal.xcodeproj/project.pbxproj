@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		3EFEE5202EC9D07E0045A07A /* Exceptions for "FitnessDiary" folder in "FitnessDiary" target */ = {
+		3EFEE5202EC9D07E0045A07A /* Exceptions for "FittyPal" folder in "FitnessDiary" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -21,12 +21,12 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3EFEE4E32EC9C5A90045A07A /* FitnessDiary */ = {
+		3EFEE4E32EC9C5A90045A07A /* FittyPal */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3EFEE5202EC9D07E0045A07A /* Exceptions for "FitnessDiary" folder in "FitnessDiary" target */,
+				3EFEE5202EC9D07E0045A07A /* Exceptions for "FittyPal" folder in "FitnessDiary" target */,
 			);
-			path = FitnessDiary;
+			path = FittyPal;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,7 +45,7 @@
 		3EFEE4D82EC9C5A90045A07A = {
 			isa = PBXGroup;
 			children = (
-				3EFEE4E32EC9C5A90045A07A /* FitnessDiary */,
+				3EFEE4E32EC9C5A90045A07A /* FittyPal */,
 				3EFEE4E22EC9C5A90045A07A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -74,7 +74,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				3EFEE4E32EC9C5A90045A07A /* FitnessDiary */,
+				3EFEE4E32EC9C5A90045A07A /* FittyPal */,
 			);
 			name = FitnessDiary;
 			packageProductDependencies = (
@@ -98,7 +98,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3EFEE4DC2EC9C5A90045A07A /* Build configuration list for PBXProject "FitnessDiary" */;
+			buildConfigurationList = 3EFEE4DC2EC9C5A90045A07A /* Build configuration list for PBXProject "FittyPal" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -289,7 +289,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = lo.france.FitnessDiary;
+				PRODUCT_BUNDLE_IDENTIFIER = lorenzo.franceschini.fittypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
@@ -323,7 +323,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = lo.france.FitnessDiary;
+				PRODUCT_BUNDLE_IDENTIFIER = lorenzo.franceschini.fittypal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
@@ -334,7 +334,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3EFEE4DC2EC9C5A90045A07A /* Build configuration list for PBXProject "FitnessDiary" */ = {
+		3EFEE4DC2EC9C5A90045A07A /* Build configuration list for PBXProject "FittyPal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3EFEE4ED2EC9C5AC0045A07A /* Debug */,
