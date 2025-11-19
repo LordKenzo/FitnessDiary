@@ -131,8 +131,7 @@ struct ExerciseFiltersView: View {
 
                     FilterSection(title: L("filters.primary.muscle")) {
                         VStack(alignment: .leading, spacing: 12) {
-                            TextField(L("muscles.search"), text: $muscleSearchText)
-                                .textFieldStyle(.roundedBorder)
+                            GlassSearchField(text: $muscleSearchText, placeholder: L("muscles.search"))
 
                             Button(action: { filterPrimaryMuscle = nil }) {
                                 Label(L("muscles.all"), systemImage: filterPrimaryMuscle == nil ? "checkmark.circle.fill" : "figure.strengthtraining.traditional")
@@ -161,7 +160,7 @@ struct ExerciseFiltersView: View {
                             .toggleStyle(SwitchToggleStyle(tint: .yellow))
                     }
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 20)
                 .padding(.top, 24)
                 .padding(.bottom, 32)
             }
@@ -175,6 +174,7 @@ struct ExerciseFiltersView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     @ViewBuilder
@@ -188,14 +188,17 @@ struct ExerciseFiltersView: View {
 struct FilterSection<Content: View>: View {
     let title: String
     @ViewBuilder var content: () -> Content
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text(title.uppercased())
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                .tracking(0.6)
             content()
         }
+        .dashboardCardStyle()
     }
 }
 
@@ -230,5 +233,30 @@ struct FilterChip: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+private struct GlassSearchField: View {
+    @Binding var text: String
+    let placeholder: String
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+            TextField(placeholder, text: $text)
+                .textInputAutocapitalization(.words)
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(AppTheme.cardBackground(for: colorScheme))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(AppTheme.stroke(for: colorScheme), lineWidth: 1)
+                )
+        )
     }
 }

@@ -12,44 +12,38 @@ struct EquipmentListView: View {
     }
 
     var body: some View {
-        List {
-            if equipment.isEmpty {
-                ContentUnavailableView {
-                    Label(L("equipment.no.equipment"), systemImage: "dumbbell")
-                } description: {
-                    Text(L("equipment.no.equipment.description"))
-                } actions: {
-                    Button(L("equipment.initialize")) {
-                        initializeDefaultEquipment()
+        ScrollView {
+            VStack(spacing: 22) {
+                if equipment.isEmpty {
+                    GlassEmptyStateCard(
+                        systemImage: "dumbbell",
+                        title: L("equipment.no.equipment"),
+                        description: L("equipment.no.equipment.description")
+                    ) {
+                        Button(L("equipment.initialize")) {
+                            initializeDefaultEquipment()
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
-                    .buttonStyle(.borderedProminent)
-                }
-            } else {
-                ForEach(EquipmentCategory.allCases, id: \.self) { category in
-                    if let equipmentInCategory = equipmentByCategory[category], !equipmentInCategory.isEmpty {
-                        Section {
-                            ForEach(equipmentInCategory) { item in
-                                HStack {
-                                    Text(item.name)
-                                    Spacer()
-                                    Text(item.category.rawValue)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selectedEquipment = item
+                } else {
+                    ForEach(EquipmentCategory.allCases, id: \.self) { category in
+                        if let equipmentInCategory = equipmentByCategory[category], !equipmentInCategory.isEmpty {
+                            GlassSectionCard(title: category.rawValue, iconName: category.icon) {
+                                ForEach(equipmentInCategory) { item in
+                                    GlassListRow(title: item.name, subtitle: item.category.rawValue, iconName: category.icon) {
+                                        menuButton(for: item)
+                                    }
+                                    .onTapGesture {
+                                        selectedEquipment = item
+                                    }
                                 }
                             }
-                            .onDelete { indexSet in
-                                deleteEquipment(from: equipmentInCategory, at: indexSet)
-                            }
-                        } header: {
-                            Label(category.rawValue, systemImage: category.icon)
                         }
                     }
                 }
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
         }
         .navigationTitle(L("equipment.title"))
         .toolbar {
@@ -89,17 +83,35 @@ struct EquipmentListView: View {
         .sheet(item: $selectedEquipment) { equipment in
             EditEquipmentView(equipment: equipment)
         }
-    }
-
-    private func deleteEquipment(from equipment: [Equipment], at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(equipment[index])
-        }
+        .appScreenBackground()
     }
 
     private func deleteAllEquipment() {
         for item in equipment {
             modelContext.delete(item)
+        }
+    }
+
+    private func deleteEquipment(_ equipment: Equipment) {
+        modelContext.delete(equipment)
+    }
+
+    @ViewBuilder
+    private func menuButton(for equipment: Equipment) -> some View {
+        Menu {
+            Button(L("common.edit")) {
+                selectedEquipment = equipment
+            }
+
+            Button(role: .destructive) {
+                deleteEquipment(equipment)
+            } label: {
+                Label(L("common.delete"), systemImage: "trash")
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.title3)
+                .foregroundStyle(.secondary)
         }
     }
 

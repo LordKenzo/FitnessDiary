@@ -15,6 +15,7 @@ struct WorkoutCardListView: View {
     @State private var selectedClient: Client?
     @State private var expandedFolders: Set<UUID> = []
     @ObservedObject private var localizationManager = LocalizationManager.shared
+    private static let noFolderID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
 
     @MainActor
     enum FilterOwner: CaseIterable {
@@ -61,127 +62,63 @@ struct WorkoutCardListView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                if allCards.isEmpty {
-                    ContentUnavailableView {
-                        Label(L("cards.no.cards"), systemImage: "doc.text")
-                    } description: {
-                        Text(L("cards.no.cards.description"))
-                    } actions: {
-                        Button(L("cards.create")) {
-                            showingAddCard = true
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                } else {
-                    // Schede organizzate per folder (collassabili)
-                    ForEach(folders) { folder in
-                        let folderCards = cards(for: folder)
-                        if !folderCards.isEmpty {
-                            DisclosureGroup(
-                                isExpanded: Binding(
-                                    get: { expandedFolders.contains(folder.id) },
-                                    set: { isExpanded in
-                                        if isExpanded {
-                                            expandedFolders.insert(folder.id)
-                                        } else {
-                                            expandedFolders.remove(folder.id)
-                                        }
-                                    }
-                                )
-                            ) {
-                                ForEach(folderCards) { card in
-                                    WorkoutCardRow(card: card)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            selectedCard = card
-                                        }
-                                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                            Button(role: .destructive) {
-                                                deleteCard(card)
-                                            } label: {
-                                                Label(L("confirm.delete"), systemImage: "trash")
-                                            }
-                                            Button {
-                                                selectedCard = card
-                                            } label: {
-                                                Label(L("common.edit"), systemImage: "pencil")
-                                            }
-                                            .tint(.blue)
-                                        }
-                                }
-                            } label: {
-                                HStack {
-                                    Circle()
-                                        .fill(folder.color)
-                                        .frame(width: 12, height: 12)
-                                    Text(folder.name)
-                                        .font(.headline)
-                                    Text("(\(folderCards.count))")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    Spacer()
-                                    Button {
-                                        selectedFolder = folder
-                                    } label: {
-                                        Image(systemName: "pencil.circle.fill")
-                                            .font(.caption)
-                                    }
-                                    .buttonStyle(.plain)
-                                    .onTapGesture {
-                                        selectedFolder = folder
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Schede senza folder (in basso)
-                    if !cardsWithoutFolder.isEmpty {
-                        DisclosureGroup(
-                            isExpanded: Binding(
-                                get: { expandedFolders.contains(UUID(uuidString: "00000000-0000-0000-0000-000000000000")!) },
-                                set: { isExpanded in
-                                    let noFolderUUID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
-                                    if isExpanded {
-                                        expandedFolders.insert(noFolderUUID)
-                                    } else {
-                                        expandedFolders.remove(noFolderUUID)
-                                    }
-                                }
-                            )
+            ScrollView {
+                VStack(spacing: 22) {
+                    if allCards.isEmpty {
+                        GlassEmptyStateCard(
+                            systemImage: "doc.text",
+                            title: L("cards.no.cards"),
+                            description: L("cards.no.cards.description")
                         ) {
-                            ForEach(cardsWithoutFolder) { card in
-                                WorkoutCardRow(card: card)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        selectedCard = card
-                                    }
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                        Button(role: .destructive) {
-                                            deleteCard(card)
-                                        } label: {
-                                            Label("Elimina", systemImage: "trash")
-                                        }
-                                        Button {
-                                            selectedCard = card
-                                        } label: {
-                                            Label("Modifica", systemImage: "pencil")
-                                        }
-                                        .tint(.blue)
-                                    }
+                            Button(L("cards.create")) {
+                                showingAddCard = true
                             }
-                        } label: {
-                            HStack {
-                                Text("Senza Folder")
-                                    .font(.headline)
-                                Text("(\(cardsWithoutFolder.count))")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                            .buttonStyle(.borderedProminent)
+                        }
+                    } else {
+                        ForEach(folders) { folder in
+                            let folderCards = cards(for: folder)
+                            if !folderCards.isEmpty {
+                                FolderDisclosureCard(
+                                    title: folder.name,
+                                    count: folderCards.count,
+                                    color: folder.color,
+                                    isExpanded: binding(for: folder.id),
+                                    onEditFolder: { selectedFolder = folder }
+                                ) {
+                                    ForEach(folderCards) { card in
+                                        WorkoutCardRow(
+                                            card: card,
+                                            onEdit: { selectedCard = card },
+                                            onDelete: { deleteCard(card) }
+                                        )
+                                        .onTapGesture { selectedCard = card }
+                                    }
+                                }
+                            }
+                        }
+
+                        if !cardsWithoutFolder.isEmpty {
+                            FolderDisclosureCard(
+                                title: "Senza Folder",
+                                count: cardsWithoutFolder.count,
+                                color: .gray.opacity(0.4),
+                                isExpanded: binding(for: Self.noFolderID)
+                            ) {
+                                ForEach(cardsWithoutFolder) { card in
+                                    WorkoutCardRow(
+                                        card: card,
+                                        onEdit: { selectedCard = card },
+                                        onDelete: { deleteCard(card) }
+                                    )
+                                    .onTapGesture { selectedCard = card }
+                                }
                             }
                         }
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 24)
             }
             .searchable(text: $searchText, prompt: L("cards.search"))
             .navigationTitle("Schede")
@@ -224,10 +161,24 @@ struct WorkoutCardListView: View {
                 EditFolderView(folder: folder)
             }
         }
+        .appScreenBackground()
     }
 
     private func deleteCard(_ card: WorkoutCard) {
         modelContext.delete(card)
+    }
+
+    private func binding(for folderID: UUID) -> Binding<Bool> {
+        Binding(
+            get: { expandedFolders.contains(folderID) },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedFolders.insert(folderID)
+                } else {
+                    expandedFolders.remove(folderID)
+                }
+            }
+        )
     }
 
     @ViewBuilder
@@ -298,9 +249,12 @@ struct WorkoutCardListView: View {
 
 struct WorkoutCardRow: View {
     let card: WorkoutCard
+    var onEdit: () -> Void
+    var onDelete: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Text(card.name)
                     .font(.headline)
@@ -379,7 +333,76 @@ struct WorkoutCardRow: View {
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(18)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(AppTheme.cardBackground(for: colorScheme))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(AppTheme.stroke(for: colorScheme), lineWidth: 1)
+                )
+        )
+        .overlay(alignment: .topTrailing) {
+            Menu {
+                Button(L("common.edit")) {
+                    onEdit()
+                }
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label(L("common.delete"), systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.title3)
+                    .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                    .padding(6)
+            }
+        }
+    }
+}
+
+private struct FolderDisclosureCard<Content: View>: View {
+    let title: String
+    let count: Int
+    let color: Color
+    @Binding var isExpanded: Bool
+    var onEditFolder: (() -> Void)? = nil
+    @ViewBuilder var content: () -> Content
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(spacing: 12) {
+                content()
+            }
+            .padding(.top, 8)
+        } label: {
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 14, height: 14)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.headline)
+                    Text("\(count) schede")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                }
+
+                Spacer()
+
+                if let onEditFolder {
+                    Button(action: onEditFolder) {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.title3)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .dashboardCardStyle()
     }
 }
 

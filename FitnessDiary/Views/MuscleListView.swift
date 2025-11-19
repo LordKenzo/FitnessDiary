@@ -13,44 +13,38 @@ struct MuscleListView: View {
     }
 
     var body: some View {
-        List {
-            if muscles.isEmpty {
-                ContentUnavailableView {
-                    Label(L("muscles.no.muscles"), systemImage: "figure.arms.open")
-                } description: {
-                    Text(L("muscles.no.muscles.description"))
-                } actions: {
-                    Button(L("muscles.initialize")) {
-                        initializeDefaultMuscles()
+        ScrollView {
+            VStack(spacing: 22) {
+                if muscles.isEmpty {
+                    GlassEmptyStateCard(
+                        systemImage: "figure.arms.open",
+                        title: L("muscles.no.muscles"),
+                        description: L("muscles.no.muscles.description")
+                    ) {
+                        Button(L("muscles.initialize")) {
+                            initializeDefaultMuscles()
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
-                    .buttonStyle(.borderedProminent)
-                }
-            } else {
-                ForEach(MuscleCategory.allCases, id: \.self) { category in
-                    if let musclesInCategory = musclesByCategory[category], !musclesInCategory.isEmpty {
-                        Section {
-                            ForEach(musclesInCategory) { muscle in
-                                HStack {
-                                    Text(muscle.name)
-                                    Spacer()
-                                    Text(muscle.category.rawValue)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    selectedMuscle = muscle
+                } else {
+                    ForEach(MuscleCategory.allCases, id: \.self) { category in
+                        if let musclesInCategory = musclesByCategory[category], !musclesInCategory.isEmpty {
+                            GlassSectionCard(title: category.rawValue, iconName: category.icon) {
+                                ForEach(musclesInCategory) { muscle in
+                                    GlassListRow(title: muscle.name, subtitle: category.rawValue, iconName: category.icon) {
+                                        menuButton(for: muscle)
+                                    }
+                                    .onTapGesture {
+                                        selectedMuscle = muscle
+                                    }
                                 }
                             }
-                            .onDelete { indexSet in
-                                deleteMuscles(from: musclesInCategory, at: indexSet)
-                            }
-                        } header: {
-                            Label(category.rawValue, systemImage: category.icon)
                         }
                     }
                 }
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
         }
         .navigationTitle(L("muscles.title"))
         .toolbar {
@@ -90,17 +84,35 @@ struct MuscleListView: View {
         .sheet(item: $selectedMuscle) { muscle in
             EditMuscleView(muscle: muscle)
         }
-    }
-
-    private func deleteMuscles(from muscles: [Muscle], at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(muscles[index])
-        }
+        .appScreenBackground()
     }
 
     private func deleteAllMuscles() {
         for muscle in muscles {
             modelContext.delete(muscle)
+        }
+    }
+
+    private func deleteMuscle(_ muscle: Muscle) {
+        modelContext.delete(muscle)
+    }
+
+    @ViewBuilder
+    private func menuButton(for muscle: Muscle) -> some View {
+        Menu {
+            Button(L("common.edit")) {
+                selectedMuscle = muscle
+            }
+
+            Button(role: .destructive) {
+                deleteMuscle(muscle)
+            } label: {
+                Label(L("common.delete"), systemImage: "trash")
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.title3)
+                .foregroundStyle(.secondary)
         }
     }
 

@@ -523,6 +523,7 @@ struct WorkoutExecutionView: View {
         } message: {
             Text(saveErrorMessage ?? "Si è verificato un errore inatteso. Riprova.")
         }
+        .appScreenBackground()
     }
 
     @ToolbarContentBuilder
@@ -630,9 +631,7 @@ struct WorkoutExecutionView: View {
             }
             .buttonStyle(.borderedProminent)
         }
-        .padding()
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private var headerSection: some View {
@@ -679,9 +678,7 @@ struct WorkoutExecutionView: View {
             .buttonStyle(.borderedProminent)
             .disabled(!viewModel.isSessionActive || viewModel.isCountdownActive || viewModel.isWorkoutCompleted)
         }
-        .padding()
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private var heartRateSection: some View {
@@ -703,9 +700,7 @@ struct WorkoutExecutionView: View {
             HeartRateHistogram(currentZone: activeHeartRateZone, usagePercentages: viewModel.zoneUsagePercentages)
                 .frame(height: 140)
         }
-        .padding()
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     @ViewBuilder
@@ -732,8 +727,7 @@ struct WorkoutExecutionView: View {
                 Text("Nessuna fase disponibile")
             }
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private func timedStepView(step: WorkoutExecutionViewModel.Step, isRest: Bool) -> some View {
@@ -866,8 +860,7 @@ struct WorkoutExecutionView: View {
                 }
             }
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private var upcomingSteps: ArraySlice<WorkoutExecutionViewModel.Step> {
@@ -1091,8 +1084,7 @@ struct WorkoutExecutionView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private var moodSelectionSection: some View {
