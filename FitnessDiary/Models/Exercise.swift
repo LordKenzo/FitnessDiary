@@ -230,8 +230,7 @@ enum MotorSchema: String, Codable, CaseIterable, Identifiable {
     case hinge = "Hip Hinge"
     case squat = "Squat"
     case lunge = "Affondo"
-    case rotation = "Rotazione"
-    case carry = "Portata"
+    case rotation = "Torsione"
     case gait = "Camminata/Corsa"
     case coreStability = "Core Stability"
 
@@ -244,10 +243,9 @@ enum MotorSchema: String, Codable, CaseIterable, Identifiable {
         case .pullHorizontal: return "rectangle.portrait.and.arrow.right"
         case .pullVertical: return "arrow.down.to.line"
         case .hinge: return "figure.strengthtraining.functional"
-        case .squat: return "figure.squat"
-        case .lunge: return "figure.lunge"
-        case .rotation: return "arrow.2.circlepath"
-        case .carry: return "figure.walk"
+        case .squat: return "figure.strengthtraining.traditional"
+        case .lunge: return "figure.walk.motion"
+        case .rotation: return "arrow.triangle.2.circlepath"
         case .gait: return "figure.run"
         case .coreStability: return "shield.lefthalf.filled"
         }
@@ -259,9 +257,36 @@ enum MotorSchema: String, Codable, CaseIterable, Identifiable {
         case .pullHorizontal, .pullVertical: return .blue
         case .hinge, .squat, .lunge: return .green
         case .rotation: return .purple
-        case .carry, .gait: return .teal
+        case .gait: return .teal
         case .coreStability: return .pink
         }
+    }
+
+    // MARK: - Codable compatibility helpers
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+
+        switch rawValue {
+        case "Rotazione":
+            self = .rotation
+        case "Portata":
+            // "Portata" (carry) has been removed; treat legacy values as locomotion
+            self = .gait
+        default:
+            guard let schema = MotorSchema(rawValue: rawValue) else {
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Schema motorio non supportato: \(rawValue)"
+                )
+            }
+            self = schema
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
     }
 }
 
