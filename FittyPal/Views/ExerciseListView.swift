@@ -44,47 +44,50 @@ struct ExerciseListView: View {
     }
     
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 18, pinnedViews: []) {
-                if exercises.isEmpty {
-                    GlassEmptyStateCard(
-                        systemImage: "figure.strengthtraining.traditional",
-                        title: L("exercises.no.exercises"),
-                        description: L("exercises.no.exercises.description")
-                    ) {
-                        Button(L("exercises.add")) {
-                            showingAddExercise = true
+        List {
+            if exercises.isEmpty {
+                GlassEmptyStateCard(
+                    systemImage: "figure.strengthtraining.traditional",
+                    title: L("exercises.no.exercises"),
+                    description: L("exercises.no.exercises.description")
+                ) {
+                    Button(L("exercises.add")) {
+                        showingAddExercise = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 9, leading: 20, bottom: 9, trailing: 20))
+            } else {
+                ForEach(filteredExercises) { exercise in
+                    ExerciseRow(exercise: exercise)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            quickLookExercise = exercise
                         }
-                        .buttonStyle(.borderedProminent)
-                    }
-                } else {
-                    ForEach(filteredExercises) { exercise in
-                        ExerciseRow(exercise: exercise)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                quickLookExercise = exercise
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 9, leading: 20, bottom: 9, trailing: 20))
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                editingExercise = exercise
+                            } label: {
+                                Label(L("common.edit"), systemImage: "pencil")
                             }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button {
-                                    editingExercise = exercise
-                                } label: {
-                                    Label(L("common.edit"), systemImage: "pencil")
-                                }
-                                .tint(.blue)
-                                
-                                Button(role: .destructive) {
-                                    deleteExercise(exercise)
-                                } label: {
-                                    Label(L("common.delete"), systemImage: "trash")
-                                }
+                            .tint(.blue)
+
+                            Button(role: .destructive) {
+                                deleteExercise(exercise)
+                            } label: {
+                                Label(L("common.delete"), systemImage: "trash")
                             }
-                    }
+                        }
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 24)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
         .searchable(text: $searchText, prompt: L("exercises.search"))
         .safeAreaInset(edge: .top) {
             if isAnyFilterActive() {
