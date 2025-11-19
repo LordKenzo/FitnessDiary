@@ -223,6 +223,7 @@ struct AddExerciseView: View {
                         .autocapitalization(.none)
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Nuovo Esercizio")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

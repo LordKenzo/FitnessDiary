@@ -46,6 +46,7 @@ struct WorkoutDebugLogView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .glassScrollBackground()
         .navigationTitle("Log Allenamento")
         .toolbar {
             if !logEntries.isEmpty {

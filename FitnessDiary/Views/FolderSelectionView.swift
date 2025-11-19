@@ -55,6 +55,7 @@ struct FolderSelectionView: View {
                 }
             }
         }
+        .glassScrollBackground()
         .navigationTitle(L("folders.select"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

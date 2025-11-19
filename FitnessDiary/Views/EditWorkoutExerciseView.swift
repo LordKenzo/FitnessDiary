@@ -99,6 +99,7 @@ struct EditWorkoutExerciseView: View {
                 }
             }
         }
+        .glassScrollBackground()
         .navigationTitle("Configura Esercizio")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingExercisePicker) {

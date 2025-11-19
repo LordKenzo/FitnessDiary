@@ -269,6 +269,7 @@ struct EditWorkoutBlockView: View {
                 }
             }
         }
+        .glassScrollBackground()
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

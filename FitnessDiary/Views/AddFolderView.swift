@@ -39,6 +39,7 @@ struct AddFolderView: View {
                     .padding(.vertical, 8)
                 }
             }
+            .glassScrollBackground()
             .navigationTitle(L("folders.create"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

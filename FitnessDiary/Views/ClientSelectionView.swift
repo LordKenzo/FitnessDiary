@@ -99,6 +99,7 @@ struct ClientSelectionView: View {
                     }
                 }
             }
+            .glassScrollBackground()
             .searchable(text: $searchText, prompt: L("clients.search"))
             .navigationTitle(L("clients.assign"))
             .navigationBarTitleDisplayMode(.inline)

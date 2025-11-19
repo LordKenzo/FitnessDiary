@@ -195,6 +195,12 @@ extension View {
     func appScreenBackground() -> some View {
         modifier(AppScreenBackgroundModifier())
     }
+
+    /// Makes `List` and `Form` containers transparent so the ambient gradient
+    /// remains visible behind scrollable system chrome.
+    func glassScrollBackground() -> some View {
+        modifier(GlassScrollBackgroundModifier())
+    }
 }
 
 private struct AppScreenBackgroundModifier: ViewModifier {
@@ -203,5 +209,13 @@ private struct AppScreenBackgroundModifier: ViewModifier {
             AppBackgroundView()
             content
         }
+    }
+}
+
+private struct GlassScrollBackgroundModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .scrollContentBackground(.hidden)
+            .background(Color.clear)
     }
 }

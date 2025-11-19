@@ -149,6 +149,7 @@ struct AddWorkoutCardView: View {
                     }
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Nuova Scheda")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

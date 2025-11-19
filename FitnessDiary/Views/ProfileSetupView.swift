@@ -137,6 +137,7 @@ struct ProfileSetupView: View {
                     }
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Profilo")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -223,6 +223,7 @@ struct EditWorkoutCardView: View {
                     }
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Modifica Scheda")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -129,6 +129,7 @@ struct ProfileDetailView: View {
                 Text(L("profile.cardio.zones"))
             }
         }
+        .glassScrollBackground()
         .navigationTitle(L("profile.title"))
         .toolbar {
             Button(L("common.edit")) {
@@ -287,6 +288,7 @@ struct ProfileEditView: View {
                     .disabled(isLoadingHealthData)
                 }
             }
+            .glassScrollBackground()
             .navigationTitle(L("profile.edit"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
