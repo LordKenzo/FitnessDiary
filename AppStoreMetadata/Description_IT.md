@@ -4,7 +4,7 @@
 FittyPal - Workout Tracker
 
 ## Sottotitolo (30 caratteri max)
-Allenamento & Frequenza Cardiaca
+Allenamento & Heart Rate
 
 ## Parole Chiave (100 caratteri max, separate da virgole, SENZA spazi)
 allenamento,fitness,palestra,esercizi,forza,cardio,personal trainer,pesi,massa,bodybuilding
@@ -182,7 +182,7 @@ Se non hai un cardiofrequenzimetro Bluetooth, puoi comunque testare tutte le alt
 
 **Conteggio Caratteri:**
 - Nome App: 28 caratteri ✓
-- Sottotitolo: 35 caratteri ⚠️ (riduci a "Allenamento & Heart Rate" = 27 car.)
+- Sottotitolo: 27 caratteri ✓
 - Parole Chiave: 97 caratteri ✓
 - Descrizione: 3,912 caratteri ✓
 - Note di Rilascio: 968 caratteri ✓
