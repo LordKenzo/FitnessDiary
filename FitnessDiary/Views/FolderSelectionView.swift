@@ -48,18 +48,18 @@ struct FolderSelectionView: View {
                     } label: {
                         HStack {
                             Spacer()
-                            Text("Deseleziona Tutto")
+                            Text(L("folders.deselect.all"))
                             Spacer()
                         }
                     }
                 }
             }
         }
-        .navigationTitle("Seleziona Folder")
+        .navigationTitle(L("folders.select"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Fine") {
+                Button(L("common.done")) {
                     // Aggiorna selectedFolders con la selezione
                     selectedFolders = folders.filter { localSelection.contains($0.id) }
                     dismiss()

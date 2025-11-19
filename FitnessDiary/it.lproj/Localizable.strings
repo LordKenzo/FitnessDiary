@@ -114,11 +114,15 @@
 "common.search" = "Cerca";
 "common.filter" = "Filtra";
 "common.select" = "Seleziona";
+"common.deselect.all" = "Deseleziona Tutto";
 "common.loading" = "Caricamento...";
 "common.error" = "Errore";
 "common.success" = "Successo";
 "common.warning" = "Attenzione";
 "common.info" = "Info";
+"common.reset" = "Reset";
+"search.no.results" = "Nessun risultato";
+"search.no.results.description" = "Prova con un termine di ricerca diverso";
 
 // MARK: - Units
 "unit.seconds" = "sec";
@@ -213,6 +217,9 @@
 "clients.workouts" = "Schede";
 "clients.new" = "Nuovo Cliente";
 "clients.edit" = "Modifica Cliente";
+"clients.assign" = "Assegna ai Clienti";
+"clients.selection.empty.description" = "Crea dei clienti per poter assegnare le schede";
+"clients.selected.count" = "%d selezionati";
 "clients.form.required" = "Dati Obbligatori";
 "clients.form.optional" = "Dati Facoltativi";
 "clients.form.photo.label" = "Foto";
@@ -235,6 +242,25 @@
 "exercises.equipment" = "Attrezzatura";
 "exercises.category" = "Categoria";
 "exercises.notes" = "Note";
+"exercises.filters.title" = "Filtri esercizi";
+
+// MARK: - Filtri
+"filters.all" = "Tutti";
+"filters.primary.metabolism" = "Metabolismo primario";
+"filters.biomechanical.structure" = "Struttura biomeccanica";
+"filters.training.role" = "Ruolo nell'allenamento";
+"filters.category" = "Categoria";
+"filters.reference.plane" = "Piano di riferimento";
+"filters.motor.schemas" = "Schemi motori";
+"filters.tags" = "Tag";
+"filters.primary.muscle" = "Muscolo primario";
+"filters.favorites" = "Preferiti";
+"filters.favorites.only" = "Mostra solo preferiti";
+
+// MARK: - Metadata
+"metadata.motor.limit" = "Puoi selezionare al massimo %d schemi motori";
+"metadata.motor.title" = "Schemi Motori";
+"metadata.tags.title" = "Tag esercizio";
 
 // MARK: - Muscles
 "muscles.title" = "Muscoli";
@@ -244,6 +270,12 @@
 "muscles.add" = "Aggiungi Muscolo";
 "muscles.name" = "Nome";
 "muscles.category" = "Categoria";
+"muscles.delete.all" = "Elimina Tutti";
+"muscles.new.title" = "Nuovo Muscolo";
+"muscles.edit.title" = "Modifica Muscolo";
+"muscles.delete.action" = "Elimina Muscolo";
+"muscles.all" = "Tutti i muscoli";
+"muscles.search" = "Cerca muscolo";
 
 // MARK: - Equipment
 "equipment.title" = "Attrezzi";
@@ -252,6 +284,20 @@
 "equipment.initialize" = "Inizializza Database";
 "equipment.add" = "Aggiungi Attrezzo";
 "equipment.name" = "Nome";
+"equipment.category" = "Categoria";
+"equipment.delete.all" = "Elimina Tutti";
+"equipment.new.title" = "Nuovo Attrezzo";
+"equipment.edit.title" = "Modifica Attrezzo";
+"equipment.delete.action" = "Elimina Attrezzo";
+
+// MARK: - Metodi
+"methods.section.multi.sets" = "Serie Multiple";
+"methods.section.intensity.volume" = "Intensità e Volume";
+"methods.section.power.strength" = "Potenza e Forza";
+"methods.section.density.timing" = "Densità e Timing";
+"methods.section.conditioning" = "Condizionamento";
+"methods.select" = "Seleziona Metodo";
+"methods.min.exercises.badge" = "%d+ es.";
 
 // MARK: - Workout Cards
 "cards.title" = "Schede";
@@ -274,6 +320,10 @@
 "folders.color" = "Colore";
 "folders.edit" = "Modifica Cartella";
 "folders.create" = "Crea Cartella";
+"folders.section.info" = "Informazioni";
+"folders.section.color" = "Colore";
+"folders.select" = "Seleziona Folder";
+"folders.deselect.all" = "Deseleziona Tutto";
 
 // MARK: - Confirmation Dialogs
 "confirm.delete" = "Elimina";

@@ -31,15 +31,15 @@ struct ClientSelectionView: View {
                 if filteredClients.isEmpty {
                     if clients.isEmpty {
                         ContentUnavailableView {
-                            Label("Nessun cliente", systemImage: "person.3")
+                            Label(L("clients.no.clients"), systemImage: "person.3")
                         } description: {
-                            Text("Crea dei clienti per poter assegnare le schede")
+                            Text(L("clients.selection.empty.description"))
                         }
                     } else {
                         ContentUnavailableView {
-                            Label("Nessun risultato", systemImage: "magnifyingglass")
+                            Label(L("search.no.results"), systemImage: "magnifyingglass")
                         } description: {
-                            Text("Prova con un termine di ricerca diverso")
+                            Text(L("search.no.results.description"))
                         }
                     }
                 } else {
@@ -94,30 +94,30 @@ struct ClientSelectionView: View {
                         }
                     } header: {
                         if !localSelection.isEmpty {
-                            Text("\(localSelection.count) selezionati")
+                            Text(String(format: L("clients.selected.count"), localSelection.count))
                         }
                     }
                 }
             }
-            .searchable(text: $searchText, prompt: "Cerca cliente")
-            .navigationTitle("Assegna a Clienti")
+            .searchable(text: $searchText, prompt: L("clients.search"))
+            .navigationTitle(L("clients.assign"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button(L("common.cancel")) {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Fatto") {
+                    Button(L("common.done")) {
                         saveSelection()
                     }
                 }
 
                 ToolbarItem(placement: .bottomBar) {
                     if !localSelection.isEmpty {
-                        Button("Deseleziona Tutto") {
+                        Button(L("common.deselect.all")) {
                             localSelection.removeAll()
                         }
                     }

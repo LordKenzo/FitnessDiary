@@ -11,12 +11,12 @@ struct MotorSchemaSelectionView: View {
                     schemaRow(schema)
                 }
             } footer: {
-                Text("Puoi selezionare al massimo \(selectionLimit) schemi motori")
+                Text(String(format: L("metadata.motor.limit"), selectionLimit))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
         }
-        .navigationTitle("Schemi Motori")
+        .navigationTitle(L("metadata.motor.title"))
     }
 
     private func toggleSelection(_ schema: MotorSchema) {
@@ -58,7 +58,7 @@ struct ExerciseTagSelectionView: View {
                 }
             }
         }
-        .navigationTitle("Tag esercizio")
+        .navigationTitle(L("metadata.tags.title"))
     }
 
     @ViewBuilder
