@@ -188,10 +188,11 @@ struct HeartRateMonitorView: View {
                         Spacer()
                         if bluetoothManager.isScanning {
                             Button("Ferma") { bluetoothManager.stopScanning() }
+                                .font(.footnote.weight(.semibold))
                         } else {
                             Button("Scansiona") { bluetoothManager.startScanning() }
+                                .font(.footnote.weight(.semibold))
                         }
-                        .font(.footnote.weight(.semibold))
                     }
 
                     ForEach(bluetoothManager.discoveredDevices) { device in
