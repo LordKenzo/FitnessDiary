@@ -74,10 +74,36 @@ struct SettingsView: View {
                         Label(L("settings.exercises"), systemImage: "figure.strengthtraining.traditional")
                     }
                 }
+
+                Section(L("settings.section.legal")) {
+                    if let privacyURL = SupportResources.privacyPolicyURL {
+                        Link(destination: privacyURL) {
+                            Label(L("settings.legal.privacy"), systemImage: "lock.shield")
+                        }
+                    }
+
+                    if let termsURL = SupportResources.termsOfUseURL {
+                        Link(destination: termsURL) {
+                            Label(L("settings.legal.terms"), systemImage: "doc.text")
+                        }
+                    }
+
+                    if let supportURL = SupportResources.supportEmailURL {
+                        Link(destination: supportURL) {
+                            Label(L("settings.legal.support"), systemImage: "envelope")
+                        }
+                    }
+                }
             }
             .navigationTitle(L("settings.title"))
         }
     }
+}
+
+private enum SupportResources {
+    static let privacyPolicyURL = URL(string: "https://raw.githubusercontent.com/LordKenzo/FitnessDiary/main/AppStoreMetadata/privacy-policy.html")
+    static let termsOfUseURL = URL(string: "https://raw.githubusercontent.com/LordKenzo/FitnessDiary/main/AppStoreMetadata/terms-of-use.html")
+    static let supportEmailURL = URL(string: "mailto:support@fittypal.com")
 }
 
 #Preview {

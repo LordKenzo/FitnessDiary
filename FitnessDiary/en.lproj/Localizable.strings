@@ -57,6 +57,7 @@
 "settings.section.clients" = "Clients";
 "settings.section.monitoring" = "Monitoring";
 "settings.section.library" = "Library";
+"settings.section.legal" = "Legal";
 
 "settings.general.preferences" = "General Preferences";
 "settings.profile" = "Profile";
@@ -66,6 +67,9 @@
 "settings.muscles" = "Muscles";
 "settings.equipment" = "Equipment";
 "settings.exercises" = "Exercises";
+"settings.legal.privacy" = "Privacy Policy";
+"settings.legal.terms" = "Terms of Use";
+"settings.legal.support" = "Support Email";
 
 // MARK: - General Preferences
 "preferences.title" = "General Preferences";

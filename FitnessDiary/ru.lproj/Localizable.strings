@@ -57,6 +57,7 @@
 "settings.section.clients" = "Клиенты";
 "settings.section.monitoring" = "Мониторинг";
 "settings.section.library" = "Библиотека";
+"settings.section.legal" = "Юр. информация";
 
 "settings.general.preferences" = "Общие настройки";
 "settings.profile" = "Профиль";
@@ -66,6 +67,9 @@
 "settings.muscles" = "Мышцы";
 "settings.equipment" = "Оборудование";
 "settings.exercises" = "Упражнения";
+"settings.legal.privacy" = "Политика конфиденциальности";
+"settings.legal.terms" = "Условия использования";
+"settings.legal.support" = "Почта поддержки";
 
 // MARK: - General Preferences
 "preferences.title" = "Общие настройки";
