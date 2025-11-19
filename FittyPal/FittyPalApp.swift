@@ -3,7 +3,7 @@ import SwiftData
 import UIKit
 
 @main
-struct FitnessDiaryApp: App {
+struct FittyPalApp: App {
     @State private var showOnboarding = true
 
     init() {
