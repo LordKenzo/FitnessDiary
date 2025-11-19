@@ -6,12 +6,35 @@ struct GeneralPreferencesView: View {
     @AppStorage("workoutCountdownSeconds") private var workoutCountdownSeconds = 10
     @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
     @ObservedObject private var localizationManager = LocalizationManager.shared
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        Form {
-            Section(L("preferences.section.general")) {
-                // Language Picker
-                Picker(L("preferences.language"), selection: Binding(
+        ScrollView {
+            VStack(spacing: 20) {
+                generalPreferencesCard
+                AudioPreferencesCard()
+                    .dashboardCardStyle()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
+        }
+        .navigationTitle(L("preferences.title"))
+        .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
+    }
+
+    private var generalPreferencesCard: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text(L("preferences.section.general").uppercased())
+                .font(.caption.weight(.semibold))
+                .tracking(0.6)
+                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L("preferences.language"))
+                    .font(.subheadline.weight(.semibold))
+
+                Picker("", selection: Binding(
                     get: { localizationManager.currentLanguage },
                     set: { newLanguage in
                         localizationManager.setLanguage(newLanguage)
@@ -26,45 +49,51 @@ struct GeneralPreferencesView: View {
                     }
                 }
                 .pickerStyle(.menu)
+            }
 
-                Toggle(L("preferences.debug.log"), isOn: $debugWorkoutLogEnabled)
+            Toggle(L("preferences.debug.log"), isOn: $debugWorkoutLogEnabled)
+                .tint(.blue)
 
-                Toggle(L("preferences.clone.load"), isOn: $cloneLoadEnabled)
-                    .tint(.blue)
-                    .font(.subheadline)
+            Toggle(L("preferences.clone.load"), isOn: $cloneLoadEnabled)
+                .tint(.blue)
+                .font(.subheadline)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text(localized: "preferences.countdown")
-                        Spacer()
-                        Text(String(format: L("preferences.countdown.seconds"), workoutCountdownSeconds))
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                    }
-
-                    Slider(
-                        value: Binding(
-                            get: { Double(workoutCountdownSeconds) },
-                            set: { workoutCountdownSeconds = Int($0) }
-                        ),
-                        in: 0...120,
-                        step: 1
-                    )
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(localized: "preferences.countdown")
+                    Spacer()
+                    Text(String(format: L("preferences.countdown.seconds"), workoutCountdownSeconds))
+                        .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                        .monospacedDigit()
                 }
 
-                Text(localized: "preferences.made.by")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, 4)
+                Slider(
+                    value: Binding(
+                        get: { Double(workoutCountdownSeconds) },
+                        set: { workoutCountdownSeconds = Int($0) }
+                    ),
+                    in: 0...120,
+                    step: 1
+                )
             }
 
-            Section(L("preferences.section.audio")) {
-                AudioPreferencesCard()
+            Divider()
+
+            VStack(spacing: 4) {
+                Text(versionText)
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                Text(localized: "preferences.made.by")
+                    .font(.footnote.weight(.semibold))
             }
+            .frame(maxWidth: .infinity, alignment: .center)
         }
-        .navigationTitle(L("preferences.title"))
-        .navigationBarTitleDisplayMode(.inline)
+        .dashboardCardStyle()
+    }
+
+    private var versionText: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        return String(format: L("preferences.version"), version)
     }
 }
 
@@ -77,9 +106,15 @@ private struct AudioPreferencesCard: View {
 
     @State private var previewPlayer: AVAudioPlayer?
     @State private var pendingVolumePreview: DispatchWorkItem?
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            Text(L("preferences.section.audio").uppercased())
+                .font(.caption.weight(.semibold))
+                .tracking(0.6)
+                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+
             Label(L("timer.sound.title"), systemImage: "speaker.wave.2.fill")
                 .font(.headline)
 
@@ -113,12 +148,15 @@ private struct AudioPreferencesCard: View {
                     Spacer()
                     Image(systemName: "chevron.down")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppTheme.subtleText(for: colorScheme))
                 }
                 .padding(.vertical, 10)
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .background(
+                    AppTheme.chipBackground(for: colorScheme),
+                    in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                )
             }
             .disabled(!isTimerSoundEnabled)
             .opacity(isTimerSoundEnabled ? 1 : 0.5)
@@ -130,7 +168,7 @@ private struct AudioPreferencesCard: View {
                     Text(String(format: "%.0f%%", soundVolume * 100))
                         .font(.caption)
                         .monospacedDigit()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppTheme.subtleText(for: colorScheme))
                 }
                 Slider(
                     value: Binding(
@@ -146,8 +184,6 @@ private struct AudioPreferencesCard: View {
             }
             .opacity(isTimerSoundEnabled ? 1 : 0.5)
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onDisappear {
             stopPreview()
         }
@@ -202,13 +238,7 @@ private struct AudioPreferencesCard: View {
             previewPlayer?.prepareToPlay()
             previewPlayer?.play()
         } catch {
-            print("Failed to play preview tone", error)
+            print("Failed to play preview: \(error)")
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        GeneralPreferencesView()
     }
 }

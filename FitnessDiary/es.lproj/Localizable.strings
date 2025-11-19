@@ -82,6 +82,7 @@
 "preferences.language" = "Idioma";
 "preferences.language.select" = "Seleccionar idioma";
 "preferences.made.by" = "Hecho con ❤️ por Lorenzo Franceschini";
+"preferences.version" = "Versión %@";
 
 // MARK: - Language Settings
 "language.english" = "English";

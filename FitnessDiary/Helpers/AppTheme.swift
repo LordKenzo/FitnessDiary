@@ -146,4 +146,18 @@ extension View {
     func dashboardCardStyle() -> some View {
         modifier(DashboardCardModifier())
     }
+
+    /// Wraps the receiver in the ambient gradient background used across the app.
+    func appScreenBackground() -> some View {
+        modifier(AppScreenBackgroundModifier())
+    }
+}
+
+private struct AppScreenBackgroundModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        ZStack {
+            AppBackgroundView()
+            content
+        }
+    }
 }
