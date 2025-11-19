@@ -108,6 +108,59 @@ struct InfoBadge: View {
     }
 }
 
+// MARK: - Organization Row
+struct OrganizationRow: View {
+    let icon: String
+    let iconColor: Color
+    let title: String
+    let isEmpty: Bool
+    let emptyText: String
+    let badges: [(String, Color)]
+    let extraCount: Int
+
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .font(.subheadline)
+                .foregroundStyle(iconColor)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.primary)
+
+                if isEmpty {
+                    Text(emptyText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    HStack(spacing: 6) {
+                        ForEach(Array(badges.enumerated()), id: \.offset) { _, badge in
+                            InfoBadge(icon: icon, text: badge.0, color: badge.1)
+                        }
+                        if extraCount > 0 {
+                            InfoBadge(icon: "ellipsis", text: "+\(extraCount)", color: iconColor)
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundStyle(.tertiary)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.white.opacity(0.05))
+        )
+    }
+}
+
 // MARK: - Enhanced Block Row
 struct EnhancedBlockRow: View {
     @Environment(\.colorScheme) private var colorScheme

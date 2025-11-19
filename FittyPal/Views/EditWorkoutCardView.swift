@@ -263,126 +263,73 @@ struct EditWorkoutCardView: View {
     private var organizationSection: some View {
         SectionCard(title: "Organizzazione") {
             VStack(spacing: 14) {
-                // Folder selection
-                NavigationLink {
-                    FolderSelectionView(
-                        selectedFolders: $selectedFolders,
-                        folders: folders
-                    )
-                } label: {
-                    HStack {
-                        Image(systemName: "folder.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.orange)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Folder")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundStyle(.primary)
-
-                            if selectedFolders.isEmpty {
-                                Text("Nessuna cartella selezionata")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                HStack(spacing: 6) {
-                                    ForEach(selectedFolders.prefix(2)) { folder in
-                                        InfoBadge(icon: "folder.fill", text: folder.name, color: .orange)
-                                    }
-                                    if selectedFolders.count > 2 {
-                                        InfoBadge(icon: "ellipsis", text: "+\(selectedFolders.count - 2)", color: .orange)
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
-                }
-                .buttonStyle(.plain)
-
-                // "Mia" toggle
-                HStack {
-                    Image(systemName: "person.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(.blue)
-
-                    Text("Mia")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-
-                    Spacer()
-
-                    Toggle("", isOn: $isAssignedToMe)
-                        .labelsHidden()
-                }
-                .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
-
-                // Client assignment
-                NavigationLink {
-                    ClientSelectionView(
-                        selectedClients: $selectedClients,
-                        clients: clients
-                    )
-                } label: {
-                    HStack {
-                        Image(systemName: "person.2.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.green)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Assegnata a clienti")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundStyle(.primary)
-
-                            if selectedClients.isEmpty {
-                                Text("Nessun cliente selezionato")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                HStack(spacing: 6) {
-                                    ForEach(selectedClients.prefix(2)) { client in
-                                        InfoBadge(icon: "person.fill", text: client.name, color: .green)
-                                    }
-                                    if selectedClients.count > 2 {
-                                        InfoBadge(icon: "ellipsis", text: "+\(selectedClients.count - 2)", color: .green)
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
-                }
-                .buttonStyle(.plain)
+                folderSelectionRow
+                myToggleRow
+                clientSelectionRow
             }
         }
+    }
+
+    private var folderSelectionRow: some View {
+        NavigationLink {
+            FolderSelectionView(
+                selectedFolders: $selectedFolders,
+                folders: folders
+            )
+        } label: {
+            OrganizationRow(
+                icon: "folder.fill",
+                iconColor: .orange,
+                title: "Folder",
+                isEmpty: selectedFolders.isEmpty,
+                emptyText: "Nessuna cartella selezionata",
+                badges: selectedFolders.prefix(2).map { ($0.name, Color.orange) },
+                extraCount: selectedFolders.count > 2 ? selectedFolders.count - 2 : 0
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var myToggleRow: some View {
+        HStack {
+            Image(systemName: "person.fill")
+                .font(.subheadline)
+                .foregroundStyle(.blue)
+
+            Text("Mia")
+                .font(.subheadline)
+                .fontWeight(.medium)
+
+            Spacer()
+
+            Toggle("", isOn: $isAssignedToMe)
+                .labelsHidden()
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.white.opacity(0.05))
+        )
+    }
+
+    private var clientSelectionRow: some View {
+        NavigationLink {
+            ClientSelectionView(
+                selectedClients: $selectedClients,
+                clients: clients
+            )
+        } label: {
+            OrganizationRow(
+                icon: "person.2.fill",
+                iconColor: .green,
+                title: "Assegnata a clienti",
+                isEmpty: selectedClients.isEmpty,
+                emptyText: "Nessun cliente selezionato",
+                badges: selectedClients.prefix(2).map { ($0.name, Color.green) },
+                extraCount: selectedClients.count > 2 ? selectedClients.count - 2 : 0
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Blocks Section
