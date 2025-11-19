@@ -28,6 +28,7 @@ struct ProfileView: View {
                 }
             }
         }
+        .appScreenBackground()
         .sheet(isPresented: $showingSetup) {
             ProfileSetupView()
         }
@@ -128,6 +129,7 @@ struct ProfileDetailView: View {
                 Text(L("profile.cardio.zones"))
             }
         }
+        .glassScrollBackground()
         .navigationTitle(L("profile.title"))
         .toolbar {
             Button(L("common.edit")) {
@@ -140,6 +142,7 @@ struct ProfileDetailView: View {
         .sheet(isPresented: $showingZonesEditor) {
             HeartRateZonesEditorView(profile: profile)
         }
+        .appScreenBackground()
     }
     
     /// Computes the body mass index (BMI) for the current profile.
@@ -285,6 +288,7 @@ struct ProfileEditView: View {
                     .disabled(isLoadingHealthData)
                 }
             }
+            .glassScrollBackground()
             .navigationTitle(L("profile.edit"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -310,6 +314,7 @@ struct ProfileEditView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
     
     private func importFromHealthKit() async {

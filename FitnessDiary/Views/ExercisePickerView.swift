@@ -162,6 +162,7 @@ struct ExercisePickerView: View {
                 )
             }
         }
+        .appScreenBackground()
     }
 
     private func select(_ exercise: Exercise) {

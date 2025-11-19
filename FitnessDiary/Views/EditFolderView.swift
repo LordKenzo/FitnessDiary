@@ -57,6 +57,7 @@ struct EditFolderView: View {
                     }
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Modifica Folder")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -73,6 +74,7 @@ struct EditFolderView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func saveChanges() {

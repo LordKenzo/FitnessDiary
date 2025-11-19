@@ -58,6 +58,7 @@ struct MuscleSelectionView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func toggleMuscle(_ muscle: Muscle) {

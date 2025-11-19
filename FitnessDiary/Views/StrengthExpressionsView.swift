@@ -13,30 +13,53 @@ struct StrengthExpressionsView: View {
     @Query private var allParameters: [StrengthExpressionParameters]
 
     var body: some View {
-        List {
-            Section {
-                Text("Configura i parametri di ogni espressione di forza per ricevere feedback intelligenti durante la creazione degli allenamenti.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+        ScrollView {
+            VStack(spacing: 24) {
+                GlassSectionCard(
+                    title: "Espressioni di Forza",
+                    subtitle: "Personalizza i range per guidare carichi e recuperi",
+                    iconName: "bolt.fill"
+                ) {
+                    Text("Configura i parametri di ogni espressione di forza per ricevere feedback intelligenti durante la creazione degli allenamenti.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
 
-            Section("Espressioni di Forza") {
-                ForEach(StrengthExpressionType.allCases) { type in
-                    if let params = getParameters(for: type) {
-                        NavigationLink {
-                            EditStrengthExpressionView(parameters: params)
-                        } label: {
-                            StrengthExpressionRow(parameters: params)
+                GlassSectionCard(
+                    title: "Preset disponibili",
+                    iconName: "list.bullet.rectangle"
+                ) {
+                    ForEach(StrengthExpressionType.allCases) { type in
+                        if let params = getParameters(for: type) {
+                            NavigationLink {
+                                EditStrengthExpressionView(parameters: params)
+                            } label: {
+                                GlassListRow(
+                                    title: type.rawValue,
+                                    subtitle: summary(for: params),
+                                    iconName: type.icon,
+                                    iconTint: type.color
+                                ) {
+                                    Image(systemName: "chevron.right")
+                                        .font(.footnote.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
         }
         .navigationTitle("Espressioni Forza")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             initializeDefaultParametersIfNeeded()
         }
+        .appScreenBackground()
     }
 
     private func getParameters(for type: StrengthExpressionType) -> StrengthExpressionParameters? {
@@ -51,33 +74,6 @@ struct StrengthExpressionsView: View {
                 modelContext.insert(defaultParams)
             }
         }
-    }
-}
-
-struct StrengthExpressionRow: View {
-    let parameters: StrengthExpressionParameters
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: parameters.type.icon)
-                .font(.title2)
-                .foregroundStyle(parameters.type.color)
-                .frame(width: 30)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(parameters.type.rawValue)
-                    .font(.headline)
-
-                HStack(spacing: 8) {
-                    Label("\(Int(parameters.loadPercentageMin))-\(Int(parameters.loadPercentageMax))%", systemImage: "gauge.with.dots.needle.67percent")
-                    Label("\(parameters.repsMin)-\(parameters.repsMax) reps", systemImage: "repeat")
-                    Label("\(parameters.restTimeMinFormatted)-\(parameters.restTimeMaxFormatted)", systemImage: "clock")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-        }
-        .padding(.vertical, 4)
     }
 }
 
@@ -190,6 +186,8 @@ struct EditStrengthExpressionView: View {
                 }
             }
         }
+        .glassScrollBackground()
+        .appScreenBackground()
     }
 
     private func resetToDefaults() {
@@ -203,6 +201,15 @@ struct EditStrengthExpressionView: View {
         parameters.restTimeMin = defaults.restTimeMin
         parameters.restTimeMax = defaults.restTimeMax
     }
+}
+
+private func summary(for parameters: StrengthExpressionParameters) -> String {
+    let load = "\(Int(parameters.loadPercentageMin))-\(Int(parameters.loadPercentageMax))%"
+    let reps = "\(parameters.repsMin)-\(parameters.repsMax) reps"
+    let rest = parameters.restTimeMinFormatted == parameters.restTimeMaxFormatted
+        ? parameters.restTimeMinFormatted
+        : "\(parameters.restTimeMinFormatted)-\(parameters.restTimeMaxFormatted)"
+    return "\(load) • \(reps) • \(rest)"
 }
 
 #Preview {

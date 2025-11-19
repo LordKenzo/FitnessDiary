@@ -223,6 +223,7 @@ struct EditWorkoutCardView: View {
                     }
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Modifica Scheda")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -252,6 +253,7 @@ struct EditWorkoutCardView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func addSimpleBlock(_ exercise: Exercise) {

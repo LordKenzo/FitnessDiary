@@ -7,6 +7,7 @@ struct ExerciseListView: View {
     @Query(sort: \Exercise.name) private var exercises: [Exercise]
     @Query(sort: \Muscle.name) private var muscles: [Muscle]
     @Query(sort: \Equipment.name) private var equipment: [Equipment]
+    @Environment(\.colorScheme) private var colorScheme
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @State private var showingAddExercise = false
     @State private var quickLookExercise: Exercise?
@@ -43,40 +44,44 @@ struct ExerciseListView: View {
     }
     
     var body: some View {
-        List {
-            if exercises.isEmpty {
-                ContentUnavailableView {
-                    Label(L("exercises.no.exercises"), systemImage: "figure.strengthtraining.traditional")
-                } description: {
-                    Text(L("exercises.no.exercises.description"))
-                } actions: {
-                    Button(L("exercises.add")) {
-                        showingAddExercise = true
+        ScrollView {
+            LazyVStack(spacing: 18, pinnedViews: []) {
+                if exercises.isEmpty {
+                    GlassEmptyStateCard(
+                        systemImage: "figure.strengthtraining.traditional",
+                        title: L("exercises.no.exercises"),
+                        description: L("exercises.no.exercises.description")
+                    ) {
+                        Button(L("exercises.add")) {
+                            showingAddExercise = true
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
-                    .buttonStyle(.borderedProminent)
-                }
-            } else {
-                ForEach(filteredExercises) { exercise in
-                    ExerciseRow(exercise: exercise)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            quickLookExercise = exercise
-                        }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button {
-                                editingExercise = exercise
-                            } label: {
-                                Label(L("common.edit"), systemImage: "pencil")
+                } else {
+                    ForEach(filteredExercises) { exercise in
+                        ExerciseRow(exercise: exercise)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                quickLookExercise = exercise
                             }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button {
+                                    editingExercise = exercise
+                                } label: {
+                                    Label(L("common.edit"), systemImage: "pencil")
+                                }
 
-                            Button(role: .destructive) {
-                                deleteExercise(exercise)
-                            } label: {
-                                Label(L("common.delete"), systemImage: "trash")
+                                Button(role: .destructive) {
+                                    deleteExercise(exercise)
+                                } label: {
+                                    Label(L("common.delete"), systemImage: "trash")
+                                }
                             }
-                        }
+                    }
                 }
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
         }
         .searchable(text: $searchText, prompt: L("exercises.search"))
         .safeAreaInset(edge: .top) {
@@ -93,9 +98,17 @@ struct ExerciseListView: View {
                     filterFavoritesOnly: $filterFavoritesOnly,
                     onClearAll: removeAllFilters
                 )
-                .padding(.horizontal)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(AppTheme.cardBackground(for: colorScheme))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(AppTheme.stroke(for: colorScheme), lineWidth: 1)
+                        )
+                )
+                .padding(.horizontal, 16)
                 .padding(.bottom, 8)
-                .background(.regularMaterial)
             }
         }
         .navigationTitle(L("exercises.title"))
@@ -139,6 +152,7 @@ struct ExerciseListView: View {
                 onClearAll: removeAllFilters
             )
         }
+        .appScreenBackground()
     }
     
     private func deleteExercise(_ exercise: Exercise) {
@@ -177,6 +191,7 @@ struct ExerciseListView: View {
 struct ExerciseRow: View {
     let exercise: Exercise
     @State private var showingFullscreenPhoto = false
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(spacing: 12) {
@@ -343,7 +358,15 @@ struct ExerciseRow: View {
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(18)
+        .background(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(AppTheme.cardBackground(for: colorScheme))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(AppTheme.stroke(for: colorScheme), lineWidth: 1)
+                )
+        )
         .fullScreenCover(isPresented: $showingFullscreenPhoto) {
             if let photoData = exercise.photo1Data {
                 FullscreenPhotoView(imageData: photoData)

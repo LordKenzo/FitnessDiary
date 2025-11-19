@@ -39,6 +39,7 @@ struct AddFolderView: View {
                     .padding(.vertical, 8)
                 }
             }
+            .glassScrollBackground()
             .navigationTitle(L("folders.create"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -55,6 +56,7 @@ struct AddFolderView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func saveFolder() {

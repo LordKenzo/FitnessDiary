@@ -223,6 +223,7 @@ struct AddExerciseView: View {
                         .autocapitalization(.none)
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Nuovo Esercizio")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -239,6 +240,7 @@ struct AddExerciseView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
     
     private func saveExercise() {

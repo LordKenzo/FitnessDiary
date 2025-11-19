@@ -1,9 +1,20 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 @main
 struct FitnessDiaryApp: App {
     @State private var showOnboarding = true
+
+    init() {
+        let tableAppearance = UITableView.appearance()
+        tableAppearance.backgroundColor = .clear
+        tableAppearance.tableFooterView = UIView()
+        tableAppearance.tableHeaderView = UIView()
+
+        UITableViewCell.appearance().backgroundColor = .clear
+        UITableViewHeaderFooterView.appearance().tintColor = .clear
+    }
 
     var body: some Scene {
         WindowGroup {

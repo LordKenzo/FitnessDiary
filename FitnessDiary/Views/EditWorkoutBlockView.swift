@@ -269,6 +269,7 @@ struct EditWorkoutBlockView: View {
                 }
             }
         }
+        .glassScrollBackground()
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -288,6 +289,7 @@ struct EditWorkoutBlockView: View {
                 }
             )
         }
+        .appScreenBackground()
     }
 
     private var isValid: Bool {

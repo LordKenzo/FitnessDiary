@@ -149,6 +149,7 @@ struct AddWorkoutCardView: View {
                     }
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Nuova Scheda")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -178,6 +179,7 @@ struct AddWorkoutCardView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func addSimpleBlock(_ exercise: Exercise) {

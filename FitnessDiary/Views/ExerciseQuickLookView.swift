@@ -26,6 +26,7 @@ struct ExerciseQuickLookView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     @ViewBuilder

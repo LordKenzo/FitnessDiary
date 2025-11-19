@@ -27,7 +27,7 @@ struct WorkoutSessionDetailView: View {
     var body: some View {
         List {
             heroSection
-            
+
             if let analytics {
                 metricsSection(analytics: analytics)
                 distributionSection(analytics: analytics)
@@ -35,7 +35,7 @@ struct WorkoutSessionDetailView: View {
             } else {
                 missingAnalyticsSection
             }
-            
+
             if !log.notes.isEmpty {
                 Section("Note") {
                     Text(log.notes)
@@ -45,8 +45,10 @@ struct WorkoutSessionDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .glassScrollBackground()
         .navigationTitle(log.cardName)
         .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
     }
     
     private var heroSection: some View {

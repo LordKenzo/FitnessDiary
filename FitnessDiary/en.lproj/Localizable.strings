@@ -77,11 +77,15 @@
 "preferences.section.audio" = "Audio";
 "preferences.debug.log" = "Generate Workout Sequence";
 "preferences.clone.load" = "Auto-clone load";
+"preferences.theme.title" = "Appearance";
+"preferences.theme.light" = "Light";
+"preferences.theme.vibrant" = "Vibrant";
 "preferences.countdown" = "Initial countdown";
 "preferences.countdown.seconds" = "%d sec";
 "preferences.language" = "Language";
 "preferences.language.select" = "Select language";
 "preferences.made.by" = "Made with ❤️ by Lorenzo Franceschini";
+"preferences.version" = "Version %@";
 
 // MARK: - Language Settings
 "language.english" = "English";

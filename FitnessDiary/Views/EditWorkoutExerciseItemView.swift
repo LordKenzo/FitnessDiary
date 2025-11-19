@@ -81,6 +81,7 @@ struct EditWorkoutExerciseItemView: View {
 
             setsSection
         }
+        .glassScrollBackground()
         .navigationTitle("Configura Esercizio")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingExercisePicker) {
@@ -92,6 +93,7 @@ struct EditWorkoutExerciseItemView: View {
         .onAppear {
             loadUserProfile()
         }
+        .appScreenBackground()
     }
 
     // MARK: - View Components

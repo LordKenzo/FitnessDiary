@@ -474,56 +474,59 @@ struct WorkoutExecutionView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isSessionActive {
-                    ZStack {
-                        ScrollView {
-                            VStack(spacing: 24) {
-                                headerSection
-                                heartRateSection
-                                currentStepSection
-                                upcomingSection
+            AppBackgroundView {
+                Group {
+                    if viewModel.isSessionActive {
+                        ZStack {
+                            ScrollView {
+                                VStack(spacing: 24) {
+                                    headerSection
+                                    heartRateSection
+                                    currentStepSection
+                                    upcomingSection
+                                }
+                                .padding(24)
                             }
-                            .padding(24)
+                            .background(Color.clear)
+                            .disabled(viewModel.isCountdownActive)
+                            countdownOverlay
                         }
-                        .disabled(viewModel.isCountdownActive)
-
-                        countdownOverlay
+                    } else {
+                        workoutPicker
                     }
-                } else {
-                    workoutPicker
+                }
+                .navigationTitle(viewModel.sessionTitle)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { toolbarContent }
+                .onAppear(perform: refreshHeartRateZone)
+                .onChange(of: bluetoothManager.currentHeartRate) { _, _ in
+                    refreshHeartRateZone()
+                }
+                .onChange(of: profiles) { _, _ in
+                    refreshHeartRateZone()
+                }
+                .onChange(of: viewModel.isWorkoutCompleted) { _, isCompleted in
+                    if isCompleted {
+                        prepareCompletionSheet()
+                    }
+                }
+                .sheet(isPresented: $isCompletionSheetPresented) {
+                    completionSheet
+                }
+                .sheet(isPresented: $isHistoryPresented) {
+                    NavigationStack {
+                        WorkoutHistoryView()
+                    }
+                }
+                .alert("Impossibile salvare l'allenamento", isPresented: $isSaveErrorAlertPresented) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(saveErrorMessage ?? "Si è verificato un errore inatteso. Riprova.")
                 }
             }
-            .navigationTitle(viewModel.sessionTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { toolbarContent }
-        }
-        .onAppear(perform: refreshHeartRateZone)
-        .onChange(of: bluetoothManager.currentHeartRate) { _, _ in
-            refreshHeartRateZone()
-        }
-        .onChange(of: profiles) { _, _ in
-            refreshHeartRateZone()
-        }
-        .onChange(of: viewModel.isWorkoutCompleted) { _, isCompleted in
-            if isCompleted {
-                prepareCompletionSheet()
-            }
-        }
-        .sheet(isPresented: $isCompletionSheetPresented) {
-            completionSheet
-        }
-        .sheet(isPresented: $isHistoryPresented) {
-            NavigationStack {
-                WorkoutHistoryView()
-            }
-        }
-        .alert("Impossibile salvare l'allenamento", isPresented: $isSaveErrorAlertPresented) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(saveErrorMessage ?? "Si è verificato un errore inatteso. Riprova.")
         }
     }
+
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
@@ -581,6 +584,7 @@ struct WorkoutExecutionView: View {
             }
             .padding(24)
         }
+        .background(Color.clear)
     }
 
     private func workoutCardButton(for card: WorkoutCard) -> some View {
@@ -630,9 +634,7 @@ struct WorkoutExecutionView: View {
             }
             .buttonStyle(.borderedProminent)
         }
-        .padding()
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private var headerSection: some View {
@@ -679,9 +681,7 @@ struct WorkoutExecutionView: View {
             .buttonStyle(.borderedProminent)
             .disabled(!viewModel.isSessionActive || viewModel.isCountdownActive || viewModel.isWorkoutCompleted)
         }
-        .padding()
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private var heartRateSection: some View {
@@ -703,9 +703,7 @@ struct WorkoutExecutionView: View {
             HeartRateHistogram(currentZone: activeHeartRateZone, usagePercentages: viewModel.zoneUsagePercentages)
                 .frame(height: 140)
         }
-        .padding()
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     @ViewBuilder
@@ -732,8 +730,7 @@ struct WorkoutExecutionView: View {
                 Text("Nessuna fase disponibile")
             }
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private func timedStepView(step: WorkoutExecutionViewModel.Step, isRest: Bool) -> some View {
@@ -866,8 +863,7 @@ struct WorkoutExecutionView: View {
                 }
             }
         }
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private var upcomingSteps: ArraySlice<WorkoutExecutionViewModel.Step> {
@@ -1091,8 +1087,7 @@ struct WorkoutExecutionView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .dashboardCardStyle()
     }
 
     private var moodSelectionSection: some View {

@@ -99,6 +99,7 @@ struct HeartRateZonesEditorView: View {
                     }
                 }
             }
+            .glassScrollBackground()
             .navigationTitle("Zone Cardio")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -128,6 +129,7 @@ struct HeartRateZonesEditorView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
     
     private var automaticZonesSection: some View {

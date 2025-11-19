@@ -32,6 +32,7 @@ struct ClientWorkoutCardsView: View {
         }
         .navigationTitle("Schede di \(client.firstName)")
         .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
     }
 }
 
@@ -82,6 +83,7 @@ struct ClientWorkoutCardDetailView: View {
         }
         .navigationTitle(card.name)
         .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
     }
 
     private var headerSection: some View {
@@ -298,6 +300,7 @@ struct ClientWorkoutExerciseDetailView: View {
         }
         .navigationTitle("Dettaglio Esercizio")
         .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
     }
 }
 

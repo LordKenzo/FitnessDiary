@@ -321,6 +321,7 @@ struct EditExerciseView: View {
                 AddVariantView(exercise: exercise, allExercises: allExercises)
             }
         }
+        .appScreenBackground()
     }
 
     private func removeVariant(_ variant: Exercise) {

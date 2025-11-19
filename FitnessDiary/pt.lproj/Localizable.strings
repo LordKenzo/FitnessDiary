@@ -77,11 +77,15 @@
 "preferences.section.audio" = "Áudio";
 "preferences.debug.log" = "Gerar Sequência de Treino";
 "preferences.clone.load" = "Clonar carga automaticamente";
+"preferences.theme.title" = "Aparência";
+"preferences.theme.light" = "Claro";
+"preferences.theme.vibrant" = "Colorido";
 "preferences.countdown" = "Contagem regressiva inicial";
 "preferences.countdown.seconds" = "%d seg";
 "preferences.language" = "Idioma";
 "preferences.language.select" = "Selecionar idioma";
 "preferences.made.by" = "Feito com ❤️ por Lorenzo Franceschini";
+"preferences.version" = "Versão %@";
 
 // MARK: - Language Settings
 "language.english" = "English";
