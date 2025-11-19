@@ -78,8 +78,14 @@
 "preferences.debug.log" = "Generate Workout Sequence";
 "preferences.clone.load" = "Auto-clone load";
 "preferences.theme.title" = "Appearance";
+"preferences.theme.description" = "Choose your preferred theme to customize the app's appearance";
 "preferences.theme.light" = "Light";
+"preferences.theme.dark" = "Dark";
 "preferences.theme.vibrant" = "Vibrant";
+"preferences.theme.ocean" = "Ocean";
+"preferences.theme.sunset" = "Sunset";
+"preferences.theme.forest" = "Forest";
+"preferences.theme.lavender" = "Lavender";
 "preferences.countdown" = "Initial countdown";
 "preferences.countdown.seconds" = "%d sec";
 "preferences.language" = "Language";

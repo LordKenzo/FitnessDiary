@@ -78,8 +78,14 @@
 "preferences.debug.log" = "Trainingssequenz generieren";
 "preferences.clone.load" = "Last automatisch klonen";
 "preferences.theme.title" = "Erscheinungsbild";
+"preferences.theme.description" = "Wählen Sie Ihr bevorzugtes Thema, um das Erscheinungsbild der App anzupassen";
 "preferences.theme.light" = "Hell";
+"preferences.theme.dark" = "Dunkel";
 "preferences.theme.vibrant" = "Farbenfroh";
+"preferences.theme.ocean" = "Ozean";
+"preferences.theme.sunset" = "Sonnenuntergang";
+"preferences.theme.forest" = "Wald";
+"preferences.theme.lavender" = "Lavendel";
 "preferences.countdown" = "Start-Countdown";
 "preferences.countdown.seconds" = "%d Sek";
 "preferences.language" = "Sprache";

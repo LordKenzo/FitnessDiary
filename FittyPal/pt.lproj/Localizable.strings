@@ -78,8 +78,14 @@
 "preferences.debug.log" = "Gerar Sequência de Treino";
 "preferences.clone.load" = "Clonar carga automaticamente";
 "preferences.theme.title" = "Aparência";
+"preferences.theme.description" = "Escolha seu tema preferido para personalizar a aparência do aplicativo";
 "preferences.theme.light" = "Claro";
+"preferences.theme.dark" = "Escuro";
 "preferences.theme.vibrant" = "Colorido";
+"preferences.theme.ocean" = "Oceano";
+"preferences.theme.sunset" = "Pôr do sol";
+"preferences.theme.forest" = "Floresta";
+"preferences.theme.lavender" = "Lavanda";
 "preferences.countdown" = "Contagem regressiva inicial";
 "preferences.countdown.seconds" = "%d seg";
 "preferences.language" = "Idioma";
