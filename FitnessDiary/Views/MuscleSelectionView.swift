@@ -55,6 +55,7 @@ struct MuscleSelectionView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Fatto") {
                     dismiss()
+                }
             }
         }
         .appScreenBackground()
