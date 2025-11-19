@@ -1,6 +1,5 @@
 # FittyPal – La tua app professionale per l’allenamento
 
-![Screenshot FittyPal](screenshot_1.png)
 
 **FittyPal** è l’app progettata per atleti e personal trainer che vogliono allenarsi con precisione scientifica, organizzazione avanzata e zero compromessi sulla privacy.
 
@@ -12,6 +11,9 @@
 - Storico allenamenti con **RPE**, umore, carichi e progressioni.
 - Supporto multicliente per personal trainer.
 - Integrazione sicura con **Apple Health**.
+
+![Screenshot FittyPal](./screenshot_1.png)
+
 
 ## 🔒 Privacy al primo posto
 FittyPal non traccia, non invia e non archivia i tuoi dati su server esterni:  
