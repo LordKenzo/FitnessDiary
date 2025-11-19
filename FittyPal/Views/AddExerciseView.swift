@@ -198,10 +198,6 @@ struct AddExerciseView: View {
                             .foregroundStyle(.tertiary)
                     }
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
                 }
                 .buttonStyle(.plain)
 
@@ -235,10 +231,6 @@ struct AddExerciseView: View {
                             .foregroundStyle(.tertiary)
                     }
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
                 }
                 .buttonStyle(.plain)
 
@@ -291,12 +283,8 @@ struct AddExerciseView: View {
                                 .foregroundStyle(.tertiary)
                         }
                         .padding(12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.white.opacity(0.05))
-                        )
-                    }
-                    .buttonStyle(.plain)
+                }
+                .buttonStyle(.plain)
 
                     if !selectedPrimaryMuscles.isEmpty {
                         Text(selectedPrimaryMuscles.map { $0.name }.sorted().joined(separator: ", "))
@@ -327,12 +315,8 @@ struct AddExerciseView: View {
                                 .foregroundStyle(.tertiary)
                         }
                         .padding(12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.white.opacity(0.05))
-                        )
-                    }
-                    .buttonStyle(.plain)
+                }
+                .buttonStyle(.plain)
 
                     if !selectedSecondaryMuscles.isEmpty {
                         Text(selectedSecondaryMuscles.map { $0.name }.sorted().joined(separator: ", "))

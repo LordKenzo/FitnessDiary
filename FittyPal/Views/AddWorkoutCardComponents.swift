@@ -128,7 +128,6 @@ struct SectionCard<Content: View>: View {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(AppTheme.stroke(for: colorScheme), lineWidth: 1)
         )
-        .shadow(color: AppTheme.shadow(for: colorScheme), radius: 6, y: 3)
     }
 }
 
