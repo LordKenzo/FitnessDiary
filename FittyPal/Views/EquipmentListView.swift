@@ -42,6 +42,7 @@ struct EquipmentListView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
             .padding(.vertical, 24)
         }
