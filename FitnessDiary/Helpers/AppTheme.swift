@@ -118,37 +118,48 @@ enum AppTheme {
     }
 }
 
-struct AppBackgroundView: View {
+struct AppBackgroundView<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
-
-    var body: some View {
-        AppTheme.backgroundGradient(for: colorScheme)
-            .ignoresSafeArea()
-            .overlay(blobLayer)
+    let content: Content
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
     }
-
-    private var blobLayer: some View {
+    
+    var body: some View {
         ZStack {
-            Circle()
-                .fill(blobColor(primary: true))
-                .frame(width: 360)
-                .blur(radius: 140)
-                .offset(x: -150, y: -260)
-
-            Circle()
-                .fill(blobColor())
-                .frame(width: 420)
-                .blur(radius: 160)
-                .offset(x: 170, y: -160)
-
-            Circle()
-                .fill(blobAccent())
-                .frame(width: 460)
-                .blur(radius: 180)
-                .offset(x: 40, y: 240)
+            AppTheme.backgroundGradient(for: colorScheme)
+                .ignoresSafeArea()
+                .overlay(blobLayer)
+            
+            content
         }
     }
-
+    
+    private var blobLayer: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Circle()
+                    .fill(blobColor(primary: true))
+                    .frame(width: geometry.size.width * 0.6)
+                    .blur(radius: geometry.size.width * 0.23)
+                    .offset(x: -geometry.size.width * 0.25, y: -geometry.size.height * 0.3)
+                
+                Circle()
+                    .fill(blobColor())
+                    .frame(width: geometry.size.width * 0.7)
+                    .blur(radius: geometry.size.width * 0.27)
+                    .offset(x: geometry.size.width * 0.28, y: -geometry.size.height * 0.18)
+                
+                Circle()
+                    .fill(blobAccent())
+                    .frame(width: geometry.size.width * 0.76)
+                    .blur(radius: geometry.size.width * 0.3)
+                    .offset(x: geometry.size.width * 0.07, y: geometry.size.height * 0.28)
+            }
+        }
+    }
+    
     private func blobColor(primary: Bool = false) -> Color {
         if colorScheme == .dark {
             return Color(red: primary ? 255/255 : 226/255, green: primary ? 102/255 : 70/255, blue: primary ? 196/255 : 125/255)
@@ -158,7 +169,7 @@ struct AppBackgroundView: View {
                 .opacity(primary ? 0.35 : 0.25)
         }
     }
-
+    
     private func blobAccent() -> Color {
         if colorScheme == .dark {
             return Color(red: 255/255, green: 92/255, blue: 125/255).opacity(0.24)
@@ -167,6 +178,9 @@ struct AppBackgroundView: View {
         }
     }
 }
+
+
+
 
 struct DashboardCardModifier: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
@@ -195,7 +209,7 @@ extension View {
     func appScreenBackground() -> some View {
         modifier(AppScreenBackgroundModifier())
     }
-
+    
     /// Makes `List` and `Form` containers transparent so the ambient gradient
     /// remains visible behind scrollable system chrome.
     func glassScrollBackground() -> some View {
@@ -205,8 +219,7 @@ extension View {
 
 private struct AppScreenBackgroundModifier: ViewModifier {
     func body(content: Content) -> some View {
-        ZStack {
-            AppBackgroundView()
+        AppBackgroundView {
             content
         }
     }

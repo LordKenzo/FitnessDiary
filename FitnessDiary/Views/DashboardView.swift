@@ -47,77 +47,82 @@ struct DashboardView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
-                    heroHeader
-
-                    metricGrid
-
-                    trendSection
-
-                    focusSection
-
-                    quickActionsSection
-
-                    placeholderInsights
+            AppBackgroundView {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 32) {
+                        heroHeader
+                        metricGrid
+                        trendSection
+                        focusSection
+                        quickActionsSection
+                        placeholderInsights
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 24)
-                .padding(.bottom, 40)
+                .scrollIndicators(.hidden)
+                .background(Color.clear)
+                .navigationTitle(L("dashboard.title"))
+                .toolbarBackground(.hidden, for: .navigationBar)
             }
-            .scrollIndicators(.hidden)
-            .background(Color.clear)
-            .navigationTitle(L("dashboard.title"))
-            .toolbarBackground(.hidden, for: .navigationBar)
         }
-        .background(Color.clear)
-        .appScreenBackground()
     }
+
+
+
 
     private var heroHeader: some View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(localized: "dashboard.greeting")
                     .font(.headline)
-                    .foregroundStyle(Color.white.opacity(0.8))
+                    .foregroundStyle(.white.opacity(0.85))
                 Text(heroHeadline)
                     .font(.largeTitle.bold())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.white.opacity(0.85))
             }
-
+            
             if let latest = sessionLogs.first {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(localized: "dashboard.last.session")
                         .font(.caption)
-                        .foregroundStyle(Color.white.opacity(0.7))
+                        .foregroundStyle(.white.opacity(0.85))
+                    
                     HStack(alignment: .center, spacing: 14) {
                         Text(latest.mood.emoji)
                             .font(.system(size: 44))
+                        
                         VStack(alignment: .leading, spacing: 6) {
                             Text(latest.cardName)
                                 .font(.headline)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.white.opacity(0.85))
+                            
                             Text(dateFormatter.string(from: latest.date))
                                 .font(.caption)
-                                .foregroundStyle(Color.white.opacity(0.75))
+                                .foregroundStyle(.white.opacity(0.85))
+                            
                             Text(latest.notes.isEmpty ? L("dashboard.no.notes") : "\"\(latest.notes)\"")
                                 .font(.footnote.italic())
-                                .foregroundStyle(Color.white.opacity(0.65))
+                                .foregroundStyle(.white.opacity(0.85))
                                 .lineLimit(2)
                         }
+                        
                         Spacer()
+                        
                         if let rpe = latest.rpe {
                             VStack(spacing: 4) {
                                 Text(localized: "workout.rpe")
                                     .font(.caption2)
-                                    .foregroundStyle(Color.white.opacity(0.7))
+                                    .foregroundStyle(.white.opacity(0.85))
+                                
                                 Text("\(rpe)")
                                     .font(.headline)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(.white.opacity(0.85))
                             }
                             .padding(.vertical, 10)
                             .padding(.horizontal, 14)
-                            .background(Color.white.opacity(0.15))
+                            .background(Color.white.opacity(colorScheme == .dark ? 0.15 : 0.25))
                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
                     }
@@ -126,32 +131,37 @@ struct DashboardView: View {
             } else {
                 Text(localized: "dashboard.empty.sessions")
                     .font(.callout)
-                    .foregroundStyle(Color.white.opacity(0.7))
+                    .foregroundStyle(.white.opacity(0.85))
             }
-
+            
             Divider()
-                .overlay(Color.white.opacity(0.2))
-
+                .overlay(colorScheme == .dark ? Color.white.opacity(0.2) : Color.primary.opacity(0.2))
+            
             HStack(alignment: .bottom, spacing: 20) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(localized: "dashboard.weekly.goal")
                         .font(.caption)
-                        .foregroundStyle(Color.white.opacity(0.7))
+                        .foregroundStyle(.white.opacity(0.85))
+                    
                     Text(String(format: L("dashboard.sessions.count"), sessionsThisWeek, weeklyGoal))
                         .font(.title3.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.white.opacity(0.85))
+                    
                     ProgressView(value: min(weeklyProgress, 1))
-                        .tint(.white)
+                        .tint(colorScheme == .dark ? .white : .primary)
                         .scaleEffect(x: 1, y: 1.1, anchor: .center)
                 }
+                
                 Spacer()
+                
                 VStack(alignment: .trailing, spacing: 6) {
                     Text(localized: "dashboard.streak")
                         .font(.caption)
-                        .foregroundStyle(Color.white.opacity(0.7))
+                        .foregroundStyle(.white.opacity(0.85))
+                    
                     Text(String(format: L("dashboard.streak.days"), currentStreak))
                         .font(.system(size: 34, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.white.opacity(0.85))
                 }
             }
         }
@@ -162,11 +172,12 @@ struct DashboardView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 36, style: .continuous)
-                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                .stroke(colorScheme == .dark ? Color.white.opacity(0.2) : Color.primary.opacity(0.2), lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
         .shadow(color: AppTheme.shadow(for: colorScheme), radius: 30, y: 18)
     }
+
 
     private var metricGrid: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 2), spacing: 16) {
@@ -178,15 +189,19 @@ struct DashboardView: View {
                     Text(card.value)
                         .font(.system(size: 32, weight: .bold))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                     Text(card.title)
                         .font(.headline)
                         .foregroundStyle(.white.opacity(0.95))
+                        .lineLimit(1)
                     Text(card.subtitle)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.7))
+                        .lineLimit(1)
                 }
                 .padding()
-                .frame(maxWidth: .infinity, minHeight: 150, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: 160, maxHeight: 160, alignment: .topLeading) // ⬅️ minHeight e maxHeight uguali
                 .background(card.gradient)
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .overlay(

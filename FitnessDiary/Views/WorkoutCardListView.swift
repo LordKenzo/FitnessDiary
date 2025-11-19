@@ -62,31 +62,50 @@ struct WorkoutCardListView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 22) {
-                    if allCards.isEmpty {
-                        GlassEmptyStateCard(
-                            systemImage: "doc.text",
-                            title: L("cards.no.cards"),
-                            description: L("cards.no.cards.description")
-                        ) {
-                            Button(L("cards.create")) {
-                                showingAddCard = true
+            AppBackgroundView {
+                ScrollView {
+                    VStack(spacing: 22) {
+                        if allCards.isEmpty {
+                            GlassEmptyStateCard(
+                                systemImage: "doc.text",
+                                title: L("cards.no.cards"),
+                                description: L("cards.no.cards.description")
+                            ) {
+                                Button(L("cards.create")) {
+                                    showingAddCard = true
+                                }
+                                .buttonStyle(.borderedProminent)
                             }
-                            .buttonStyle(.borderedProminent)
-                        }
-                    } else {
-                        ForEach(folders) { folder in
-                            let folderCards = cards(for: folder)
-                            if !folderCards.isEmpty {
+                        } else {
+                            ForEach(folders) { folder in
+                                let folderCards = cards(for: folder)
+                                if !folderCards.isEmpty {
+                                    FolderDisclosureCard(
+                                        title: folder.name,
+                                        count: folderCards.count,
+                                        color: folder.color,
+                                        isExpanded: binding(for: folder.id),
+                                        onEditFolder: { selectedFolder = folder }
+                                    ) {
+                                        ForEach(folderCards) { card in
+                                            WorkoutCardRow(
+                                                card: card,
+                                                onEdit: { selectedCard = card },
+                                                onDelete: { deleteCard(card) }
+                                            )
+                                            .onTapGesture { selectedCard = card }
+                                        }
+                                    }
+                                }
+                            }
+                            if !cardsWithoutFolder.isEmpty {
                                 FolderDisclosureCard(
-                                    title: folder.name,
-                                    count: folderCards.count,
-                                    color: folder.color,
-                                    isExpanded: binding(for: folder.id),
-                                    onEditFolder: { selectedFolder = folder }
+                                    title: "Senza Folder",
+                                    count: cardsWithoutFolder.count,
+                                    color: .gray.opacity(0.4),
+                                    isExpanded: binding(for: Self.noFolderID)
                                 ) {
-                                    ForEach(folderCards) { card in
+                                    ForEach(cardsWithoutFolder) { card in
                                         WorkoutCardRow(
                                             card: card,
                                             onEdit: { selectedCard = card },
@@ -97,74 +116,56 @@ struct WorkoutCardListView: View {
                                 }
                             }
                         }
-
-                        if !cardsWithoutFolder.isEmpty {
-                            FolderDisclosureCard(
-                                title: "Senza Folder",
-                                count: cardsWithoutFolder.count,
-                                color: .gray.opacity(0.4),
-                                isExpanded: binding(for: Self.noFolderID)
-                            ) {
-                                ForEach(cardsWithoutFolder) { card in
-                                    WorkoutCardRow(
-                                        card: card,
-                                        onEdit: { selectedCard = card },
-                                        onDelete: { deleteCard(card) }
-                                    )
-                                    .onTapGesture { selectedCard = card }
-                                }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 24)
+                }
+                .background(Color.clear)
+                .searchable(text: $searchText, prompt: L("cards.search"))
+                .navigationTitle("Schede")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItemGroup(placement: .topBarLeading) {
+                        ownerFilterMenu()
+                        if !folders.isEmpty {
+                            foldersManagementButton()
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button {
+                                showingAddCard = true
+                            } label: {
+                                Label("Nuova Scheda", systemImage: "doc.text")
                             }
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 24)
-            }
-            .background(Color.clear)
-            .searchable(text: $searchText, prompt: L("cards.search"))
-            .navigationTitle("Schede")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItemGroup(placement: .topBarLeading) {
-                    ownerFilterMenu()
-                    if !folders.isEmpty {
-                        foldersManagementButton()
-                    }
-                }
-
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button {
-                            showingAddCard = true
+                            Button {
+                                showingAddFolder = true
+                            } label: {
+                                Label("Nuovo Folder", systemImage: "folder.badge.plus")
+                            }
                         } label: {
-                            Label("Nuova Scheda", systemImage: "doc.text")
+                            Image(systemName: "plus")
                         }
-                        Button {
-                            showingAddFolder = true
-                        } label: {
-                            Label("Nuovo Folder", systemImage: "folder.badge.plus")
-                        }
-                    } label: {
-                        Image(systemName: "plus")
                     }
                 }
-            }
-            .sheet(isPresented: $showingAddCard) {
-                AddWorkoutCardView(folders: folders, clients: clients)
-            }
-            .sheet(item: $selectedCard) { card in
-                EditWorkoutCardView(card: card, folders: folders, clients: clients)
-            }
-            .sheet(isPresented: $showingAddFolder) {
-                AddFolderView()
-            }
-            .sheet(item: $selectedFolder) { folder in
-                EditFolderView(folder: folder)
+                .sheet(isPresented: $showingAddCard) {
+                    AddWorkoutCardView(folders: folders, clients: clients)
+                }
+                .sheet(item: $selectedCard) { card in
+                    EditWorkoutCardView(card: card, folders: folders, clients: clients)
+                }
+                .sheet(isPresented: $showingAddFolder) {
+                    AddFolderView()
+                }
+                .sheet(item: $selectedFolder) { folder in
+                    EditFolderView(folder: folder)
+                }
             }
         }
-        .background(Color.clear)
-        .appScreenBackground()
     }
+
+
+
 
     private func deleteCard(_ card: WorkoutCard) {
         modelContext.delete(card)

@@ -474,59 +474,59 @@ struct WorkoutExecutionView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isSessionActive {
-                    ZStack {
-                        ScrollView {
-                            VStack(spacing: 24) {
-                                headerSection
-                                heartRateSection
-                                currentStepSection
-                                upcomingSection
+            AppBackgroundView {
+                Group {
+                    if viewModel.isSessionActive {
+                        ZStack {
+                            ScrollView {
+                                VStack(spacing: 24) {
+                                    headerSection
+                                    heartRateSection
+                                    currentStepSection
+                                    upcomingSection
+                                }
+                                .padding(24)
                             }
-                            .padding(24)
+                            .background(Color.clear)
+                            .disabled(viewModel.isCountdownActive)
+                            countdownOverlay
                         }
-                        .disabled(viewModel.isCountdownActive)
-                        .background(Color.clear)
-
-                        countdownOverlay
+                    } else {
+                        workoutPicker
                     }
-                } else {
-                    workoutPicker
+                }
+                .navigationTitle(viewModel.sessionTitle)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { toolbarContent }
+                .onAppear(perform: refreshHeartRateZone)
+                .onChange(of: bluetoothManager.currentHeartRate) { _, _ in
+                    refreshHeartRateZone()
+                }
+                .onChange(of: profiles) { _, _ in
+                    refreshHeartRateZone()
+                }
+                .onChange(of: viewModel.isWorkoutCompleted) { _, isCompleted in
+                    if isCompleted {
+                        prepareCompletionSheet()
+                    }
+                }
+                .sheet(isPresented: $isCompletionSheetPresented) {
+                    completionSheet
+                }
+                .sheet(isPresented: $isHistoryPresented) {
+                    NavigationStack {
+                        WorkoutHistoryView()
+                    }
+                }
+                .alert("Impossibile salvare l'allenamento", isPresented: $isSaveErrorAlertPresented) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(saveErrorMessage ?? "Si è verificato un errore inatteso. Riprova.")
                 }
             }
-            .navigationTitle(viewModel.sessionTitle)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { toolbarContent }
         }
-        .onAppear(perform: refreshHeartRateZone)
-        .onChange(of: bluetoothManager.currentHeartRate) { _, _ in
-            refreshHeartRateZone()
-        }
-        .onChange(of: profiles) { _, _ in
-            refreshHeartRateZone()
-        }
-        .onChange(of: viewModel.isWorkoutCompleted) { _, isCompleted in
-            if isCompleted {
-                prepareCompletionSheet()
-            }
-        }
-        .sheet(isPresented: $isCompletionSheetPresented) {
-            completionSheet
-        }
-        .sheet(isPresented: $isHistoryPresented) {
-            NavigationStack {
-                WorkoutHistoryView()
-            }
-        }
-        .alert("Impossibile salvare l'allenamento", isPresented: $isSaveErrorAlertPresented) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(saveErrorMessage ?? "Si è verificato un errore inatteso. Riprova.")
-        }
-        .background(Color.clear)
-        .appScreenBackground()
     }
+
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {

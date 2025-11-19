@@ -12,104 +12,99 @@ struct SettingsView: View {
     let bluetoothManager: BluetoothHeartRateManager
     @Query private var profiles: [UserProfile]
     @ObservedObject private var localizationManager = LocalizationManager.shared
-
+    
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    SettingsSectionCard(title: L("settings.section.general")) {
-                        SettingsNavigationRow(
-                            title: L("settings.general.preferences"),
-                            iconName: "slider.horizontal.3"
-                        ) {
-                            GeneralPreferencesView()
-                        }
-                    }
-
-                    SettingsSectionCard(title: L("settings.section.account")) {
-                        SettingsNavigationRow(
-                            title: L("settings.profile"),
-                            iconName: "person.circle"
-                        ) {
-                            ProfileView()
-                        }
-                    }
-
-                    SettingsSectionCard(title: L("settings.section.clients")) {
-                        SettingsNavigationRow(
-                            title: L("settings.clients.management"),
-                            iconName: "person.3"
-                        ) {
-                            ClientListView()
-                        }
-                    }
-
-                    SettingsSectionCard(title: L("settings.section.monitoring")) {
-                        SettingsNavigationRow(
-                            title: L("settings.heart.rate"),
-                            iconName: "heart.circle"
-                        ) {
-                            HeartRateMonitorView(bluetoothManager: bluetoothManager)
-                        }
-
-                        SettingsNavigationRow(
-                            title: L("settings.strength.expressions"),
-                            iconName: "bolt.fill"
-                        ) {
-                            StrengthExpressionsView()
-                        }
-                    }
-
-                    SettingsSectionCard(title: L("settings.section.library")) {
-                        SettingsNavigationRow(
-                            title: L("settings.muscles"),
-                            iconName: "figure.arms.open"
-                        ) {
-                            MuscleListView()
-                        }
-
-                        SettingsNavigationRow(
-                            title: L("settings.equipment"),
-                            iconName: "dumbbell"
-                        ) {
-                            EquipmentListView()
-                        }
-
-                        SettingsNavigationRow(
-                            title: L("settings.exercises"),
-                            iconName: "figure.strengthtraining.traditional"
-                        ) {
-                            ExerciseListView()
-                        }
-                    }
-
-                    SettingsSectionCard(title: L("settings.section.legal")) {
-                        if let privacyURL = SupportResources.privacyPolicyURL {
-                            Link(destination: privacyURL) {
-                                SettingsRow(title: L("settings.legal.privacy"), iconName: "lock.shield", showsDisclosure: false)
+            AppBackgroundView {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        SettingsSectionCard(title: L("settings.section.general")) {
+                            SettingsNavigationRow(
+                                title: L("settings.general.preferences"),
+                                iconName: "slider.horizontal.3"
+                            ) {
+                                GeneralPreferencesView()
                             }
                         }
-
-                        if let termsURL = SupportResources.termsOfUseURL {
-                            Link(destination: termsURL) {
-                                SettingsRow(title: L("settings.legal.terms"), iconName: "doc.text", showsDisclosure: false)
+                        SettingsSectionCard(title: L("settings.section.account")) {
+                            SettingsNavigationRow(
+                                title: L("settings.profile"),
+                                iconName: "person.circle"
+                            ) {
+                                ProfileView()
                             }
                         }
-
-                        if let supportURL = SupportResources.supportEmailURL {
-                            Link(destination: supportURL) {
-                                SettingsRow(title: L("settings.legal.support"), iconName: "envelope", showsDisclosure: false)
+                        SettingsSectionCard(title: L("settings.section.clients")) {
+                            SettingsNavigationRow(
+                                title: L("settings.clients.management"),
+                                iconName: "person.3"
+                            ) {
+                                ClientListView()
+                            }
+                        }
+                        SettingsSectionCard(title: L("settings.section.monitoring")) {
+                            SettingsNavigationRow(
+                                title: L("settings.heart.rate"),
+                                iconName: "heart.circle"
+                            ) {
+                                HeartRateMonitorView(bluetoothManager: bluetoothManager)
+                            }
+                            SettingsNavigationRow(
+                                title: L("settings.strength.expressions"),
+                                iconName: "bolt.fill"
+                            ) {
+                                StrengthExpressionsView()
+                            }
+                        }
+                        SettingsSectionCard(title: L("settings.section.library")) {
+                            SettingsNavigationRow(
+                                title: L("settings.muscles"),
+                                iconName: "figure.arms.open"
+                            ) {
+                                MuscleListView()
+                            }
+                            SettingsNavigationRow(
+                                title: L("settings.equipment"),
+                                iconName: "dumbbell"
+                            ) {
+                                EquipmentListView()
+                            }
+                            SettingsNavigationRow(
+                                title: L("settings.exercises"),
+                                iconName: "figure.strengthtraining.traditional"
+                            ) {
+                                ExerciseListView()
+                            }
+                        }
+                        SettingsSectionCard(title: L("settings.section.legal")) {
+                            if let privacyURL = SupportResources.privacyPolicyURL {
+                                Link(destination: privacyURL) {
+                                    SettingsRow(title: L("settings.legal.privacy"), iconName: "lock.shield", showsDisclosure: false)
+                                }
+                            }
+                            if let termsURL = SupportResources.termsOfUseURL {
+                                Link(destination: termsURL) {
+                                    SettingsRow(title: L("settings.legal.terms"), iconName: "doc.text", showsDisclosure: false)
+                                }
+                            }
+                            if let supportURL = SupportResources.supportEmailURL {
+                                Link(destination: supportURL) {
+                                    SettingsRow(title: L("settings.legal.support"), iconName: "envelope", showsDisclosure: false)
+                                }
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 24)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 24)
+                .scrollContentBackground(.hidden)
+                .background(Color.clear)
+                .navigationTitle(L("settings.title"))
+                .toolbarBackground(.hidden, for: .navigationBar)
             }
-            .navigationTitle(L("settings.title"))
         }
-        .appScreenBackground()
     }
+
 }
 
 private struct SettingsSectionCard<Content: View>: View {
