@@ -487,6 +487,7 @@ struct WorkoutExecutionView: View {
                             .padding(24)
                         }
                         .disabled(viewModel.isCountdownActive)
+                        .background(Color.clear)
 
                         countdownOverlay
                     }
@@ -523,6 +524,7 @@ struct WorkoutExecutionView: View {
         } message: {
             Text(saveErrorMessage ?? "Si è verificato un errore inatteso. Riprova.")
         }
+        .background(Color.clear)
         .appScreenBackground()
     }
 
@@ -582,6 +584,7 @@ struct WorkoutExecutionView: View {
             }
             .padding(24)
         }
+        .background(Color.clear)
     }
 
     private func workoutCardButton(for card: WorkoutCard) -> some View {

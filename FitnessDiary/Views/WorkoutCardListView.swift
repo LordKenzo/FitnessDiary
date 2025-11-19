@@ -120,6 +120,7 @@ struct WorkoutCardListView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 24)
             }
+            .background(Color.clear)
             .searchable(text: $searchText, prompt: L("cards.search"))
             .navigationTitle("Schede")
             .navigationBarTitleDisplayMode(.inline)
@@ -161,6 +162,7 @@ struct WorkoutCardListView: View {
                 EditFolderView(folder: folder)
             }
         }
+        .background(Color.clear)
         .appScreenBackground()
     }
 
