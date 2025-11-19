@@ -9,7 +9,8 @@ struct ExerciseListView: View {
     @Query(sort: \Equipment.name) private var equipment: [Equipment]
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @State private var showingAddExercise = false
-    @State private var selectedExercise: Exercise?
+    @State private var quickLookExercise: Exercise?
+    @State private var editingExercise: Exercise?
     @State private var searchText = ""
     @State private var filterPrimaryMetabolism: PrimaryMetabolism?
     @State private var filterBiomechanicalStructure: BiomechanicalStructure?
@@ -59,16 +60,28 @@ struct ExerciseListView: View {
                     ExerciseRow(exercise: exercise)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            selectedExercise = exercise
+                            quickLookExercise = exercise
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                editingExercise = exercise
+                            } label: {
+                                Label(L("common.edit"), systemImage: "pencil")
+                            }
+
+                            Button(role: .destructive) {
+                                deleteExercise(exercise)
+                            } label: {
+                                Label(L("common.delete"), systemImage: "trash")
+                            }
                         }
                 }
-                .onDelete(perform: deleteExercises)
             }
         }
         .searchable(text: $searchText, prompt: L("exercises.search"))
         .safeAreaInset(edge: .top) {
             if isAnyFilterActive() {
-                ActiveFiltersBar(
+                ExerciseFiltersSummaryBar(
                     filterPrimaryMuscle: $filterPrimaryMuscle,
                     filterPrimaryMetabolism: $filterPrimaryMetabolism,
                     filterBiomechanicalStructure: $filterBiomechanicalStructure,
@@ -105,7 +118,10 @@ struct ExerciseListView: View {
         .sheet(isPresented: $showingAddExercise) {
             AddExerciseView(muscles: muscles, equipment: equipment)
         }
-        .sheet(item: $selectedExercise) { exercise in
+        .sheet(item: $quickLookExercise) { exercise in
+            ExerciseQuickLookView(exercise: exercise)
+        }
+        .sheet(item: $editingExercise) { exercise in
             EditExerciseView(exercise: exercise, muscles: muscles, equipment: equipment)
         }
         .sheet(isPresented: $showingFiltersSheet) {
@@ -125,14 +141,11 @@ struct ExerciseListView: View {
         }
     }
     
-    private func deleteExercises(at offsets: IndexSet) {
-        for index in offsets {
-            let exerciseToDelete = filteredExercises[index]
-            for variant in exerciseToDelete.variants {
-                variant.variants.removeAll { $0.id == exerciseToDelete.id }
-            }
-            modelContext.delete(exerciseToDelete)
+    private func deleteExercise(_ exercise: Exercise) {
+        for variant in exercise.variants {
+            variant.variants.removeAll { $0.id == exercise.id }
         }
+        modelContext.delete(exercise)
     }
     
     private func removeAllFilters() {
@@ -159,114 +172,6 @@ struct ExerciseListView: View {
         filterFavoritesOnly
     }
 }
-
-private struct ActiveFiltersBar: View {
-    @Binding var filterPrimaryMuscle: Muscle?
-    @Binding var filterPrimaryMetabolism: PrimaryMetabolism?
-    @Binding var filterBiomechanicalStructure: BiomechanicalStructure?
-    @Binding var filterTrainingRole: TrainingRole?
-    @Binding var filterCategory: ExerciseCategory?
-    @Binding var filterReferencePlane: ReferencePlane?
-    @Binding var filterMotorSchemas: Set<MotorSchema>
-    @Binding var filterTags: Set<ExerciseTag>
-    @Binding var filterFavoritesOnly: Bool
-    let onClearAll: () -> Void
-
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                if let muscle = filterPrimaryMuscle {
-                    ActiveFilterChip(title: muscle.name, systemImage: "figure.strengthtraining.traditional") {
-                        filterPrimaryMuscle = nil
-                    }
-                }
-
-                if let metabolism = filterPrimaryMetabolism {
-                    ActiveFilterChip(title: metabolism.rawValue, systemImage: metabolism.icon) {
-                        filterPrimaryMetabolism = nil
-                    }
-                }
-
-                if let structure = filterBiomechanicalStructure {
-                    ActiveFilterChip(title: structure.rawValue, systemImage: structure.icon) {
-                        filterBiomechanicalStructure = nil
-                    }
-                }
-
-                if let role = filterTrainingRole {
-                    ActiveFilterChip(title: role.rawValue, systemImage: role.icon) {
-                        filterTrainingRole = nil
-                    }
-                }
-
-                if let category = filterCategory {
-                    ActiveFilterChip(title: category.rawValue, systemImage: category.icon) {
-                        filterCategory = nil
-                    }
-                }
-
-                if let plane = filterReferencePlane {
-                    ActiveFilterChip(title: plane.rawValue, systemImage: plane.icon) {
-                        filterReferencePlane = nil
-                    }
-                }
-
-                ForEach(filterMotorSchemas.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { schema in
-                    ActiveFilterChip(title: schema.rawValue, systemImage: schema.icon) {
-                        filterMotorSchemas.remove(schema)
-                    }
-                }
-
-                ForEach(filterTags.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { tag in
-                    ActiveFilterChip(title: tag.rawValue, systemImage: tag.icon) {
-                        filterTags.remove(tag)
-                    }
-                }
-
-                if filterFavoritesOnly {
-                    ActiveFilterChip(title: "Preferiti", systemImage: "star.fill") {
-                        filterFavoritesOnly = false
-                    }
-                }
-
-                Button("Reset", role: .destructive, action: onClearAll)
-                    .buttonStyle(.bordered)
-                    .font(.caption)
-            }
-            .padding(.vertical, 8)
-        }
-    }
-}
-
-private struct ActiveFilterChip: View {
-    let title: String
-    var systemImage: String?
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                if let systemImage {
-                    Image(systemName: systemImage)
-                }
-                Text(title)
-                    .lineLimit(1)
-                Image(systemName: "xmark.circle.fill")
-                    .font(.caption2)
-            }
-            .font(.caption)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill(Color.accentColor.opacity(0.15))
-            )
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-
 
 // MARK: - Exercise Row
 struct ExerciseRow: View {
