@@ -7,31 +7,28 @@ struct ContentView: View {
     @AppStorage("appColorTheme") private var appColorThemeRaw = AppColorTheme.vibrant.rawValue
 
     var body: some View {
-        ZStack {
-            AppBackgroundView()
+        TabView {
+            DashboardView()
+                .tabItem {
+                    Label(L("tab.dashboard"), systemImage: "house.fill")
+                }
 
-            TabView {
-                DashboardView()
-                    .tabItem {
-                        Label(L("tab.dashboard"), systemImage: "house.fill")
-                    }
+            WorkoutExecutionView(bluetoothManager: bluetoothManager)
+                .tabItem {
+                    Label(L("tab.workout"), systemImage: "stopwatch")
+                }
 
-                WorkoutExecutionView(bluetoothManager: bluetoothManager)
-                    .tabItem {
-                        Label(L("tab.workout"), systemImage: "stopwatch")
-                    }
+            WorkoutCardListView()
+                .tabItem {
+                    Label(L("tab.cards"), systemImage: "list.bullet.clipboard")
+                }
 
-                WorkoutCardListView()
-                    .tabItem {
-                        Label(L("tab.cards"), systemImage: "list.bullet.clipboard")
-                    }
-
-                SettingsView(bluetoothManager: bluetoothManager)
-                    .tabItem {
-                        Label(L("tab.settings"), systemImage: "gearshape")
-                    }
-            }
+            SettingsView(bluetoothManager: bluetoothManager)
+                .tabItem {
+                    Label(L("tab.settings"), systemImage: "gearshape")
+                }
         }
+        .appScreenBackground()
         .preferredColorScheme(appColorTheme.colorScheme)
     }
 

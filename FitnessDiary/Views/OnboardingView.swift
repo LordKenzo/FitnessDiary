@@ -26,12 +26,16 @@ struct OnboardingView: View {
             // TabView per lo swipe tra le immagini
             TabView(selection: $currentIndex) {
                 ForEach(0..<onboardingImages.count, id: \.self) { index in
-                    Image(onboardingImages[index])
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .clipped()
-                        .tag(index)
+                    GeometryReader { proxy in
+                        Image(onboardingImages[index])
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: proxy.size.width, height: proxy.size.height)
+                            .clipped()
+                            .contentShape(Rectangle())
+                            .ignoresSafeArea()
+                    }
+                    .tag(index)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
