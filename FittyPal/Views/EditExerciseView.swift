@@ -93,10 +93,6 @@ struct EditExerciseView: View {
                     .fontWeight(.semibold)
                     .textFieldStyle(.plain)
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
 
                 TextField("Descrizione (opzionale)", text: Binding(
                     get: { exercise.exerciseDescription ?? "" },
@@ -106,10 +102,6 @@ struct EditExerciseView: View {
                     .textFieldStyle(.plain)
                     .lineLimit(3...6)
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
             }
         }
     }
@@ -125,10 +117,6 @@ struct EditExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 Picker("Ruolo nell'Allenamento", selection: $exercise.trainingRole) {
                     ForEach(TrainingRole.allCases, id: \.self) { role in
@@ -138,10 +126,6 @@ struct EditExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 Picker("Metabolismo Primario", selection: $exercise.primaryMetabolism) {
                     ForEach(PrimaryMetabolism.allCases, id: \.self) { metabolism in
@@ -151,10 +135,6 @@ struct EditExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 Picker("Categoria", selection: $exercise.category) {
                     ForEach(ExerciseCategory.allCases, id: \.self) { cat in
@@ -164,10 +144,6 @@ struct EditExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
             }
         }
     }
@@ -187,10 +163,6 @@ struct EditExerciseView: View {
                 }
                 .pickerStyle(.menu)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 TextField("Focus On (opzionale)", text: Binding(
                     get: { exercise.focusOn ?? "" },
@@ -200,17 +172,9 @@ struct EditExerciseView: View {
                     .textFieldStyle(.plain)
                     .lineLimit(1...3)
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
 
                 Toggle("Segna come preferito", isOn: $exercise.isFavorite)
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
             }
         }
     }
@@ -232,10 +196,6 @@ struct EditExerciseView: View {
                             .foregroundStyle(.tertiary)
                     }
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
                 }
                 .buttonStyle(.plain)
 
@@ -272,10 +232,6 @@ struct EditExerciseView: View {
                             .foregroundStyle(.tertiary)
                     }
                     .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color.white.opacity(0.05))
-                    )
                 }
                 .buttonStyle(.plain)
 
@@ -306,10 +262,6 @@ struct EditExerciseView: View {
             }
             .pickerStyle(.menu)
             .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
-            )
         }
     }
 
@@ -335,10 +287,6 @@ struct EditExerciseView: View {
                                 .foregroundStyle(.tertiary)
                         }
                         .padding(12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.white.opacity(0.05))
-                        )
                     }
                     .buttonStyle(.plain)
 
@@ -374,10 +322,6 @@ struct EditExerciseView: View {
                                 .foregroundStyle(.tertiary)
                         }
                         .padding(12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.white.opacity(0.05))
-                        )
                     }
                     .buttonStyle(.plain)
 
@@ -455,10 +399,6 @@ struct EditExerciseView: View {
                             .buttonStyle(.plain)
                         }
                         .padding(12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.white.opacity(0.05))
-                        )
                     }
                 }
 
@@ -496,10 +436,6 @@ struct EditExerciseView: View {
                 .keyboardType(.URL)
                 .autocapitalization(.none)
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
 
                 if let urlString = exercise.youtubeURL,
                    let url = URL(string: urlString) {

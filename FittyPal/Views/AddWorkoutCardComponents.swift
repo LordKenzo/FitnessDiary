@@ -123,13 +123,12 @@ struct SectionCard<Content: View>: View {
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(AppTheme.cardBackground(for: colorScheme))
-        .background(.thinMaterial.opacity(colorScheme == .dark ? 0.15 : 0.2))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(AppTheme.stroke(for: colorScheme), lineWidth: 1)
         )
-        .shadow(color: AppTheme.shadow(for: colorScheme), radius: 8, y: 4)
+        .shadow(color: AppTheme.shadow(for: colorScheme), radius: 6, y: 3)
     }
 }
 

@@ -188,10 +188,6 @@ struct AddMuscleView: View {
                             .fontWeight(.semibold)
                             .textFieldStyle(.plain)
                             .padding(12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(Color.white.opacity(0.05))
-                            )
                     }
 
                     // Category Section
@@ -261,10 +257,6 @@ struct EditMuscleView: View {
                             .fontWeight(.semibold)
                             .textFieldStyle(.plain)
                             .padding(12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(Color.white.opacity(0.05))
-                            )
                     }
 
                     // Category Section

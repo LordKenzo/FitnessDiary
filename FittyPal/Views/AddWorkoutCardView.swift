@@ -129,10 +129,6 @@ struct AddWorkoutCardView: View {
                         .fontWeight(.semibold)
                         .textFieldStyle(.plain)
                         .padding(12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.white.opacity(0.05))
-                        )
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -146,10 +142,6 @@ struct AddWorkoutCardView: View {
                         .textFieldStyle(.plain)
                         .lineLimit(2...4)
                         .padding(12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.white.opacity(0.05))
-                        )
                 }
             }
         }
@@ -241,10 +233,6 @@ struct AddWorkoutCardView: View {
                 .labelsHidden()
         }
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color.white.opacity(0.05))
-        )
     }
 
     private var clientSelectionRow: some View {

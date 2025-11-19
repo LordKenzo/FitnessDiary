@@ -197,15 +197,11 @@ struct AddEquipmentView: View {
                 VStack(spacing: 20) {
                     // Name Section
                     SectionCard(title: L("equipment.name")) {
-                        TextField(L("equipment.name.placeholder"), text: $name)
+                        TextField(L("equipment.name"), text: $name)
                             .font(.title3)
                             .fontWeight(.semibold)
                             .textFieldStyle(.plain)
                             .padding(12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(Color.white.opacity(0.05))
-                            )
                     }
 
                     // Category Section
@@ -270,15 +266,11 @@ struct EditEquipmentView: View {
                 VStack(spacing: 20) {
                     // Name Section
                     SectionCard(title: L("equipment.name")) {
-                        TextField(L("equipment.name.placeholder"), text: $equipment.name)
+                        TextField(L("equipment.name"), text: $equipment.name)
                             .font(.title3)
                             .fontWeight(.semibold)
                             .textFieldStyle(.plain)
                             .padding(12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(Color.white.opacity(0.05))
-                            )
                     }
 
                     // Category Section
