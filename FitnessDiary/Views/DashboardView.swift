@@ -70,6 +70,7 @@ struct DashboardView: View {
             .navigationTitle(L("dashboard.title"))
             .toolbarBackground(.hidden, for: .navigationBar)
         }
+        .appScreenBackground()
     }
 
     private var heroHeader: some View {

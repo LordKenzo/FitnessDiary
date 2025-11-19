@@ -37,6 +37,7 @@ struct StrengthExpressionsView: View {
         .onAppear {
             initializeDefaultParametersIfNeeded()
         }
+        .appScreenBackground()
     }
 
     private func getParameters(for type: StrengthExpressionType) -> StrengthExpressionParameters? {
@@ -190,6 +191,7 @@ struct EditStrengthExpressionView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func resetToDefaults() {

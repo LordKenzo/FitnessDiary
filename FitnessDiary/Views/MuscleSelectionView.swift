@@ -55,10 +55,11 @@ struct MuscleSelectionView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Fatto") {
                     dismiss()
-                }
             }
         }
+        .appScreenBackground()
     }
+}
 
     private func toggleMuscle(_ muscle: Muscle) {
         if selectedMuscles.contains(muscle) {

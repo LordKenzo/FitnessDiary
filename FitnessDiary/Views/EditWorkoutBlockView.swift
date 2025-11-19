@@ -288,6 +288,7 @@ struct EditWorkoutBlockView: View {
                 }
             )
         }
+        .appScreenBackground()
     }
 
     private var isValid: Bool {

@@ -73,6 +73,7 @@ struct EditFolderView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func saveChanges() {

@@ -62,6 +62,7 @@ struct MethodSelectionView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 }
 

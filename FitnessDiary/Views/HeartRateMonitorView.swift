@@ -50,6 +50,7 @@ struct HeartRateMonitorView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
     
     // MARK: - Connection Header

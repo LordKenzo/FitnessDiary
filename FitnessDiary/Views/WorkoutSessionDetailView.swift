@@ -47,6 +47,7 @@ struct WorkoutSessionDetailView: View {
         .listStyle(.insetGrouped)
         .navigationTitle(log.cardName)
         .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
     }
     
     private var heroSection: some View {

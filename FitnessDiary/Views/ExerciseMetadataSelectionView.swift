@@ -17,6 +17,7 @@ struct MotorSchemaSelectionView: View {
             }
         }
         .navigationTitle(L("metadata.motor.title"))
+        .appScreenBackground()
     }
 
     private func toggleSelection(_ schema: MotorSchema) {
@@ -59,6 +60,7 @@ struct ExerciseTagSelectionView: View {
             }
         }
         .navigationTitle(L("metadata.tags.title"))
+        .appScreenBackground()
     }
 
     @ViewBuilder

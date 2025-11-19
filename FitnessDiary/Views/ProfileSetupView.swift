@@ -156,6 +156,7 @@ struct ProfileSetupView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
     
     /// Produces a human-readable BPM range for the specified heart rate zone using the view's current age and maxHeartRate.

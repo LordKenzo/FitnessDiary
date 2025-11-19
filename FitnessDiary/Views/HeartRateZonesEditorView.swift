@@ -128,6 +128,7 @@ struct HeartRateZonesEditorView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
     
     private var automaticZonesSection: some View {

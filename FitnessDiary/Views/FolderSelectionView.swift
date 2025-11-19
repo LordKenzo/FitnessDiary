@@ -66,6 +66,7 @@ struct FolderSelectionView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 }
 

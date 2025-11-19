@@ -125,6 +125,7 @@ struct ClientListView: View {
         } message: {
             Text(String(format: L("clients.delete.all.confirm.message"), clients.count))
         }
+        .appScreenBackground()
     }
 
     private func deleteClient(_ client: Client) {

@@ -92,6 +92,7 @@ struct EditWorkoutExerciseItemView: View {
         .onAppear {
             loadUserProfile()
         }
+        .appScreenBackground()
     }
 
     // MARK: - View Components

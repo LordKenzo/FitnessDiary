@@ -55,6 +55,7 @@ struct AddFolderView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func saveFolder() {

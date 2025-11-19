@@ -64,5 +64,6 @@ struct OnboardingView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 24)
         }
+        .appScreenBackground()
     }
 }

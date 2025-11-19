@@ -46,6 +46,7 @@ struct OneRepMaxView: View {
         .onDisappear {
             saveChanges()
         }
+        .appScreenBackground()
     }
 
     private func binding(for exercise: Big5Exercise) -> Binding<String> {

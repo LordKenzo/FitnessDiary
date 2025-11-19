@@ -239,6 +239,7 @@ struct AddExerciseView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
     
     private func saveExercise() {

@@ -124,6 +124,7 @@ struct ClientSelectionView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func toggleSelection(for client: Client) {

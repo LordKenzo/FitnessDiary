@@ -34,6 +34,7 @@ struct WorkoutHistoryView: View {
         }
         .navigationTitle("Storico Allenamenti")
         .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
     }
 
     private func deleteLogs(at offsets: IndexSet) {

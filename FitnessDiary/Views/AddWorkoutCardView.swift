@@ -178,6 +178,7 @@ struct AddWorkoutCardView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func addSimpleBlock(_ exercise: Exercise) {

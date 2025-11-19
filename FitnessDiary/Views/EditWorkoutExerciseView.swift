@@ -110,6 +110,7 @@ struct EditWorkoutExerciseView: View {
         .onAppear {
             loadUserProfile()
         }
+        .appScreenBackground()
     }
 
     private func loadUserProfile() {

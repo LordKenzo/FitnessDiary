@@ -54,6 +54,7 @@ struct WorkoutDebugLogView: View {
                 }
             }
         }
+        .appScreenBackground()
     }
 }
 
