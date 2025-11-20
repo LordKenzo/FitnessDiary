@@ -196,7 +196,7 @@ struct PeriodizationTimelineView: View {
                 }
                 .listStyle(.plain)
                 .listRowSpacing(12)
-                .frame(height: CGFloat(sortedMesocycles.count) * 165 + 40)
+                .frame(height: CGFloat(sortedMesocycles.count) * 175 + 60)
                 .environment(\.editMode, .constant(.active))
                 .scrollDisabled(true)
             } else {
@@ -304,6 +304,12 @@ struct MesocycleBarView: View {
         VStack(alignment: .leading, spacing: 8) {
             // Header con numero e nome
             HStack(spacing: 12) {
+                if editMode {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                }
+
                 Text("M\(mesocycle.order)")
                     .font(.subheadline)
                     .fontWeight(.bold)
