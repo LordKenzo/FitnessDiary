@@ -294,7 +294,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
     }
 
     private func prepareForNextGroup(groups: [RepGroup]) {
-        guard currentGroupIndex < groups.count else { return }
+        guard currentGroupIndex >= 0, currentGroupIndex < groups.count else { return }
         let nextGroup = groups[currentGroupIndex]
         loadText = String(format: "%.1f", nextGroup.load)
         perceivedExertion = 7
@@ -967,7 +967,13 @@ struct WorkoutExecutionView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    ProgressView(value: 1.0 - (viewModel.groupRestRemaining / groups[max(0, viewModel.currentGroupIndex)].restAfterGroup))
+                    ProgressView(value: {
+                        let index = min(viewModel.currentGroupIndex, groups.count - 1)
+                        guard index >= 0, index < groups.count else { return 0 }
+                        let totalRest = groups[index].restAfterGroup
+                        guard totalRest > 0 else { return 1.0 }
+                        return 1.0 - (viewModel.groupRestRemaining / totalRest)
+                    }())
                         .tint(.purple)
 
                     Button(action: viewModel.skipGroupRest) {

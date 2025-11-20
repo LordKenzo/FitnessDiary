@@ -82,13 +82,13 @@ struct SettingsView: View {
                                 ExerciseListView()
                             }
                             SettingsNavigationRow(
-                                title: "Metodi Classici",
+                                title: L("settings.classic.methods"),
                                 iconName: "book.fill"
                             ) {
                                 ClassicMethodsLibraryView()
                             }
                             SettingsNavigationRow(
-                                title: "Metodi Custom",
+                                title: L("settings.custom.methods"),
                                 iconName: "bolt.circle.fill"
                             ) {
                                 CustomMethodsListView()

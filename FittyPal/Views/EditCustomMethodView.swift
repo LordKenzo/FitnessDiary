@@ -66,7 +66,7 @@ struct EditCustomMethodView: View {
                         Text("Anteprima Esecuzione")
                     }
                 } footer: {
-                    Text("Così verranno raggruppate le ripetizioni durante l'allenamento. Ripetizioni consecutive con stesso carico e stessa pausa vengono confermate insieme.")
+                    Text("Così verranno raggruppate le ripetizioni durante l'allenamento. Ripetizioni consecutive con stesso carico e stessa pausa vengono confermate insieme. I carichi mostrati sono esempi basati su 100kg.")
                 }
             }
         }
@@ -427,7 +427,12 @@ struct GroupPreviewCard: View {
 
 #Preview("Edit Method") {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: CustomTrainingMethod.self, configurations: config)
+    let container: ModelContainer
+    do {
+        container = try ModelContainer(for: CustomTrainingMethod.self, configurations: config)
+    } catch {
+        fatalError("Failed to create ModelContainer for preview: \(error)")
+    }
 
     let method = CustomTrainingMethod(
         name: "Metodo Test",

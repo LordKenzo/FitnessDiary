@@ -67,6 +67,8 @@
 "settings.muscles" = "Мышцы";
 "settings.equipment" = "Оборудование";
 "settings.exercises" = "Упражнения";
+"settings.classic.methods" = "Классические методы";
+"settings.custom.methods" = "Пользовательские методы";
 "settings.legal.privacy" = "Политика конфиденциальности";
 "settings.legal.terms" = "Условия использования";
 "settings.legal.support" = "Почта поддержки";
