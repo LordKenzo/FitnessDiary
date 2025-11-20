@@ -14,17 +14,7 @@ enum AppColorTheme: String, CaseIterable, Identifiable, Sendable {
     var id: String { rawValue }
 
     var displayName: String {
-        switch self {
-        case .vibrant: return "Vibrant"
-        case .ocean: return "Ocean"
-        case .sunset: return "Sunset"
-        case .forest: return "Forest"
-        case .sunrise: return "Sunrise"
-        case .lavender: return "Lavender"
-        case .fittypal: return "FittyPal"
-        case .yellowstone: return "Yellowstone"
-        case .christmas: return "Christmas"
-        }
+        return L(localizationKey)
     }
 
     var localizationKey: String {
@@ -80,11 +70,9 @@ enum AppColorTheme: String, CaseIterable, Identifiable, Sendable {
 
         switch self {
         case .christmas:
-            // Debug: Available Nov 20-21
-            // Production: Available Dec 1-31
-            if let month = components.month, let day = components.day {
-                return (month == 11 && day >= 20 && day <= 21) // Debug
-                // return (month == 12) // Production
+            // Available December 1-31
+            if let month = components.month {
+                return (month == 12)
             }
             return false
         default:
@@ -305,6 +293,64 @@ enum AppTheme {
             return Color.black.opacity(0.6)
         }
     }
+
+    // MARK: - Blob colors for backgrounds
+    /// Get blob color for a theme
+    static func blobColor(for theme: AppColorTheme, primary: Bool = false) -> Color {
+        switch theme {
+        case .vibrant:
+            return Color(red: primary ? 255/255 : 226/255, green: primary ? 102/255 : 70/255, blue: primary ? 196/255 : 125/255)
+                .opacity(primary ? 0.32 : 0.22)
+        case .ocean:
+            return Color(red: primary ? 80/255 : 100/255, green: primary ? 180/255 : 200/255, blue: primary ? 255/255 : 220/255)
+                .opacity(primary ? 0.28 : 0.18)
+        case .sunset:
+            return Color(red: primary ? 255/255 : 255/255, green: primary ? 140/255 : 180/255, blue: primary ? 100/255 : 130/255)
+                .opacity(primary ? 0.35 : 0.25)
+        case .forest:
+            return Color(red: primary ? 100/255 : 120/255, green: primary ? 200/255 : 180/255, blue: primary ? 100/255 : 120/255)
+                .opacity(primary ? 0.25 : 0.18)
+        case .sunrise:
+            return Color(red: primary ? 200/255 : 180/255, green: primary ? 160/255 : 180/255, blue: primary ? 255/255 : 240/255)
+                .opacity(primary ? 0.30 : 0.20)
+        case .lavender:
+            return Color(red: primary ? 200/255 : 180/255, green: primary ? 160/255 : 180/255, blue: primary ? 255/255 : 240/255)
+                .opacity(primary ? 0.30 : 0.20)
+        case .fittypal:
+            return Color(red: primary ? 80/255 : 100/255, green: primary ? 220/255 : 200/255, blue: primary ? 180/255 : 160/255)
+                .opacity(primary ? 0.35 : 0.25)
+        case .yellowstone:
+            return Color(red: primary ? 80/255 : 100/255, green: primary ? 220/255 : 200/255, blue: primary ? 180/255 : 160/255)
+                .opacity(primary ? 0.35 : 0.25)
+        case .christmas:
+            return Color(red: primary ? 220/255 : 180/255, green: primary ? 50/255 : 180/255, blue: primary ? 50/255 : 50/255)
+                .opacity(primary ? 0.30 : 0.22)
+        }
+    }
+
+    /// Get blob accent color for a theme
+    static func blobAccent(for theme: AppColorTheme) -> Color {
+        switch theme {
+        case .vibrant:
+            return Color(red: 255/255, green: 92/255, blue: 125/255).opacity(0.24)
+        case .ocean:
+            return Color(red: 120/255, green: 220/255, blue: 255/255).opacity(0.20)
+        case .sunset:
+            return Color(red: 255/255, green: 100/255, blue: 150/255).opacity(0.28)
+        case .forest:
+            return Color(red: 150/255, green: 220/255, blue: 100/255).opacity(0.22)
+        case .sunrise:
+            return Color(red: 100/255, green: 240/255, blue: 200/255).opacity(0.28)
+        case .lavender:
+            return Color(red: 220/255, green: 180/255, blue: 255/255).opacity(0.25)
+        case .fittypal:
+            return Color(red: 100/255, green: 240/255, blue: 200/255).opacity(0.28)
+        case .yellowstone:
+            return Color(red: 100/255, green: 240/255, blue: 200/255).opacity(0.28)
+        case .christmas:
+            return Color(red: 80/255, green: 180/255, blue: 80/255).opacity(0.25)
+        }
+    }
 }
 
 struct AppBackgroundView<Content: View>: View {
@@ -352,58 +398,11 @@ struct AppBackgroundView<Content: View>: View {
     }
 
     private func blobColor(primary: Bool = false) -> Color {
-        switch themeManager.currentTheme {
-        case .vibrant:
-            return Color(red: primary ? 255/255 : 226/255, green: primary ? 102/255 : 70/255, blue: primary ? 196/255 : 125/255)
-                .opacity(primary ? 0.32 : 0.22)
-        case .ocean:
-            return Color(red: primary ? 80/255 : 100/255, green: primary ? 180/255 : 200/255, blue: primary ? 255/255 : 220/255)
-                .opacity(primary ? 0.28 : 0.18)
-        case .sunset:
-            return Color(red: primary ? 255/255 : 255/255, green: primary ? 140/255 : 180/255, blue: primary ? 100/255 : 130/255)
-                .opacity(primary ? 0.35 : 0.25)
-        case .forest:
-            return Color(red: primary ? 100/255 : 120/255, green: primary ? 200/255 : 180/255, blue: primary ? 100/255 : 120/255)
-                .opacity(primary ? 0.25 : 0.18)
-        case .sunrise:
-            return Color(red: primary ? 200/255 : 180/255, green: primary ? 160/255 : 180/255, blue: primary ? 255/255 : 240/255)
-                .opacity(primary ? 0.30 : 0.20)
-        case .lavender:
-            return Color(red: primary ? 200/255 : 180/255, green: primary ? 160/255 : 180/255, blue: primary ? 255/255 : 240/255)
-                .opacity(primary ? 0.30 : 0.20)
-        case .fittypal:
-            return Color(red: primary ? 80/255 : 100/255, green: primary ? 220/255 : 200/255, blue: primary ? 180/255 : 160/255)
-                .opacity(primary ? 0.35 : 0.25)
-        case .yellowstone:
-            return Color(red: primary ? 80/255 : 100/255, green: primary ? 220/255 : 200/255, blue: primary ? 180/255 : 160/255)
-                .opacity(primary ? 0.35 : 0.25)
-        case .christmas:
-            return Color(red: primary ? 220/255 : 180/255, green: primary ? 50/255 : 180/255, blue: primary ? 50/255 : 50/255)
-                .opacity(primary ? 0.30 : 0.22)
-        }
+        return AppTheme.blobColor(for: themeManager.currentTheme, primary: primary)
     }
 
     private func blobAccent() -> Color {
-        switch themeManager.currentTheme {
-        case .vibrant:
-            return Color(red: 255/255, green: 92/255, blue: 125/255).opacity(0.24)
-        case .ocean:
-            return Color(red: 120/255, green: 220/255, blue: 255/255).opacity(0.20)
-        case .sunset:
-            return Color(red: 255/255, green: 100/255, blue: 150/255).opacity(0.28)
-        case .forest:
-            return Color(red: 150/255, green: 220/255, blue: 100/255).opacity(0.22)
-        case .sunrise:
-            return Color(red: 100/255, green: 240/255, blue: 200/255).opacity(0.28)
-        case .lavender:
-            return Color(red: 220/255, green: 180/255, blue: 255/255).opacity(0.25)
-        case .fittypal:
-            return Color(red: 100/255, green: 240/255, blue: 200/255).opacity(0.28)
-        case .yellowstone:
-            return Color(red: 100/255, green: 240/255, blue: 200/255).opacity(0.28)
-        case .christmas:
-            return Color(red: 80/255, green: 180/255, blue: 80/255).opacity(0.25)
-        }
+        return AppTheme.blobAccent(for: themeManager.currentTheme)
     }
 }
 

@@ -44,11 +44,11 @@ struct ContentView: View {
         appearance.configureWithTransparentBackground()
 
         switch theme {
-        case .sunrise, .vibrant, .ocean, .forest:
+        case .sunset, .vibrant, .ocean, .forest:
             // Dark themes: subtle dark tint with blur
             appearance.backgroundColor = UIColor.black.withAlphaComponent(0.65)
 
-        case .sunset, .lavender, .fittypal, .yellowstone, .christmas:
+        case .sunrise, .lavender, .fittypal, .yellowstone, .christmas:
             // Light themes: subtle white tint with blur + dark icons
             appearance.backgroundColor = UIColor.white.withAlphaComponent(0.75)
 
