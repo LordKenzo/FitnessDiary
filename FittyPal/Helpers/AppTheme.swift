@@ -13,10 +13,6 @@ enum AppColorTheme: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
 
-    var displayName: String {
-        return L(localizationKey)
-    }
-
     var localizationKey: String {
         switch self {
         case .vibrant: return "preferences.theme.vibrant"
