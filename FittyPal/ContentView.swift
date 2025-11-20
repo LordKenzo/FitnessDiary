@@ -106,18 +106,25 @@ private struct IsAtBottomPreferenceKey: PreferenceKey {
 
 // MARK: - Scroll Position Tracker
 struct ScrollPositionTracker: ViewModifier {
-    let threshold: CGFloat = 50 // Distance from bottom to trigger
+    let threshold: CGFloat = 100 // Distance from bottom to trigger
 
     func body(content: Content) -> some View {
         content
             .background(
-                GeometryReader { geometry in
-                    let minY = geometry.frame(in: .named("scrollView")).minY
-                    let isNearBottom = minY < -threshold
-                    Color.clear.preference(
-                        key: IsAtBottomPreferenceKey.self,
-                        value: isNearBottom
-                    )
+                GeometryReader { contentGeometry in
+                    GeometryReader { scrollGeometry in
+                        let contentHeight = contentGeometry.size.height
+                        let scrollViewHeight = scrollGeometry.size.height
+                        let scrollOffset = contentGeometry.frame(in: .named("scrollView")).minY
+
+                        // Check if we're at the bottom: content bottom - scroll offset <= visible height
+                        let isNearBottom = (contentHeight + scrollOffset) <= (scrollViewHeight + threshold)
+
+                        Color.clear.preference(
+                            key: IsAtBottomPreferenceKey.self,
+                            value: isNearBottom
+                        )
+                    }
                 }
             )
     }
