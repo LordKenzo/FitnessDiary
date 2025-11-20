@@ -45,7 +45,7 @@ struct WorkoutCardPickerView: View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 ForEach(filteredCards) { card in
-                    WorkoutCardRow(card: card)
+                    WorkoutCardPickerRow(card: card)
                         .onTapGesture {
                             selectCard(card)
                         }
@@ -86,9 +86,9 @@ struct WorkoutCardPickerView: View {
     }
 }
 
-// MARK: - Workout Card Row
+// MARK: - Workout Card Picker Row
 
-struct WorkoutCardRow: View {
+struct WorkoutCardPickerRow: View {
     let card: WorkoutCard
 
     var body: some View {
