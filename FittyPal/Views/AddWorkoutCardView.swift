@@ -312,7 +312,7 @@ struct AddWorkoutCardView: View {
                             )
                         } label: {
                             EnhancedBlockRow(
-                                block: workoutBlockToModel(workoutBlocks[index]),
+                                blockData: workoutBlocks[index],
                                 order: index + 1
                             )
                         }

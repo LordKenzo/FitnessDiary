@@ -211,8 +211,36 @@ struct OrganizationRow: View {
 // MARK: - Enhanced Block Row
 struct EnhancedBlockRow: View {
     @Environment(\.colorScheme) private var colorScheme
-    let block: WorkoutBlock
+
+    let blockType: BlockType
+    let methodType: MethodType?
+    let title: String
+    let subtitle: String
+    let globalRestTime: TimeInterval?
+    let formattedRestTime: String?
     let order: Int
+
+    // Initializer accepting WorkoutBlock (for backward compatibility)
+    init(block: WorkoutBlock, order: Int) {
+        self.blockType = block.blockType
+        self.methodType = block.methodType
+        self.title = block.title
+        self.subtitle = block.subtitle
+        self.globalRestTime = block.globalRestTime
+        self.formattedRestTime = block.formattedRestTime
+        self.order = order
+    }
+
+    // Optimized initializer accepting WorkoutBlockData directly (avoids full model conversion)
+    init(blockData: WorkoutBlockData, order: Int) {
+        self.blockType = blockData.blockType
+        self.methodType = blockData.methodType
+        self.title = blockData.title
+        self.subtitle = blockData.subtitle
+        self.globalRestTime = blockData.globalRestTime
+        self.formattedRestTime = blockData.formattedRestTime
+        self.order = order
+    }
 
     var body: some View {
         HStack(spacing: 14) {
@@ -233,21 +261,21 @@ struct EnhancedBlockRow: View {
                         .font(.subheadline)
                         .foregroundStyle(accentColor)
 
-                    Text(block.title)
+                    Text(title)
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.primary)
                 }
 
-                Text(block.subtitle)
+                Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                if block.blockType != .rest, let restTime = block.globalRestTime, restTime > 0 {
+                if blockType != .rest, let restTime = globalRestTime, restTime > 0 {
                     HStack(spacing: 4) {
                         Image(systemName: "clock.fill")
                             .font(.caption2)
-                        Text(block.formattedRestTime ?? "")
+                        Text(formattedRestTime ?? "")
                             .font(.caption2)
                     }
                     .foregroundStyle(.tertiary)
@@ -273,18 +301,18 @@ struct EnhancedBlockRow: View {
     }
 
     private var accentColor: Color {
-        if block.blockType == .method, let method = block.methodType {
+        if blockType == .method, let method = methodType {
             return method.color
-        } else if block.blockType == .rest {
+        } else if blockType == .rest {
             return .orange
         }
         return .blue
     }
 
     private var blockIcon: String {
-        if block.blockType == .method, let method = block.methodType {
+        if blockType == .method, let method = methodType {
             return method.icon
-        } else if block.blockType == .rest {
+        } else if blockType == .rest {
             return "moon.zzz.fill"
         }
         return "figure.strengthtraining.traditional"
