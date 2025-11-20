@@ -40,21 +40,22 @@ struct ContentView: View {
     private func configureTabBarAppearance(for theme: AppColorTheme) {
         let appearance = UITabBarAppearance()
 
+        // Use transparent background with blur for all themes
+        appearance.configureWithTransparentBackground()
+
         switch theme {
         case .vibrant, .ocean, .forest:
-            // Dark themes: transparent background with light icons
-            appearance.configureWithTransparentBackground()
-            appearance.backgroundColor = UIColor.black.withAlphaComponent(0.15)
+            // Dark themes: subtle dark tint with blur
+            appearance.backgroundColor = UIColor.black.withAlphaComponent(0.2)
 
         case .sunset, .lavender:
-            // Light themes: semi-opaque background for better contrast
-            appearance.configureWithDefaultBackground()
-            appearance.backgroundColor = UIColor.white.withAlphaComponent(0.85)
+            // Light themes: subtle white tint with blur + dark icons
+            appearance.backgroundColor = UIColor.white.withAlphaComponent(0.4)
 
-            // Use dark icons for light themes
+            // Use dark icons for light themes for better contrast
             let itemAppearance = UITabBarItemAppearance()
-            itemAppearance.normal.iconColor = UIColor.black.withAlphaComponent(0.6)
-            itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.black.withAlphaComponent(0.6)]
+            itemAppearance.normal.iconColor = UIColor.black.withAlphaComponent(0.7)
+            itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.black.withAlphaComponent(0.7)]
             itemAppearance.selected.iconColor = UIColor.systemBlue
             itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.systemBlue]
 
