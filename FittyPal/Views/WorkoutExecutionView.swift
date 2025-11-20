@@ -280,10 +280,35 @@ final class WorkoutExecutionViewModel: ObservableObject {
                 // No rest, move to next group immediately
                 currentGroupIndex += 1
 
+                // Reset inputs for next group
+                if currentGroupIndex < groups.count {
+                    prepareForNextGroup(groups: groups)
+                }
+
                 // Check if we completed all groups
                 if currentGroupIndex >= groups.count {
                     skipToNextStep()
                 }
+            }
+        }
+    }
+
+    private func prepareForNextGroup(groups: [RepGroup]) {
+        guard currentGroupIndex < groups.count else { return }
+        let nextGroup = groups[currentGroupIndex]
+        loadText = String(format: "%.1f", nextGroup.load)
+        perceivedExertion = 7
+    }
+
+    func skipGroupRest() {
+        guard let step = currentStep else { return }
+        if case let .customMethodReps(groups, _, _) = step.type {
+            isShowingGroupRest = false
+            currentGroupIndex += 1
+            if currentGroupIndex < groups.count {
+                prepareForNextGroup(groups: groups)
+            } else {
+                skipToNextStep()
             }
         }
     }
@@ -353,12 +378,29 @@ final class WorkoutExecutionViewModel: ObservableObject {
     private func resetStepState(resetCounters: Bool = false) {
         stepElapsedTime = 0
         completedSets = 0
-        loadText = ""
         perceivedExertion = 7
         actualRepsText = repsTextForCurrentStep()
         currentGroupIndex = 0
         isShowingGroupRest = false
         groupRestRemaining = 0
+
+        // Initialize loadText based on step type
+        if let step = currentStep {
+            switch step.type {
+            case let .customMethodReps(groups, _, _):
+                // Set initial load from first group
+                if let firstGroup = groups.first {
+                    loadText = String(format: "%.1f", firstGroup.load)
+                } else {
+                    loadText = ""
+                }
+            default:
+                loadText = ""
+            }
+        } else {
+            loadText = ""
+        }
+
         updateMotivation(for: currentStep)
     }
 
@@ -406,7 +448,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
             }
         case .reps:
             break
-        case .customMethodReps:
+        case let .customMethodReps(groups, _, _):
             // Handle group rest timer
             if isShowingGroupRest && groupRestRemaining > 0 {
                 triggerFiveSecondCueIfNeeded(for: groupRestRemaining, isRest: true)
@@ -414,6 +456,13 @@ final class WorkoutExecutionViewModel: ObservableObject {
                 if groupRestRemaining == 0 {
                     isShowingGroupRest = false
                     currentGroupIndex += 1
+                    // Prepare inputs for next group
+                    if currentGroupIndex < groups.count {
+                        prepareForNextGroup(groups: groups)
+                    } else {
+                        // All groups completed
+                        skipToNextStep()
+                    }
                 }
             }
         case .none:
@@ -921,10 +970,7 @@ struct WorkoutExecutionView: View {
                     ProgressView(value: 1.0 - (viewModel.groupRestRemaining / groups[max(0, viewModel.currentGroupIndex)].restAfterGroup))
                         .tint(.purple)
 
-                    Button(action: {
-                        viewModel.isShowingGroupRest = false
-                        viewModel.currentGroupIndex += 1
-                    }) {
+                    Button(action: viewModel.skipGroupRest) {
                         Label("Salta pausa", systemImage: "forward.end.fill")
                             .frame(maxWidth: .infinity)
                     }
@@ -1002,6 +1048,34 @@ struct WorkoutExecutionView: View {
                     .padding(12)
                     .background(Color.purple.opacity(0.08))
                     .cornerRadius(10)
+
+                    // Input fields for actual execution
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Carico effettivo")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text("Suggerito: \(currentGroup.formattedLoad) kg")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        TextField("Kg", text: $viewModel.loadText)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("RPE")
+                            Spacer()
+                            Text(String(format: "%.0f", viewModel.perceivedExertion))
+                                .font(.subheadline)
+                                .bold()
+                        }
+                        Slider(value: $viewModel.perceivedExertion, in: 1...10, step: 1)
+                            .tint(.purple)
+                    }
 
                     Button(action: viewModel.confirmGroup) {
                         Label("Conferma gruppo", systemImage: "checkmark.circle.fill")
