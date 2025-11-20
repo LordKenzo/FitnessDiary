@@ -196,7 +196,7 @@ struct PeriodizationTimelineView: View {
                 }
                 .listStyle(.plain)
                 .listRowSpacing(12)
-                .frame(height: CGFloat(sortedMesocycles.count) * 145 + 20)
+                .frame(height: CGFloat(sortedMesocycles.count) * 165 + 40)
                 .environment(\.editMode, .constant(.active))
                 .scrollDisabled(true)
             } else {
