@@ -493,13 +493,13 @@ struct DashboardView: View {
     }
 
     private var heroHeadline: String {
-        switch sessionsLast30Days.count {
+        switch recentSessions.count {
         case 0:
             return L("dashboard.hero.ready")
         case 1:
             return L("dashboard.hero.sessions.one")
         default:
-            return String(format: L("dashboard.hero.sessions.many"), sessionsLast30Days.count)
+            return String(format: L("dashboard.hero.sessions.many"), recentSessions.count)
         }
     }
 
