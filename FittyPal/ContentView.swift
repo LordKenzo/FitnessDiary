@@ -31,9 +31,11 @@ struct ContentView: View {
         }
         .appScreenBackground()
         .onPreferenceChange(IsAtBottomPreferenceKey.self) { newValue in
-            if isAtBottom != newValue {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isAtBottom = newValue
+            Task { @MainActor in
+                if isAtBottom != newValue {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isAtBottom = newValue
+                    }
                 }
             }
         }
@@ -96,8 +98,8 @@ struct ContentView: View {
 
 // MARK: - Scroll Position Preference Key
 private struct IsAtBottomPreferenceKey: PreferenceKey {
-    static var defaultValue: Bool = false
-    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+    nonisolated(unsafe) static var defaultValue: Bool = false
+    nonisolated(unsafe) static func reduce(value: inout Bool, nextValue: () -> Bool) {
         value = nextValue()
     }
 }
