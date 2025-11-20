@@ -30,7 +30,13 @@ struct ContentView: View {
                 }
         }
         .appScreenBackground()
-        .environment(\.isAtBottomKey, $isAtBottom)
+        .onPreferenceChange(IsAtBottomPreferenceKey.self) { newValue in
+            if isAtBottom != newValue {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isAtBottom = newValue
+                }
+            }
+        }
         .onAppear {
             configureTabBarAppearance(for: themeManager.currentTheme, isAtBottom: isAtBottom)
         }
@@ -88,49 +94,30 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Environment Key for Bottom Detection
-private struct IsAtBottomKey: EnvironmentKey {
-    static let defaultValue: Binding<Bool> = .constant(false)
-}
-
-extension EnvironmentValues {
-    var isAtBottomKey: Binding<Bool> {
-        get { self[IsAtBottomKey.self] }
-        set { self[IsAtBottomKey.self] = newValue }
+// MARK: - Scroll Position Preference Key
+private struct IsAtBottomPreferenceKey: PreferenceKey {
+    static var defaultValue: Bool = false
+    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+        value = nextValue()
     }
 }
 
 // MARK: - Scroll Position Tracker
 struct ScrollPositionTracker: ViewModifier {
-    @Environment(\.isAtBottomKey) private var isAtBottom
     let threshold: CGFloat = 50 // Distance from bottom to trigger
 
     func body(content: Content) -> some View {
         content
             .background(
                 GeometryReader { geometry in
+                    let minY = geometry.frame(in: .named("scrollView")).minY
+                    let isNearBottom = minY < -threshold
                     Color.clear.preference(
-                        key: ScrollOffsetPreferenceKey.self,
-                        value: geometry.frame(in: .named("scrollView")).minY
+                        key: IsAtBottomPreferenceKey.self,
+                        value: isNearBottom
                     )
                 }
             )
-            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
-                // When minY is very negative, we're at the bottom
-                let isNearBottom = minY < -threshold
-                if isAtBottom.wrappedValue != isNearBottom {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isAtBottom.wrappedValue = isNearBottom
-                    }
-                }
-            }
-    }
-}
-
-private struct ScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
     }
 }
 
