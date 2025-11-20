@@ -64,8 +64,29 @@ struct ContentView: View {
             appearance.compactInlineLayoutAppearance = itemAppearance
         }
 
+        // Apply to global appearance for new instances
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
+
+        // IMPORTANT: Apply to existing TabBar instances immediately
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.allSubviews.compactMap { $0 as? UITabBar }.forEach { tabBar in
+                tabBar.standardAppearance = appearance
+                tabBar.scrollEdgeAppearance = appearance
+            }
+        }
+    }
+}
+
+// Helper extension to find all subviews
+extension UIView {
+    var allSubviews: [UIView] {
+        var subviews = self.subviews
+        for subview in self.subviews {
+            subviews.append(contentsOf: subview.allSubviews)
+        }
+        return subviews
     }
 }
 
