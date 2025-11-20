@@ -11,178 +11,216 @@ import SwiftData
 struct PeriodizationPlanListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PeriodizationPlan.startDate, order: .reverse) private var allPlans: [PeriodizationPlan]
+    @Query(sort: \PeriodizationFolder.order) private var folders: [PeriodizationFolder]
     @State private var showingCreatePlan = false
     @State private var selectedPlan: PeriodizationPlan?
-    @State private var showingPlanDetail = false
-    @State private var showingEditPlan = false
     @State private var showingAddFolder = false
-    
+    @State private var selectedFolder: PeriodizationFolder?
+    @State private var expandedFolders: Set<UUID> = []
+    private static let noFolderID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
+
+    private var plansWithoutFolder: [PeriodizationPlan] {
+        allPlans.filter { $0.hasNoFolders }
+    }
+
+    private func plans(for folder: PeriodizationFolder) -> [PeriodizationPlan] {
+        allPlans.filter { $0.isInFolder(folder) }
+    }
+
     var body: some View {
         NavigationStack {
-            Group {
-                if allPlans.isEmpty {
-                    emptyStateView
-                } else {
-                    plansList
+            AppBackgroundView {
+                ScrollView {
+                    VStack(spacing: 22) {
+                        if allPlans.isEmpty {
+                            GlassEmptyStateCard(
+                                systemImage: "calendar.badge.checkmark",
+                                title: "Nessun Piano di Periodizzazione",
+                                description: "Crea il tuo primo piano per organizzare l'allenamento nel tempo"
+                            ) {
+                                Button("Crea Piano") {
+                                    showingCreatePlan = true
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                        } else {
+                            ForEach(folders) { folder in
+                                let folderPlans = plans(for: folder)
+                                if !folderPlans.isEmpty {
+                                    FolderDisclosureCard(
+                                        title: folder.name,
+                                        count: folderPlans.count,
+                                        color: folder.color,
+                                        isExpanded: binding(for: folder.id),
+                                        onEditFolder: { selectedFolder = folder }
+                                    ) {
+                                        ForEach(folderPlans) { plan in
+                                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
+                                                PlanRow(
+                                                    plan: plan,
+                                                    onEdit: { selectedPlan = plan },
+                                                    onDelete: { deletePlan(plan) }
+                                                )
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                }
+                            }
+                            if !plansWithoutFolder.isEmpty {
+                                FolderDisclosureCard(
+                                    title: "Senza Folder",
+                                    count: plansWithoutFolder.count,
+                                    color: .gray.opacity(0.4),
+                                    isExpanded: binding(for: Self.noFolderID)
+                                ) {
+                                    ForEach(plansWithoutFolder) { plan in
+                                        NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
+                                            PlanRow(
+                                                plan: plan,
+                                                onEdit: { selectedPlan = plan },
+                                                onDelete: { deletePlan(plan) }
+                                            )
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 24)
+                }
+                .background(Color.clear)
+                .navigationTitle("Periodizzazione")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItemGroup(placement: .topBarLeading) {
+                        if !folders.isEmpty {
+                            foldersManagementButton()
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button {
+                                showingCreatePlan = true
+                            } label: {
+                                Label("Nuovo Piano", systemImage: "calendar.badge.plus")
+                            }
+                            Button {
+                                showingAddFolder = true
+                            } label: {
+                                Label("Nuovo Folder", systemImage: "folder.badge.plus")
+                            }
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+                }
+                .sheet(isPresented: $showingCreatePlan) {
+                    CreatePeriodizationPlanView()
+                }
+                .sheet(item: $selectedPlan) { plan in
+                    EditPeriodizationPlanView(plan: plan)
+                }
+                .sheet(isPresented: $showingAddFolder) {
+                    AddPeriodizationFolderView()
+                }
+                .sheet(item: $selectedFolder) { folder in
+                    EditPeriodizationFolderView(folder: folder)
                 }
             }
-            .navigationTitle("Periodizzazione")
-            .appScreenBackground()
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        Button {
-                            showingCreatePlan = true
-                        } label: {
-                            Label("Nuovo Piano", systemImage: "calendar.badge.plus")
-                        }
+        }
+    }
 
-                        Button {
-                            showingAddFolder = true
-                        } label: {
-                            Label("Nuovo Folder", systemImage: "folder.badge.plus")
-                        }
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
-            .sheet(isPresented: $showingCreatePlan) {
-                CreatePeriodizationPlanView()
-            }
-            .sheet(item: $selectedPlan) { plan in
-                EditPeriodizationPlanView(plan: plan)
-            }
-            .sheet(isPresented: $showingAddFolder) {
-                AddPeriodizationFolderView()
-            }
-        }
-    }
-    
-    // MARK: - Views
-    private var emptyStateView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "calendar.badge.checkmark")
-                .font(.system(size: 64))
-                .foregroundStyle(.secondary)
-            Text("Nessun Piano di Periodizzazione")
-                .font(.title2)
-                .fontWeight(.bold)
-            Text("Crea il tuo primo piano per organizzare l'allenamento nel tempo")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            Button {
-                showingCreatePlan = true
-            } label: {
-                Label("Crea Piano", systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .padding()
-                    .background(Color.accentColor)
-                    .foregroundStyle(.white)
-                    .cornerRadius(12)
-            }
-            .padding(.top, 20)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
-    private var plansList: some View {
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                // Piani attivi
-                if !activePlans.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Piani Attivi")
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .padding(.horizontal)
-                        ForEach(activePlans) { plan in
-                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
-                                PlanCardView(plan: plan, isActive: true, onEdit: {
-                                    selectedPlan = plan
-                                }, onDelete: {
-                                    deletePlan(plan)
-                                })
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-                // Piani passati/futuri
-                if !inactivePlans.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Altri Piani")
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .padding(.horizontal)
-                            .padding(.top, activePlans.isEmpty ? 0 : 12)
-                        ForEach(inactivePlans) { plan in
-                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
-                                PlanCardView(plan: plan, isActive: false, onEdit: {
-                                    selectedPlan = plan
-                                }, onDelete: {
-                                    deletePlan(plan)
-                                })
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-            }
-            .padding(.vertical)
-        }
-    }
-    
-    // MARK: - Helpers
-    private var activePlans: [PeriodizationPlan] {
-        allPlans.filter { $0.isCurrentlyActive() }
-    }
-    
-    private var inactivePlans: [PeriodizationPlan] {
-        allPlans.filter { !$0.isCurrentlyActive() }
-    }
-    
     // MARK: - Actions
     private func deletePlan(_ plan: PeriodizationPlan) {
         modelContext.delete(plan)
         try? modelContext.save()
     }
-}
 
-// MARK: - Plan Card View
-/// Card per visualizzare un piano nella lista
-struct PlanCardView: View {
-    @Environment(\.colorScheme) private var colorScheme
-    let plan: PeriodizationPlan
-    let isActive: Bool
-    let onEdit: () -> Void
-    let onDelete: () -> Void
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(plan.name)
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.primary)
-                    HStack(spacing: 8) {
-                        Label(plan.periodizationModel.rawValue, systemImage: plan.periodizationModel.icon)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        if isActive {
-                            Label("Attivo", systemImage: "circle.fill")
-                                .font(.caption)
-                                .foregroundStyle(.green)
+    private func binding(for folderID: UUID) -> Binding<Bool> {
+        Binding(
+            get: { expandedFolders.contains(folderID) },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedFolders.insert(folderID)
+                } else {
+                    expandedFolders.remove(folderID)
+                }
+            }
+        )
+    }
+
+    @ViewBuilder
+    private func foldersManagementButton() -> some View {
+        Menu {
+            Button {
+                showingAddFolder = true
+            } label: {
+                Label("Nuovo Folder", systemImage: "folder.badge.plus")
+            }
+
+            if !folders.isEmpty {
+                Divider()
+                ForEach(folders) { folder in
+                    Button {
+                        selectedFolder = folder
+                    } label: {
+                        HStack {
+                            Circle()
+                                .fill(folder.color)
+                                .frame(width: 10, height: 10)
+                            Text(folder.name)
                         }
                     }
                 }
-
             }
-            
+        } label: {
+            Label("Folder", systemImage: "folder")
+        }
+    }
+}
+
+// MARK: - Plan Row
+/// Row per visualizzare un piano nella lista
+private struct PlanRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let plan: PeriodizationPlan
+    var onEdit: () -> Void
+    var onDelete: () -> Void
+
+    private var isActive: Bool {
+        plan.isCurrentlyActive()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack(spacing: 8) {
+                Text(plan.name)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+
+                if isActive {
+                    Text("ATTIVO")
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.green.opacity(0.2))
+                        .clipShape(Capsule())
+                }
+            }
+
+            HStack(spacing: 8) {
+                Label(plan.periodizationModel.rawValue, systemImage: plan.periodizationModel.icon)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             // Info Profilo
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -213,9 +251,9 @@ struct PlanCardView: View {
                         .fontWeight(.semibold)
                 }
             }
-            
+
             Divider()
-            
+
             // Progress e Date
             VStack(spacing: 8) {
                 HStack {
@@ -244,7 +282,7 @@ struct PlanCardView: View {
                     }
                 }
             }
-            
+
             // Stats mesocicli
             if !plan.mesocycles.isEmpty {
                 HStack(spacing: 12) {
@@ -259,13 +297,39 @@ struct PlanCardView: View {
                     }
                 }
             }
+
+            // Mostra folder se il piano è in più folder
+            if !plan.folders.isEmpty {
+                HStack(spacing: 4) {
+                    ForEach(plan.folders.prefix(3)) { folder in
+                        HStack(spacing: 2) {
+                            Circle()
+                                .fill(folder.color)
+                                .frame(width: 8, height: 8)
+                            Text(folder.name)
+                                .font(.caption2)
+                        }
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(folder.color.opacity(0.1))
+                        .clipShape(Capsule())
+                    }
+                    if plan.folders.count > 3 {
+                        Text("+\(plan.folders.count - 3)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
-        .padding()
-        .background(isActive ? Color.accentColor.opacity(0.05) : Color(.systemGray6))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isActive ? Color.accentColor.opacity(0.3) : Color.clear, lineWidth: 1)
+        .padding(18)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(AppTheme.cardBackground(for: colorScheme))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(AppTheme.stroke(for: colorScheme), lineWidth: 1)
+                )
         )
         .overlay(alignment: .topTrailing) {
             Menu {
@@ -286,14 +350,58 @@ struct PlanCardView: View {
                     .padding(6)
             }
         }
-        .padding(.horizontal)
     }
-    
+
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "it_IT")
         formatter.dateFormat = "dd MMM yyyy"
         return formatter.string(from: date)
+    }
+}
+
+// MARK: - Folder Disclosure Card
+private struct FolderDisclosureCard<Content: View>: View {
+    let title: String
+    let count: Int
+    let color: Color
+    @Binding var isExpanded: Bool
+    var onEditFolder: (() -> Void)? = nil
+    @ViewBuilder var content: () -> Content
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(spacing: 12) {
+                content()
+            }
+            .padding(.top, 8)
+        } label: {
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 14, height: 14)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.headline)
+                    Text("\(count) piani")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                }
+
+                Spacer()
+
+                if let onEditFolder {
+                    Button(action: onEditFolder) {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.title3)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .dashboardCardStyle()
     }
 }
 
