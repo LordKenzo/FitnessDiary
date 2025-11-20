@@ -60,9 +60,7 @@ struct DashboardView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 24)
                     .padding(.bottom, 40)
-                    .trackScrollPosition()
                 }
-                .coordinateSpace(name: "scrollView")
                 .scrollIndicators(.hidden)
                 .background(Color.clear)
                 .navigationTitle(L("dashboard.title"))

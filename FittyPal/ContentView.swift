@@ -5,7 +5,6 @@ struct ContentView: View {
     @State private var bluetoothManager = BluetoothHeartRateManager()
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @Environment(ThemeManager.self) private var themeManager
-    @State private var isAtBottom: Bool = false
 
     var body: some View {
         TabView {
@@ -30,45 +29,28 @@ struct ContentView: View {
                 }
         }
         .appScreenBackground()
-        .onPreferenceChange(IsAtBottomPreferenceKey.self) { newValue in
-            Task { @MainActor in
-                print("🔵 Preference received: \(newValue), current: \(isAtBottom)")
-                if isAtBottom != newValue {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isAtBottom = newValue
-                    }
-                }
-            }
-        }
         .onAppear {
-            configureTabBarAppearance(for: themeManager.currentTheme, isAtBottom: isAtBottom)
+            configureTabBarAppearance(for: themeManager.currentTheme)
         }
         .onChange(of: themeManager.currentTheme) { _, newTheme in
-            configureTabBarAppearance(for: newTheme, isAtBottom: isAtBottom)
-        }
-        .onChange(of: isAtBottom) { _, newValue in
-            configureTabBarAppearance(for: themeManager.currentTheme, isAtBottom: newValue)
+            configureTabBarAppearance(for: newTheme)
         }
     }
 
-    private func configureTabBarAppearance(for theme: AppColorTheme, isAtBottom: Bool) {
+    private func configureTabBarAppearance(for theme: AppColorTheme) {
         let appearance = UITabBarAppearance()
 
         // Use transparent background with blur for all themes
         appearance.configureWithTransparentBackground()
 
-        // Adjust opacity based on scroll position
-        let darkOpacity: CGFloat = isAtBottom ? 0.1 : 0.2
-        let lightOpacity: CGFloat = isAtBottom ? 0.1 : 0.4
-
         switch theme {
         case .vibrant, .ocean, .forest:
             // Dark themes: subtle dark tint with blur
-            appearance.backgroundColor = UIColor.black.withAlphaComponent(darkOpacity)
+            appearance.backgroundColor = UIColor.black.withAlphaComponent(0.2)
 
         case .sunset, .lavender, .fittypal, .christmas:
             // Light themes: subtle white tint with blur + dark icons
-            appearance.backgroundColor = UIColor.white.withAlphaComponent(lightOpacity)
+            appearance.backgroundColor = UIColor.white.withAlphaComponent(0.4)
 
             // Use dark icons for light themes for better contrast
             let itemAppearance = UITabBarItemAppearance()
@@ -93,42 +75,6 @@ struct ContentView: View {
                 tabBar.standardAppearance = appearance
                 tabBar.scrollEdgeAppearance = appearance
             }
-        }
-    }
-}
-
-// MARK: - Scroll Position Preference Key
-private struct IsAtBottomPreferenceKey: PreferenceKey {
-    nonisolated(unsafe) static var defaultValue: Bool = false
-    nonisolated(unsafe) static func reduce(value: inout Bool, nextValue: () -> Bool) {
-        value = nextValue()
-    }
-}
-
-// MARK: - Scroll Position Tracker
-struct BottomDetector: View {
-    var body: some View {
-        GeometryReader { geometry in
-            let minY = geometry.frame(in: .named("scrollView")).minY
-            let _ = print("📏 Bottom detector minY: \(minY)")
-
-            // When bottom detector is visible (minY is positive or small negative), we're at bottom
-            let isAtBottom = minY > -200
-
-            Color.clear.preference(
-                key: IsAtBottomPreferenceKey.self,
-                value: isAtBottom
-            )
-        }
-        .frame(height: 0)
-    }
-}
-
-extension View {
-    func trackScrollPosition() -> some View {
-        VStack(spacing: 0) {
-            self
-            BottomDetector()
         }
     }
 }

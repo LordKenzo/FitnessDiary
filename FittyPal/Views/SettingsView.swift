@@ -112,9 +112,7 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 2)
                     .padding(.bottom, 10)
-                    .trackScrollPosition()
                 }
-                .coordinateSpace(name: "scrollView")
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
                 .navigationTitle(L("settings.title"))
