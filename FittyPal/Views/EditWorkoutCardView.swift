@@ -368,7 +368,7 @@ struct EditWorkoutCardView: View {
                         )
                 )
             } else {
-                VStack(spacing: 10) {
+                List {
                     ForEach(workoutBlocks.indices, id: \.self) { index in
                         NavigationLink {
                             EditWorkoutBlockView(
@@ -382,10 +382,16 @@ struct EditWorkoutCardView: View {
                             )
                         }
                         .buttonStyle(.plain)
+                        .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                     }
                     .onMove(perform: moveBlock)
                     .onDelete(perform: deleteBlock)
                 }
+                .listStyle(.plain)
+                .frame(height: CGFloat(workoutBlocks.count) * 95) // Approximate height per row
+                .scrollDisabled(true) // Disable list scroll, parent ScrollView handles it
             }
         }
     }
