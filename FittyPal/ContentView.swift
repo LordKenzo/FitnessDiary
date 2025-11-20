@@ -106,36 +106,30 @@ private struct IsAtBottomPreferenceKey: PreferenceKey {
 }
 
 // MARK: - Scroll Position Tracker
-struct ScrollPositionTracker: ViewModifier {
-    let threshold: CGFloat = 100 // Distance from bottom to trigger
+struct BottomDetector: View {
+    var body: some View {
+        GeometryReader { geometry in
+            let minY = geometry.frame(in: .named("scrollView")).minY
+            let _ = print("📏 Bottom detector minY: \(minY)")
 
-    func body(content: Content) -> some View {
-        content
-            .background(
-                GeometryReader { contentGeometry in
-                    GeometryReader { scrollGeometry in
-                        let contentHeight = contentGeometry.size.height
-                        let scrollViewHeight = scrollGeometry.size.height
-                        let scrollOffset = contentGeometry.frame(in: .named("scrollView")).minY
+            // When bottom detector is visible (minY is positive or small negative), we're at bottom
+            let isAtBottom = minY > -200
 
-                        // Check if we're at the bottom: content bottom - scroll offset <= visible height
-                        let isNearBottom = (contentHeight + scrollOffset) <= (scrollViewHeight + threshold)
-
-                        let _ = print("📏 Content: \(contentHeight), Scroll: \(scrollViewHeight), Offset: \(scrollOffset), Bottom: \(isNearBottom)")
-
-                        Color.clear.preference(
-                            key: IsAtBottomPreferenceKey.self,
-                            value: isNearBottom
-                        )
-                    }
-                }
+            Color.clear.preference(
+                key: IsAtBottomPreferenceKey.self,
+                value: isAtBottom
             )
+        }
+        .frame(height: 0)
     }
 }
 
 extension View {
     func trackScrollPosition() -> some View {
-        modifier(ScrollPositionTracker())
+        VStack(spacing: 0) {
+            self
+            BottomDetector()
+        }
     }
 }
 
