@@ -1,269 +1,530 @@
 # Custom Methods Execution - Design Document
 
-## Current Implementation Analysis
+## Overview
 
-### How Workout Execution Works Currently
+Custom training methods allow users to define variable loads and rest times per repetition. During workout execution, the system intelligently groups repetitions based on load and rest patterns, allowing efficient confirmation of rep groups rather than individual reps.
 
-**WorkoutExecutionViewModel.Step Types:**
-- `.timed(duration, isRest)` - Time-based exercises (EMOM, AMRAP, etc.)
-- `.reps(totalSets, repsPerSet)` - Rep-based exercises
+## Core Concept: Smart Grouping
 
-**Confirmation Flow:**
-1. User completes a set and clicks "Conferma Serie"
-2. `confirmSet()` → `advanceSet()` is called
-3. `completedSets` counter is incremented
-4. If `completedSets >= totalSets`, moves to next step
-5. Otherwise, prepares for next set
+**Key Principle:** Group consecutive reps with the same load AND same rest configuration together.
 
-**Key Variables:**
-- `completedSets`: Int - number of completed sets
-- `loadText`: String - actual load used
-- `actualRepsText`: String - actual reps performed
-- `perceivedExertion`: Double - RPE 1-10
+### Grouping Rules
 
-## Required Changes for Custom Methods
+A new group starts when:
+1. **Load changes** (different percentage from previous rep)
+2. **Rest pattern changes** (previous had no rest, current has rest, or vice versa)
+3. **Rest duration changes** (e.g., previous 10s, current 15s)
 
-### 1. New Step Type
+### Example Groupings
 
-Add a new step type to handle custom methods:
+**Example 1: Variable loads, no intermediate rest**
+```
+Custom Method: 6 reps
+Rep 1: 100kg (0%), no rest
+Rep 2: 105kg (+5%), no rest
+Rep 3: 105kg (+5%), no rest
+Rep 4: 110kg (+10%), no rest
+Rep 5: 110kg (+10%), no rest
+Rep 6: 115kg (+15%), no rest
+Rest between sets: 60s
+
+Groups:
+Group 1: [Rep 1] (100kg)
+Group 2: [Rep 2, Rep 3] (105kg)
+Group 3: [Rep 4, Rep 5] (110kg)
+Group 4: [Rep 6] (115kg)
+→ Series rest: 60s
+```
+
+**Example 2: Same load, rest every 2 reps**
+```
+Custom Method: 6 reps
+Rep 1: 100kg (0%), no rest
+Rep 2: 100kg (0%), 15s rest
+Rep 3: 100kg (0%), no rest
+Rep 4: 100kg (0%), 15s rest
+Rep 5: 100kg (0%), no rest
+Rep 6: 100kg (0%), no rest
+Rest between sets: 60s
+
+Groups:
+Group 1: [Rep 1] (100kg, no rest)
+Group 2: [Rep 2] (100kg, 15s rest)
+Group 3: [Rep 3] (100kg, no rest)
+Group 4: [Rep 4] (100kg, 15s rest)
+Group 5: [Rep 5, Rep 6] (100kg, no rest)
+→ Series rest: 60s
+```
+
+**Example 3: Variable loads AND rest**
+```
+Custom Method: 6 reps
+Rep 1: 100kg (0%), no rest
+Rep 2: 105kg (+5%), 10s rest
+Rep 3: 105kg (+5%), 10s rest
+Rep 4: 85kg (-15%), 15s rest
+Rep 5: 85kg (-15%), 15s rest
+Rep 6: 130kg (+30%), no rest
+Rest between sets: 60s
+
+Groups:
+Group 1: [Rep 1] (100kg, no rest)
+Group 2: [Rep 2, Rep 3] (105kg, 10s rest)
+Group 3: [Rep 4, Rep 5] (85kg, 15s rest)
+Group 4: [Rep 6] (130kg, no rest)
+→ Series rest: 60s
+```
+
+## User Flow
+
+### Per Set Execution
+
+```
+START SET 1
+    ↓
+┌─────────────────────────────────┐
+│ Group 1: Confirm Reps           │
+│ Rep 1: 100 kg ✏️               │
+│ [Conferma] [Modifica]           │
+└─────────────────────────────────┘
+    ↓ (if group has rest)
+⏱️ Rest Timer: 0s (no rest)
+    ↓
+┌─────────────────────────────────┐
+│ Group 2: Confirm Reps           │
+│ Rep 2: 105 kg ✏️               │
+│ Rep 3: 105 kg ✏️               │
+│ [Conferma] [Modifica]           │
+└─────────────────────────────────┘
+    ↓
+⏱️ Rest Timer: 10s
+    ↓
+┌─────────────────────────────────┐
+│ Group 3: Confirm Reps           │
+│ Rep 4: 85 kg ✏️                │
+│ Rep 5: 85 kg ✏️                │
+│ [Conferma] [Modifica]           │
+└─────────────────────────────────┘
+    ↓
+⏱️ Rest Timer: 15s
+    ↓
+┌─────────────────────────────────┐
+│ Group 4: Confirm Reps           │
+│ Rep 6: 130 kg ✏️               │
+│ [Conferma] [Modifica]           │
+└─────────────────────────────────┘
+    ↓
+⏱️ Rest Timer: 60s (series rest)
+    ↓
+START SET 2 (repeat all groups)
+```
+
+## Technical Implementation
+
+### 1. Data Structures
+
+#### RepGroup Model
 
 ```swift
-enum StepType: Equatable {
-    case timed(duration: TimeInterval, isRest: Bool)
-    case reps(totalSets: Int, repsPerSet: Int)
-    case customMethodReps(
-        totalSets: Int,
-        customMethodID: UUID,
-        baseLoad: Double?,
-        baseLoadType: LoadType // .absolute or .percentage
-    )
+struct RepGroup: Identifiable {
+    let id = UUID()
+    let reps: [CustomRepConfiguration]
+    let load: Double // Calculated load for this group
+    let loadPercentage: Double // Percentage variation
+    let restAfterGroup: TimeInterval // Rest after completing this group
+
+    var firstRepNumber: Int {
+        reps.first?.repOrder ?? 0
+    }
+
+    var lastRepNumber: Int {
+        reps.last?.repOrder ?? 0
+    }
+
+    var repCount: Int {
+        reps.count
+    }
+
+    var repRange: String {
+        if repCount == 1 {
+            return "Rep \(firstRepNumber)"
+        }
+        return "Rep \(firstRepNumber)-\(lastRepNumber)"
+    }
 }
 ```
 
-### 2. Additional State Variables
+#### CustomMethodExecutionState
+
+```swift
+struct CustomMethodExecutionState {
+    let method: CustomTrainingMethod
+    let baseLoad: Double
+    let loadType: LoadType // .absolute or .percentage
+    let totalSets: Int
+    let groups: [RepGroup]
+
+    var currentSetNumber: Int = 1
+    var currentGroupIndex: Int = 0
+    var confirmedLoads: [Int: Double] = [:] // repOrder -> actualLoad
+
+    var currentGroup: RepGroup? {
+        groups.indices.contains(currentGroupIndex) ? groups[currentGroupIndex] : nil
+    }
+
+    var isSetComplete: Bool {
+        currentGroupIndex >= groups.count
+    }
+
+    var areAllSetsComplete: Bool {
+        currentSetNumber > totalSets
+    }
+}
+```
+
+### 2. Grouping Algorithm
+
+```swift
+extension CustomTrainingMethod {
+    func createRepGroups(baseLoad: Double) -> [RepGroup] {
+        guard !repConfigurations.isEmpty else { return [] }
+
+        let sortedConfigs = repConfigurations.sorted { $0.repOrder < $1.repOrder }
+        var groups: [RepGroup] = []
+        var currentGroupConfigs: [CustomRepConfiguration] = []
+        var previousLoad: Double?
+        var previousRest: TimeInterval?
+
+        for config in sortedConfigs {
+            let currentLoad = baseLoad * (config.actualLoadPercentage / 100.0)
+            let currentRest = config.restAfterRep
+
+            let shouldStartNewGroup = previousLoad != nil && (
+                currentLoad != previousLoad ||
+                currentRest != previousRest
+            )
+
+            if shouldStartNewGroup {
+                // Close previous group
+                if let firstConfig = currentGroupConfigs.first {
+                    let groupLoad = baseLoad * (firstConfig.actualLoadPercentage / 100.0)
+                    let groupRest = firstConfig.restAfterRep
+
+                    groups.append(RepGroup(
+                        reps: currentGroupConfigs,
+                        load: groupLoad,
+                        loadPercentage: firstConfig.loadPercentage,
+                        restAfterGroup: groupRest
+                    ))
+                }
+                currentGroupConfigs = []
+            }
+
+            currentGroupConfigs.append(config)
+            previousLoad = currentLoad
+            previousRest = currentRest
+        }
+
+        // Add last group
+        if let firstConfig = currentGroupConfigs.first {
+            let groupLoad = baseLoad * (firstConfig.actualLoadPercentage / 100.0)
+            let groupRest = firstConfig.restAfterRep
+
+            groups.append(RepGroup(
+                reps: currentGroupConfigs,
+                load: groupLoad,
+                loadPercentage: firstConfig.loadPercentage,
+                restAfterGroup: groupRest
+            ))
+        }
+
+        return groups
+    }
+}
+```
+
+### 3. View Model Updates
 
 Add to `WorkoutExecutionViewModel`:
 
 ```swift
 // Custom method execution state
-@Published var completedReps: Int = 0 // Current rep within set
-@Published var currentRepLoad: Double = 0 // Calculated load for current rep
-@Published var currentRepRestTime: TimeInterval = 0 // Rest after current rep
-@Published private(set) var loadedCustomMethod: CustomTrainingMethod?
+@Published var customMethodState: CustomMethodExecutionState?
+@Published var isShowingRepGroupConfirmation = false
+@Published var isShowingRepGroupRest = false
+@Published var repGroupRestRemaining: TimeInterval = 0
+
+func startCustomMethodExecution(
+    method: CustomTrainingMethod,
+    baseLoad: Double,
+    loadType: LoadType,
+    totalSets: Int
+) {
+    let groups = method.createRepGroups(baseLoad: baseLoad)
+    customMethodState = CustomMethodExecutionState(
+        method: method,
+        baseLoad: baseLoad,
+        loadType: loadType,
+        totalSets: totalSets,
+        groups: groups,
+        currentSetNumber: 1,
+        currentGroupIndex: 0
+    )
+    isShowingRepGroupConfirmation = true
+}
+
+func confirmRepGroup(actualLoads: [Int: Double]) {
+    guard var state = customMethodState else { return }
+
+    // Store actual loads
+    for (repOrder, load) in actualLoads {
+        state.confirmedLoads[repOrder] = load
+    }
+
+    // Check if group has rest
+    if let currentGroup = state.currentGroup, currentGroup.restAfterGroup > 0 {
+        isShowingRepGroupConfirmation = false
+        startRepGroupRest(duration: currentGroup.restAfterGroup)
+    } else {
+        advanceToNextGroup()
+    }
+}
+
+private func startRepGroupRest(duration: TimeInterval) {
+    repGroupRestRemaining = duration
+    isShowingRepGroupRest = true
+
+    // Timer logic to countdown
+    // When timer finishes, call advanceToNextGroup()
+}
+
+private func advanceToNextGroup() {
+    guard var state = customMethodState else { return }
+
+    state.currentGroupIndex += 1
+    customMethodState = state
+
+    if state.isSetComplete {
+        // Set complete, check for series rest
+        if let seriesRest = /* get series rest from block */ {
+            startSeriesRest(duration: seriesRest)
+        } else {
+            advanceToNextSet()
+        }
+    } else {
+        // Show next group
+        isShowingRepGroupRest = false
+        isShowingRepGroupConfirmation = true
+    }
+}
+
+private func advanceToNextSet() {
+    guard var state = customMethodState else { return }
+
+    state.currentSetNumber += 1
+    state.currentGroupIndex = 0
+    state.confirmedLoads.removeAll()
+    customMethodState = state
+
+    if state.areAllSetsComplete {
+        completeCustomMethodExecution()
+    } else {
+        isShowingRepGroupConfirmation = true
+    }
+}
+
+private func completeCustomMethodExecution() {
+    customMethodState = nil
+    isShowingRepGroupConfirmation = false
+    isShowingRepGroupRest = false
+    skipToNextStep()
+}
 ```
 
-### 3. Execution Logic
+### 4. UI Components
 
-#### Flow for Custom Method Sets:
-
-```
-Start Set 1
-  ├─> Rep 1: Show load (base × 100%), User confirms
-  ├─> [Rest Timer: 0s if configured]
-  ├─> Rep 2: Show load (base × 105%), User confirms
-  ├─> [Rest Timer: 10s if configured]
-  ├─> Rep 3: Show load (base × 105%), User confirms
-  ├─> [Rest Timer: 10s if configured]
-  ├─> Rep 4: Show load (base × 85%), User confirms
-  ├─> [Rest Timer: 15s if configured]
-  ├─> Rep 5: Show load (base × 85%), User confirms
-  ├─> [Rest Timer: 15s if configured]
-  └─> Rep 6: Show load (base × 130%), User confirms
-       └─> Set complete! → [Series Rest Timer if configured]
-
-If more sets remaining:
-  → Repeat for Set 2, Set 3, etc.
-
-When all sets complete:
-  → Move to next exercise/block
-```
-
-### 4. Confirmation Modes
-
-The system should automatically determine confirmation mode:
-
-#### Same Load Mode (Current Behavior)
-**When:** All reps have 0% load variation
-**UI:** "Conferma Serie" button
-**Action:** Confirms entire set at once
-
-#### Variable Load Mode (New)
-**When:** At least one rep has non-zero load variation
-**UI:** "Conferma Rep X di Y" button
-**Action:** Confirms one rep at a time
-**Show:**
-- Current rep load prominently
-- Progress: "Rep 3/6"
-- Next rep preview if available
-
-#### Rest Timer Between Reps
-**When:** Current rep has `restAfterRep > 0`
-**Show:** Countdown timer between reps
-**Auto-advance:** No - user must click "Inizia prossima rep" after rest
-
-### 5. UI Components
-
-#### CustomMethodRepView
-New view component to display during custom method execution:
+#### RepGroupConfirmationView
 
 ```swift
-struct CustomMethodRepView: View {
-    let methodName: String
-    let currentSet: Int
+struct RepGroupConfirmationView: View {
+    let group: RepGroup
+    let setNumber: Int
     let totalSets: Int
-    let currentRep: Int
-    let totalReps: Int
-    let currentLoad: Double
-    let baseLoad: Double
-    let loadVariation: Double // percentage
-    let restTimeAfterRep: TimeInterval
+    let methodName: String
+    let onConfirm: ([Int: Double]) -> Void
+
+    @State private var editedLoads: [Int: String] = [:]
+    @State private var showingEditSheet = false
 
     var body: some View {
-        VStack {
-            // Method name and icon
-            HStack {
-                Image(systemName: "bolt.circle.fill")
-                    .foregroundColor(.purple)
-                Text(methodName)
+        VStack(spacing: 20) {
+            // Header
+            VStack(spacing: 4) {
+                HStack {
+                    Image(systemName: "bolt.circle.fill")
+                        .foregroundColor(.purple)
+                    Text(methodName)
+                        .font(.headline)
+                }
+
+                Text("Serie \(setNumber) di \(totalSets)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                Text(group.repRange)
+                    .font(.title)
+                    .bold()
             }
 
-            // Set and rep counters
-            Text("Serie \(currentSet) di \(totalSets)")
-            Text("Rep \(currentRep) di \(totalReps)")
-                .font(.title)
-                .bold()
+            Divider()
 
-            // Load information
-            VStack {
-                Text("Carico per questa rep")
-                    .font(.caption)
+            // Reps list
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(group.reps, id: \.id) { rep in
+                    HStack {
+                        Text("Rep \(rep.repOrder)")
+                            .font(.body)
+
+                        Spacer()
+
+                        Text("\(editedLoads[rep.repOrder] ?? String(format: "%.1f", group.load)) kg")
+                            .font(.title3)
+                            .bold()
+
+                        if rep.loadPercentage != 0 {
+                            Text("(\(rep.formattedLoadPercentage))")
+                                .font(.caption)
+                                .foregroundColor(rep.loadPercentage > 0 ? .green : .red)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .padding()
+            .background(Color.purple.opacity(0.1))
+            .cornerRadius(12)
+
+            // Rest preview
+            if group.restAfterGroup > 0 {
                 HStack {
-                    Text("\(currentLoad, specifier: "%.1f") kg")
-                        .font(.title2)
-                    Text("(\(loadVariation > 0 ? "+" : "")\(loadVariation, specifier: "%.0f")%)")
-                        .font(.caption)
-                        .foregroundColor(loadVariation > 0 ? .green : loadVariation < 0 ? .red : .secondary)
+                    Image(systemName: "timer")
+                        .foregroundColor(.orange)
+                    Text("Pausa dopo: \(Int(group.restAfterGroup))s")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
 
-            // Rest preview if applicable
-            if restTimeAfterRep > 0 {
-                Text("Pausa dopo: \(Int(restTimeAfterRep))s")
-                    .font(.caption)
-                    .foregroundColor(.orange)
-            }
+            Spacer()
 
-            // Confirm button
-            Button("Conferma Rep") {
-                // confirm action
+            // Actions
+            VStack(spacing: 12) {
+                Button(action: {
+                    confirmWithCurrentLoads()
+                }) {
+                    Text("Conferma")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.accentColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                }
+
+                Button(action: {
+                    showingEditSheet = true
+                }) {
+                    Text("Modifica Carichi")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.secondary.opacity(0.2))
+                        .cornerRadius(12)
+                }
             }
         }
-    }
-}
-```
-
-### 6. Load Calculation
-
-Helper function in CustomTrainingMethod model:
-
-```swift
-extension CustomTrainingMethod {
-    /// Calculate actual load for a specific rep
-    func loadForRep(_ repNumber: Int, baseLoad: Double) -> Double {
-        guard let config = repConfigurations.first(where: { $0.repOrder == repNumber }) else {
-            return baseLoad
+        .padding()
+        .sheet(isPresented: $showingEditSheet) {
+            EditLoadsSheet(
+                group: group,
+                editedLoads: $editedLoads
+            )
         }
-        let multiplier = config.actualLoadPercentage / 100.0
-        return baseLoad * multiplier
     }
 
-    /// Get all loads for all reps given a base load
-    func allLoads(baseLoad: Double) -> [Double] {
-        return repConfigurations
-            .sorted(by: { $0.repOrder < $1.repOrder })
-            .map { config in
-                let multiplier = config.actualLoadPercentage / 100.0
-                return baseLoad * multiplier
+    private func confirmWithCurrentLoads() {
+        var actualLoads: [Int: Double] = [:]
+        for rep in group.reps {
+            if let editedString = editedLoads[rep.repOrder],
+               let editedValue = Double(editedString) {
+                actualLoads[rep.repOrder] = editedValue
+            } else {
+                actualLoads[rep.repOrder] = group.load
             }
-    }
-
-    /// Check if all reps have same load (0% variation)
-    var hasSameLoadAllReps: Bool {
-        return repConfigurations.allSatisfy { $0.loadPercentage == 0 }
-    }
-
-    /// Check if any rep has rest time
-    var hasRestBetweenReps: Bool {
-        return repConfigurations.contains(where: { $0.restAfterRep > 0 })
+        }
+        onConfirm(actualLoads)
     }
 }
 ```
 
-### 7. Modified Functions
-
-#### WorkoutExecutionViewModel
+#### RepGroupRestView
 
 ```swift
-func confirmRep() {
-    guard let step = currentStep,
-          case let .customMethodReps(totalSets, methodID, baseLoad, _) = step.type,
-          let method = loadedCustomMethod else {
-        return
+struct RepGroupRestView: View {
+    let remainingTime: TimeInterval
+    let onSkip: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "timer")
+                .font(.system(size: 60))
+                .foregroundColor(.orange)
+
+            Text("Pausa tra ripetizioni")
+                .font(.headline)
+
+            Text(formatTime(remainingTime))
+                .font(.system(size: 48, weight: .bold))
+                .monospacedDigit()
+
+            ProgressView(value: 1.0 - (remainingTime / /* original duration */))
+                .tint(.orange)
+                .padding(.horizontal, 40)
+
+            Button(action: onSkip) {
+                Text("Salta pausa")
+                    .font(.subheadline)
+            }
+        }
+        .padding()
     }
 
-    completedReps += 1
-
-    // Check if current rep has rest time
-    if let config = method.repConfigurations.first(where: { $0.repOrder == completedReps }),
-       config.restAfterRep > 0 {
-        // Show rest timer
-        startRepRestTimer(duration: config.restAfterRep)
-    } else if completedReps >= method.totalReps {
-        // Set complete
-        completedReps = 0
-        confirmSet() // Reuse existing set confirmation logic
-    } else {
-        // Move to next rep
-        updateCurrentRepLoad()
-    }
-}
-
-private func startRepRestTimer(duration: TimeInterval) {
-    // Similar to existing rest timer logic
-    // After completion, automatically prepare for next rep
-}
-
-private func updateCurrentRepLoad() {
-    guard let method = loadedCustomMethod,
-          let baseLoad = extractBaseLoad(),
-          completedReps < method.totalReps else {
-        return
-    }
-
-    let nextRep = completedReps + 1
-    currentRepLoad = method.loadForRep(nextRep, baseLoad: baseLoad)
-
-    if let config = method.repConfigurations.first(where: { $0.repOrder == nextRep }) {
-        currentRepRestTime = config.restAfterRep
+    private func formatTime(_ time: TimeInterval) -> String {
+        let seconds = Int(time)
+        if seconds >= 60 {
+            let mins = seconds / 60
+            let secs = seconds % 60
+            return String(format: "%d:%02d", mins, secs)
+        }
+        return "\(seconds)s"
     }
 }
 ```
 
-### 8. Step Factory Modification
+### 5. Step Factory Integration
 
-Update `WorkoutExecutionStepFactory.steps(for:)`:
+Update `WorkoutExecutionStepFactory`:
 
 ```swift
 // For custom method blocks
 if block.blockType == .customMethod,
    let customMethodID = block.customMethodID {
 
-    // Load custom method from context
-    let descriptor = FetchDescriptor<CustomTrainingMethod>(
-        predicate: #Predicate { $0.id == customMethodID }
-    )
-
-    guard let customMethod = try? modelContext.fetch(descriptor).first else {
+    guard let customMethod = try? modelContext.fetch(
+        FetchDescriptor<CustomTrainingMethod>(
+            predicate: #Predicate { $0.id == customMethodID }
+        )
+    ).first else {
         continue
     }
 
@@ -271,119 +532,72 @@ if block.blockType == .customMethod,
         let sets = exercise.sets.sorted { $0.order < $1.order }
         guard let firstSet = sets.first else { continue }
 
-        let baseLoad: Double?
+        let baseLoad: Double
         let loadType: LoadType
 
         if let weight = firstSet.weight {
             baseLoad = weight
             loadType = .absolute
-        } else if let percentage = firstSet.percentageOfMax {
-            baseLoad = percentage
+        } else if let percentage = firstSet.percentageOfMax,
+                  let oneRM = /* calculate 1RM */ {
+            baseLoad = oneRM * (percentage / 100.0)
             loadType = .percentage
         } else {
-            baseLoad = nil
-            loadType = .absolute
+            continue
         }
 
-        // Determine if needs rep-by-rep confirmation
-        let needsRepByRep = !customMethod.hasSameLoadAllReps || customMethod.hasRestBetweenReps
-
-        if needsRepByRep {
-            result.append(
-                WorkoutExecutionViewModel.Step(
-                    title: exercise.exercise?.name ?? "Esercizio",
-                    subtitle: "\(customMethod.name) - \(customMethod.totalReps) reps per serie",
-                    zone: .zone4,
-                    estimatedDuration: TimeInterval(customMethod.totalReps * block.globalSets * 5), // estimate
-                    type: .customMethodReps(
-                        totalSets: block.globalSets,
-                        customMethodID: customMethod.id,
-                        baseLoad: baseLoad,
-                        baseLoadType: loadType
-                    ),
-                    highlight: "Segui le variazioni di carico del metodo \(customMethod.name)"
-                )
+        result.append(
+            WorkoutExecutionViewModel.Step(
+                title: exercise.exercise?.name ?? "Esercizio",
+                subtitle: "\(customMethod.name) - \(customMethod.totalReps) reps",
+                zone: .zone4,
+                estimatedDuration: TimeInterval(
+                    customMethod.totalReps * block.globalSets * 5
+                ),
+                type: .customMethodReps(
+                    totalSets: block.globalSets,
+                    customMethodID: customMethod.id,
+                    baseLoad: baseLoad,
+                    baseLoadType: loadType
+                ),
+                highlight: "Segui le variazioni di carico del metodo \(customMethod.name)"
             )
-        } else {
-            // Use standard reps mode if no variations
-            result.append(
-                WorkoutExecutionViewModel.Step(
-                    title: exercise.exercise?.name ?? "Esercizio",
-                    subtitle: "\(customMethod.name) - \(customMethod.totalReps) reps",
-                    zone: .zone4,
-                    estimatedDuration: TimeInterval(customMethod.totalReps * block.globalSets),
-                    type: .reps(totalSets: block.globalSets, repsPerSet: customMethod.totalReps),
-                    highlight: "Metodo \(customMethod.name) con carico costante"
-                )
-            )
-        }
+        )
     }
 }
 ```
 
-## Summary of Changes
+## Benefits of Group-Based Approach
 
-### Files to Modify:
+1. **Efficiency**: Confirm multiple reps at once when they share characteristics
+2. **Flexibility**: Still allows load modification before confirmation
+3. **Clarity**: See all reps in the group together
+4. **Intelligence**: System automatically determines optimal grouping
+5. **Progressive**: Rest timers only appear when needed
 
-1. **WorkoutExecutionViewModel** (in WorkoutExecutionView.swift)
-   - Add new `StepType.customMethodReps`
-   - Add state variables for rep tracking
-   - Add `confirmRep()` function
-   - Add rep rest timer logic
-   - Modify `stepProgress` to handle rep-level progress
+## Implementation Phases
 
-2. **WorkoutExecutionView** (UI)
-   - Add `customMethodRepView` function
-   - Handle rep-by-rep confirmation UI
-   - Show rep rest timers
-   - Display current rep load prominently
+### Phase 1: Core Grouping Logic ✓ Next
+- Implement `RepGroup` model
+- Implement grouping algorithm in `CustomTrainingMethod`
+- Add tests for various grouping scenarios
 
-3. **CustomTrainingMethod** (model extensions)
-   - Add `loadForRep()` helper
-   - Add `hasSameLoadAllReps` computed property
-   - Add `hasRestBetweenReps` computed property
+### Phase 2: View Model Integration
+- Add custom method state to `WorkoutExecutionViewModel`
+- Implement group confirmation flow
+- Implement rest timer between groups
 
-4. **WorkoutExecutionStepFactory**
-   - Add logic to create custom method steps
-   - Determine if rep-by-rep confirmation needed
-   - Load CustomTrainingMethod from database
+### Phase 3: UI Components
+- Create `RepGroupConfirmationView`
+- Create `RepGroupRestView`
+- Integrate with existing workout execution UI
 
-### User Experience:
+### Phase 4: Step Factory
+- Update step creation for custom methods
+- Load method from database
+- Calculate base loads correctly
 
-**Scenario 1: Same Load (Simple)**
-- Method has all reps at 0% variation
-- UI shows: "Serie 1 di 3 - 6 reps @ 100kg"
-- User clicks "Conferma Serie" once
-- Moves to next set
-
-**Scenario 2: Variable Load (Advanced)**
-- Method has varying loads per rep
-- UI shows: "Rep 1 di 6 - 100kg (base)"
-- User completes rep, clicks "Conferma Rep"
-- UI shows: "Rep 2 di 6 - 105kg (+5%)"
-- Continue for all 6 reps
-- After rep 6, "Serie 1 completata!"
-- Moves to Set 2
-
-**Scenario 3: Variable Load + Rest**
-- Same as Scenario 2, but after each rep:
-- "Pausa: 10s" countdown timer
-- After timer, "Inizia Rep 2" button enabled
-- User continues
-
-## Implementation Priority
-
-1. **Phase 1** (Minimum Viable):
-   - Add new StepType
-   - Basic rep-by-rep confirmation
-   - Load calculation and display
-
-2. **Phase 2** (Enhanced):
-   - Rep rest timers
-   - Automatic progression after rest
-   - Better UI/UX for rep tracking
-
-3. **Phase 3** (Polish):
-   - Animations between reps
-   - Load preview for next rep
-   - Summary stats after set completion
+### Phase 5: Testing & Polish
+- Test various custom method configurations
+- Ensure smooth transitions between groups
+- Add animations and feedback
