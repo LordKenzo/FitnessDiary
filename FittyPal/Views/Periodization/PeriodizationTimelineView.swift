@@ -16,6 +16,7 @@ struct PeriodizationTimelineView: View {
 
     @State private var selectedMesocycle: Mesocycle?
     @State private var showingMesocycleDetail = false
+    @State private var isGenerating = false
 
     var body: some View {
         ScrollView {
@@ -154,7 +155,7 @@ struct PeriodizationTimelineView: View {
     }
 
     private var emptyStateView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Image(systemName: "calendar.badge.exclamationmark")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
@@ -166,6 +167,26 @@ struct PeriodizationTimelineView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+
+            Button {
+                generateMesocycles()
+            } label: {
+                HStack {
+                    if isGenerating {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Image(systemName: "calendar.badge.plus")
+                    }
+                    Text(isGenerating ? "Generazione..." : "Genera Mesocicli")
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color.accentColor)
+                .foregroundStyle(.white)
+                .cornerRadius(10)
+            }
+            .disabled(isGenerating)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
@@ -178,6 +199,24 @@ struct PeriodizationTimelineView: View {
         formatter.locale = Locale(identifier: "it_IT")
         formatter.dateFormat = "dd MMM yyyy"
         return formatter.string(from: date)
+    }
+
+    // MARK: - Actions
+
+    private func generateMesocycles() {
+        isGenerating = true
+
+        // Esegui in background per non bloccare la UI
+        DispatchQueue.global(qos: .userInitiated).async {
+            let generator = PeriodizationGenerator()
+            let _ = generator.generateCompletePlan(plan)
+
+            DispatchQueue.main.async {
+                // Salva il contesto
+                try? modelContext.save()
+                isGenerating = false
+            }
+        }
     }
 }
 

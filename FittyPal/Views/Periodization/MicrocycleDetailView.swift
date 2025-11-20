@@ -41,6 +41,20 @@ struct MicrocycleDetailView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingWorkoutPicker) {
+            if let day = selectedDay {
+                WorkoutCardPickerView(trainingDay: day) { card in
+                    assignWorkoutToDay(card: card, day: day)
+                }
+            }
+        }
+    }
+
+    // MARK: - Actions
+
+    private func assignWorkoutToDay(card: WorkoutCard, day: TrainingDay) {
+        day.workoutCard = card
+        try? modelContext.save()
     }
 
     // MARK: - Sections
@@ -166,7 +180,10 @@ struct MicrocycleDetailView: View {
                 emptyDaysView
             } else {
                 ForEach(microcycle.sortedTrainingDays) { day in
-                    TrainingDayCardView(day: day)
+                    TrainingDayCardView(day: day) {
+                        selectedDay = day
+                        showingWorkoutPicker = true
+                    }
                 }
             }
         }
@@ -206,8 +223,7 @@ struct MicrocycleDetailView: View {
 struct TrainingDayCardView: View {
     @Environment(\.modelContext) private var modelContext
     let day: TrainingDay
-
-    @State private var showingWorkoutPicker = false
+    let onSelectWorkout: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -250,7 +266,7 @@ struct TrainingDayCardView: View {
                     WorkoutCardPreview(workout: workout, day: day)
                 } else {
                     Button {
-                        showingWorkoutPicker = true
+                        onSelectWorkout()
                     } label: {
                         HStack {
                             Image(systemName: "plus.circle.fill")
