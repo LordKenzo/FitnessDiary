@@ -7,6 +7,7 @@
 "tab.dashboard" = "Dashboard";
 "tab.workout" = "Allenamento";
 "tab.cards" = "Schede";
+"tab.periodization" = "Periodizzazione";
 "tab.settings" = "Impostazioni";
 
 // MARK: - Dashboard
