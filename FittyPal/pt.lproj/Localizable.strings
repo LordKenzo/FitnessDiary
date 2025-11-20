@@ -67,6 +67,8 @@
 "settings.muscles" = "Músculos";
 "settings.equipment" = "Equipamentos";
 "settings.exercises" = "Exercícios";
+"settings.classic.methods" = "Métodos Clássicos";
+"settings.custom.methods" = "Métodos Personalizados";
 "settings.legal.privacy" = "Política de privacidade";
 "settings.legal.terms" = "Termos de uso";
 "settings.legal.support" = "E-mail de suporte";

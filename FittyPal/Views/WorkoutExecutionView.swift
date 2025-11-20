@@ -68,6 +68,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
         enum StepType: Equatable {
             case timed(duration: TimeInterval, isRest: Bool)
             case reps(totalSets: Int, repsPerSet: Int)
+            case customMethodReps(groups: [RepGroup], seriesNumber: Int, baseLoad: Double)
         }
 
         let id = UUID()
@@ -102,6 +103,11 @@ final class WorkoutExecutionViewModel: ObservableObject {
     @Published var loadText: String = ""
     @Published var perceivedExertion: Double = 7
     @Published var actualRepsText: String = ""
+
+    // State for custom method groups
+    @Published var currentGroupIndex: Int = 0
+    @Published var isShowingGroupRest: Bool = false
+    @Published var groupRestRemaining: TimeInterval = 0
 
     private var timerCancellable: AnyCancellable?
     private let userDefaults: UserDefaults
@@ -186,6 +192,9 @@ final class WorkoutExecutionViewModel: ObservableObject {
         case let .reps(totalSets, _):
             guard totalSets > 0 else { return 1 }
             return min(Double(completedSets) / Double(totalSets), 1)
+        case let .customMethodReps(groups, _, _):
+            guard !groups.isEmpty else { return 1 }
+            return min(Double(currentGroupIndex) / Double(groups.count), 1)
         }
     }
 
@@ -196,6 +205,8 @@ final class WorkoutExecutionViewModel: ObservableObject {
             return max(duration - stepElapsedTime, 0)
         case .reps:
             return 0
+        case .customMethodReps:
+            return isShowingGroupRest ? groupRestRemaining : 0
         }
     }
 
@@ -243,8 +254,67 @@ final class WorkoutExecutionViewModel: ObservableObject {
         }
     }
 
-    func start(card: WorkoutCard, countdownSeconds: Int) {
-        steps = WorkoutExecutionStepFactory.steps(for: card)
+    // MARK: - Custom Method Group Functions
+
+    func confirmGroup() {
+        advanceGroup()
+    }
+
+    func skipCurrentGroup() {
+        advanceGroup()
+    }
+
+    private func advanceGroup() {
+        guard let step = currentStep else { return }
+        if case let .customMethodReps(groups, _, _) = step.type {
+            guard currentGroupIndex < groups.count else { return }
+
+            let currentGroup = groups[currentGroupIndex]
+
+            // Check if this group has rest time
+            if currentGroup.restAfterGroup > 0 {
+                isShowingGroupRest = true
+                groupRestRemaining = currentGroup.restAfterGroup
+                // Don't increment currentGroupIndex here - it will be incremented when rest finishes
+            } else {
+                // No rest, move to next group immediately
+                currentGroupIndex += 1
+
+                // Reset inputs for next group
+                if currentGroupIndex < groups.count {
+                    prepareForNextGroup(groups: groups)
+                }
+
+                // Check if we completed all groups
+                if currentGroupIndex >= groups.count {
+                    skipToNextStep()
+                }
+            }
+        }
+    }
+
+    private func prepareForNextGroup(groups: [RepGroup]) {
+        guard currentGroupIndex >= 0, currentGroupIndex < groups.count else { return }
+        let nextGroup = groups[currentGroupIndex]
+        loadText = String(format: "%.1f", nextGroup.load)
+        perceivedExertion = 7
+    }
+
+    func skipGroupRest() {
+        guard let step = currentStep else { return }
+        if case let .customMethodReps(groups, _, _) = step.type {
+            isShowingGroupRest = false
+            currentGroupIndex += 1
+            if currentGroupIndex < groups.count {
+                prepareForNextGroup(groups: groups)
+            } else {
+                skipToNextStep()
+            }
+        }
+    }
+
+    func start(card: WorkoutCard, countdownSeconds: Int, modelContext: ModelContext) {
+        steps = WorkoutExecutionStepFactory.steps(for: card, modelContext: modelContext)
         currentStepIndex = 0
         generalElapsedTime = 0
         stepElapsedTime = 0
@@ -253,6 +323,9 @@ final class WorkoutExecutionViewModel: ObservableObject {
         loadText = ""
         actualRepsText = ""
         perceivedExertion = 7
+        currentGroupIndex = 0
+        isShowingGroupRest = false
+        groupRestRemaining = 0
         isWorkoutCompleted = false
         isPaused = false
         currentHeartRateZone = nil
@@ -305,9 +378,29 @@ final class WorkoutExecutionViewModel: ObservableObject {
     private func resetStepState(resetCounters: Bool = false) {
         stepElapsedTime = 0
         completedSets = 0
-        loadText = ""
         perceivedExertion = 7
         actualRepsText = repsTextForCurrentStep()
+        currentGroupIndex = 0
+        isShowingGroupRest = false
+        groupRestRemaining = 0
+
+        // Initialize loadText based on step type
+        if let step = currentStep {
+            switch step.type {
+            case let .customMethodReps(groups, _, _):
+                // Set initial load from first group
+                if let firstGroup = groups.first {
+                    loadText = String(format: "%.1f", firstGroup.load)
+                } else {
+                    loadText = ""
+                }
+            default:
+                loadText = ""
+            }
+        } else {
+            loadText = ""
+        }
+
         updateMotivation(for: currentStep)
     }
 
@@ -355,6 +448,23 @@ final class WorkoutExecutionViewModel: ObservableObject {
             }
         case .reps:
             break
+        case let .customMethodReps(groups, _, _):
+            // Handle group rest timer
+            if isShowingGroupRest && groupRestRemaining > 0 {
+                triggerFiveSecondCueIfNeeded(for: groupRestRemaining, isRest: true)
+                groupRestRemaining -= 1
+                if groupRestRemaining == 0 {
+                    isShowingGroupRest = false
+                    currentGroupIndex += 1
+                    // Prepare inputs for next group
+                    if currentGroupIndex < groups.count {
+                        prepareForNextGroup(groups: groups)
+                    } else {
+                        // All groups completed
+                        skipToNextStep()
+                    }
+                }
+            }
         case .none:
             break
         }
@@ -366,6 +476,8 @@ final class WorkoutExecutionViewModel: ObservableObject {
         case let .reps(_, repsPerSet):
             return String(repsPerSet)
         case .timed:
+            return ""
+        case .customMethodReps:
             return ""
         }
     }
@@ -380,6 +492,8 @@ final class WorkoutExecutionViewModel: ObservableObject {
         case let .timed(_, isRest):
             applyMotivation(event: isRest ? .rest : .work)
         case .reps:
+            applyMotivation(event: .set)
+        case .customMethodReps:
             applyMotivation(event: .set)
         }
     }
@@ -629,7 +743,7 @@ struct WorkoutExecutionView: View {
             }
 
             Button {
-                viewModel.start(card: card, countdownSeconds: defaultCountdownSeconds)
+                viewModel.start(card: card, countdownSeconds: defaultCountdownSeconds, modelContext: modelContext)
             } label: {
                 Label("Avvia con countdown di \(defaultCountdownSeconds)s", systemImage: "play.circle.fill")
                     .frame(maxWidth: .infinity)
@@ -720,6 +834,8 @@ struct WorkoutExecutionView: View {
                     timedStepView(step: step, isRest: isRest)
                 case let .reps(totalSets, repsPerSet):
                     repsStepView(step: step, totalSets: totalSets, repsPerSet: repsPerSet)
+                case let .customMethodReps(groups, seriesNumber, baseLoad):
+                    customMethodRepsStepView(step: step, groups: groups, seriesNumber: seriesNumber, baseLoad: baseLoad)
                 }
             } else if viewModel.isCountdownActive {
                 Text("Il countdown è attivo")
@@ -829,6 +945,179 @@ struct WorkoutExecutionView: View {
             }
             .buttonStyle(.bordered)
             .disabled(viewModel.completedSets >= totalSets)
+        }
+    }
+
+    private func customMethodRepsStepView(step: WorkoutExecutionViewModel.Step, groups: [RepGroup], seriesNumber: Int, baseLoad: Double) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if viewModel.isShowingGroupRest {
+                // Show rest timer
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Label("Recupero tra gruppi", systemImage: "timer")
+                            .font(.subheadline)
+                            .foregroundStyle(.purple)
+                        Spacer()
+                        Text(format(seconds: viewModel.groupRestRemaining))
+                            .font(.system(.title3, design: .rounded))
+                            .monospacedDigit()
+                    }
+
+                    Text("Preparati per il prossimo gruppo")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    ProgressView(value: {
+                        let index = min(viewModel.currentGroupIndex, groups.count - 1)
+                        guard index >= 0, index < groups.count else { return 0.0 }
+                        let totalRest = groups[index].restAfterGroup
+                        guard totalRest > 0 else { return 1.0 }
+                        return 1.0 - (viewModel.groupRestRemaining / totalRest)
+                    }())
+                        .tint(.purple)
+
+                    Button(action: viewModel.skipGroupRest) {
+                        Label("Salta pausa", systemImage: "forward.end.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                }
+            } else {
+                // Show current group
+                if viewModel.currentGroupIndex < groups.count {
+                    let currentGroup = groups[viewModel.currentGroupIndex]
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Gruppo \(viewModel.currentGroupIndex + 1) di \(groups.count)")
+                                .font(.title3)
+                                .bold()
+                            Spacer()
+                            Text("Serie \(seriesNumber)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Text(currentGroup.repRange)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+
+                        Text(step.highlight)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    ProgressView(value: viewModel.stepProgress)
+                        .tint(.purple)
+
+                    // Group details card
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 16) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "scalemass")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text("Carico")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                HStack(spacing: 4) {
+                                    Text(currentGroup.formattedLoad + " kg")
+                                        .font(.title3)
+                                        .fontWeight(.bold)
+                                    if currentGroup.loadPercentage != 0 {
+                                        Text("(\(currentGroup.formattedLoadPercentage))")
+                                            .font(.subheadline)
+                                            .foregroundColor(currentGroup.loadPercentage > 0 ? .green : .red)
+                                    }
+                                }
+                            }
+
+                            Spacer()
+
+                            VStack(alignment: .trailing, spacing: 4) {
+                                HStack(spacing: 4) {
+                                    Text("Pausa dopo")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Image(systemName: "timer")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Text(formatRestTime(currentGroup.restAfterGroup))
+                                    .font(.title3)
+                                    .fontWeight(.bold)
+                            }
+                        }
+                    }
+                    .padding(12)
+                    .background(Color.purple.opacity(0.08))
+                    .cornerRadius(10)
+
+                    // Input fields for actual execution
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Carico effettivo")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text("Suggerito: \(currentGroup.formattedLoad) kg")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        TextField("Kg", text: $viewModel.loadText)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("RPE")
+                            Spacer()
+                            Text(String(format: "%.0f", viewModel.perceivedExertion))
+                                .font(.subheadline)
+                                .bold()
+                        }
+                        Slider(value: $viewModel.perceivedExertion, in: 1...10, step: 1)
+                            .tint(.purple)
+                    }
+
+                    Button(action: viewModel.confirmGroup) {
+                        Label("Conferma gruppo", systemImage: "checkmark.circle.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.purple)
+
+                    Button(role: .cancel, action: viewModel.skipCurrentGroup) {
+                        Label("Salta gruppo", systemImage: "forward.end.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                } else {
+                    Text("Tutti i gruppi completati!")
+                        .font(.title3)
+                        .foregroundStyle(.green)
+                }
+            }
+        }
+    }
+
+    private func formatRestTime(_ time: TimeInterval) -> String {
+        let seconds = Int(time)
+        if seconds == 0 {
+            return "Nessuna"
+        } else if seconds < 60 {
+            return "\(seconds)s"
+        } else {
+            let minutes = seconds / 60
+            let remainingSeconds = seconds % 60
+            if remainingSeconds == 0 {
+                return "\(minutes)m"
+            } else {
+                return "\(minutes)m \(remainingSeconds)s"
+            }
         }
     }
 
@@ -1330,7 +1619,7 @@ private struct HeartRateHistogram: View {
 // MARK: - Step Factory
 
 private enum WorkoutExecutionStepFactory {
-    static func steps(for card: WorkoutCard) -> [WorkoutExecutionViewModel.Step] {
+    static func steps(for card: WorkoutCard, modelContext: ModelContext) -> [WorkoutExecutionViewModel.Step] {
         var result: [WorkoutExecutionViewModel.Step] = []
         let orderedBlocks = card.blocks.sorted { $0.order < $1.order }
 
@@ -1341,7 +1630,7 @@ private enum WorkoutExecutionStepFactory {
                 let subtitle = block.notes ?? (restDuration > 0 ? "Recupero \(formatDuration(restDuration))" : "Recupero libero")
                 result.append(
                     WorkoutExecutionViewModel.Step(
-                        title: "Pausa", 
+                        title: "Pausa",
                         subtitle: subtitle,
                         zone: .zone1,
                         estimatedDuration: restDuration,
@@ -1351,6 +1640,8 @@ private enum WorkoutExecutionStepFactory {
                 )
             case .simple, .method:
                 result.append(contentsOf: stepsForExercises(in: block, cardTarget: card.targetExpression))
+            case .customMethod:
+                result.append(contentsOf: stepsForCustomMethod(in: block, cardTarget: card.targetExpression, modelContext: modelContext))
             }
         }
 
@@ -1391,6 +1682,62 @@ private enum WorkoutExecutionStepFactory {
                         zone: .zone4,
                         estimatedDuration: TimeInterval(reps * max(sets.count, 1)),
                         type: .reps(totalSets: max(sets.count, 1), repsPerSet: reps),
+                        highlight: highlight
+                    )
+                )
+            }
+        }
+
+        return steps
+    }
+
+    private static func stepsForCustomMethod(in block: WorkoutBlock, cardTarget: StrengthExpressionType?, modelContext: ModelContext) -> [WorkoutExecutionViewModel.Step] {
+        var steps: [WorkoutExecutionViewModel.Step] = []
+
+        // Get the custom method ID from the block
+        guard let customMethodID = block.customMethodID else { return steps }
+
+        // Fetch the custom method from database
+        let descriptor = FetchDescriptor<CustomTrainingMethod>(
+            predicate: #Predicate { $0.id == customMethodID }
+        )
+
+        guard let customMethod = try? modelContext.fetch(descriptor).first else {
+            return steps
+        }
+
+        let exercises = block.exerciseItems.sorted { $0.order < $1.order }
+
+        for exercise in exercises {
+            let sets = exercise.sets.sorted { $0.order < $1.order }
+
+            let title = exercise.exercise?.name ?? "Esercizio"
+            let highlight = cardTarget?.rawValue ?? "Focus sulla tecnica"
+
+            // Create one step per series
+            for (seriesIndex, set) in sets.enumerated() {
+                let seriesNumber = seriesIndex + 1
+                let baseLoad = set.weight ?? 0
+
+                // Create rep groups for this series
+                let groups = customMethod.createRepGroups(baseLoad: baseLoad)
+
+                guard !groups.isEmpty else { continue }
+
+                let subtitle = "\(customMethod.name) - Serie \(seriesNumber)/\(sets.count) - \(groups.count) gruppi"
+
+                // Calculate estimated duration (sum of all group rest times + ~3 seconds per rep)
+                let totalReps = groups.reduce(0) { $0 + $1.repCount }
+                let totalRestTime = groups.reduce(0.0) { $0 + $1.restAfterGroup }
+                let estimatedDuration = TimeInterval(totalReps * 3) + totalRestTime
+
+                steps.append(
+                    WorkoutExecutionViewModel.Step(
+                        title: title,
+                        subtitle: subtitle,
+                        zone: .zone4,
+                        estimatedDuration: estimatedDuration,
+                        type: .customMethodReps(groups: groups, seriesNumber: seriesNumber, baseLoad: baseLoad),
                         highlight: highlight
                     )
                 )

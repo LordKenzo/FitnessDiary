@@ -81,6 +81,18 @@ struct SettingsView: View {
                             ) {
                                 ExerciseListView()
                             }
+                            SettingsNavigationRow(
+                                title: L("settings.classic.methods"),
+                                iconName: "book.fill"
+                            ) {
+                                ClassicMethodsLibraryView()
+                            }
+                            SettingsNavigationRow(
+                                title: L("settings.custom.methods"),
+                                iconName: "bolt.circle.fill"
+                            ) {
+                                CustomMethodsListView()
+                            }
                         }
                         SettingsSectionCard(title: L("settings.section.legal")) {
                             if let privacyURL = SupportResources.privacyPolicyURL {

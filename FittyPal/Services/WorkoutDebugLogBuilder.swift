@@ -51,6 +51,8 @@ private extension WorkoutDebugLogBuilder {
                 lines.append(contentsOf: simpleEntries(for: block))
             case .method:
                 lines.append(contentsOf: methodEntries(for: block))
+            case .customMethod:
+                lines.append(contentsOf: customMethodEntries(for: block))
             }
         }
 
@@ -73,6 +75,8 @@ private extension WorkoutDebugLogBuilder {
                 lines.append(contentsOf: technicalSimpleEntries(for: block))
             case .method:
                 lines.append(contentsOf: technicalMethodEntries(for: block))
+            case .customMethod:
+                lines.append(contentsOf: technicalCustomMethodEntries(for: block))
             }
         }
 
@@ -692,6 +696,83 @@ private extension WorkoutDebugLogBuilder {
     static let defaultCountdownSeconds = 10
 
     static func methodBlockName(for block: WorkoutBlock) -> String {
-        block.methodType?.rawValue ?? block.title
+        block.methodType?.rawValue ?? block.title()
+    }
+
+    // MARK: - Custom Method Entries
+
+    static func customMethodEntries(for block: WorkoutBlock) -> [String] {
+        var lines: [String] = []
+        let blockName = block.title()
+        lines.append("Inizio Blocco Metodo Personalizzato: \(blockName)")
+
+        // Note: Custom method execution with per-rep load/rest requires runtime access to CustomTrainingMethod
+        // For now, display exercises in the block with a note about custom method application
+        let exercises = block.exerciseItems.sorted { $0.order < $1.order }
+
+        if exercises.isEmpty {
+            lines.append("Metodo personalizzato senza esercizi configurati")
+        } else {
+            lines.append("⚠️ Metodo personalizzato configurato con carico e pause variabili per ripetizione")
+            lines.append("")
+
+            for (index, exercise) in exercises.enumerated() {
+                lines.append("Esercizio \(index + 1): \(exerciseName(exercise))")
+                let sets = orderedSets(for: exercise)
+
+                if sets.isEmpty {
+                    lines.append("  Senza serie configurate")
+                } else {
+                    for (setIndex, set) in sets.enumerated() {
+                        let description = setDescription(for: set)
+                        lines.append("  Serie \(setIndex + 1): \(description)")
+                        lines.append("  (Il carico verrà modulato automaticamente dal metodo personalizzato)")
+                    }
+                }
+
+                if index < exercises.count - 1 {
+                    lines.append("")
+                }
+            }
+        }
+
+        lines.append("Fine Blocco Metodo Personalizzato")
+        return lines
+    }
+
+    static func technicalCustomMethodEntries(for block: WorkoutBlock) -> [String] {
+        var lines: [String] = []
+        let blockName = block.title()
+        lines.append("Inizio \(blockName)")
+
+        let exercises = block.exerciseItems.sorted { $0.order < $1.order }
+
+        if exercises.isEmpty {
+            lines.append("Metodo personalizzato senza esercizi")
+        } else {
+            lines.append("// Metodo personalizzato: carico e pause variabili per ripetizione")
+
+            for exercise in exercises {
+                let name = exerciseName(exercise)
+                let groups = technicalSetGroups(for: exercise)
+
+                if groups.isEmpty {
+                    lines.append("\(name) senza serie configurate")
+                    continue
+                }
+
+                for group in groups {
+                    var line = "\(name) \(group.count)x\(group.descriptor)"
+                    line += " (custom load/rest)"
+                    if let restSuffix = technicalRestSuffix(for: exercise, in: block) {
+                        line += " \(restSuffix)"
+                    }
+                    lines.append(line)
+                }
+            }
+        }
+
+        lines.append("Fine \(blockName)")
+        return lines
     }
 }

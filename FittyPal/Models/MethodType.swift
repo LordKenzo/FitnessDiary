@@ -4,6 +4,7 @@ import SwiftUI
 enum BlockType: String, Codable, CaseIterable {
     case simple = "Esercizio Singolo"
     case method = "Con Metodo"
+    case customMethod = "Con Metodo Custom"
     case rest = "Riposo"
 }
 

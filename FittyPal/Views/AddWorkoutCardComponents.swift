@@ -224,7 +224,7 @@ struct EnhancedBlockRow: View {
     init(block: WorkoutBlock, order: Int) {
         self.blockType = block.blockType
         self.methodType = block.methodType
-        self.title = block.title
+        self.title = block.title()
         self.subtitle = block.subtitle
         self.globalRestTime = block.globalRestTime
         self.formattedRestTime = block.formattedRestTime

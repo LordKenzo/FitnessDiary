@@ -7,6 +7,7 @@ final class WorkoutBlock: Identifiable {
     var order: Int
     var blockType: BlockType
     var methodType: MethodType? // solo se blockType == .method
+    var customMethodID: UUID? // ID del metodo custom, solo se blockType == .customMethod
 
     // Parametri globali del blocco
     var globalSets: Int // numero di serie totali del blocco (es. 3 superset)
@@ -22,11 +23,12 @@ final class WorkoutBlock: Identifiable {
     @Relationship(deleteRule: .cascade)
     var exerciseItems: [WorkoutExerciseItem] // lista esercizi nel blocco
 
-    init(order: Int, blockType: BlockType = .simple, methodType: MethodType? = nil, globalSets: Int = 3, globalRestTime: TimeInterval? = 60, notes: String? = nil, tabataWorkDuration: TimeInterval? = nil, tabataRestDuration: TimeInterval? = nil, tabataRounds: Int? = nil, tabataRecoveryBetweenRounds: TimeInterval? = nil, exerciseItems: [WorkoutExerciseItem] = []) {
+    init(order: Int, blockType: BlockType = .simple, methodType: MethodType? = nil, customMethodID: UUID? = nil, globalSets: Int = 3, globalRestTime: TimeInterval? = 60, notes: String? = nil, tabataWorkDuration: TimeInterval? = nil, tabataRestDuration: TimeInterval? = nil, tabataRounds: Int? = nil, tabataRecoveryBetweenRounds: TimeInterval? = nil, exerciseItems: [WorkoutExerciseItem] = []) {
         self.id = UUID()
         self.order = order
         self.blockType = blockType
         self.methodType = methodType
+        self.customMethodID = customMethodID
         self.globalSets = globalSets
         self.globalRestTime = globalRestTime
         self.notes = notes
@@ -38,13 +40,15 @@ final class WorkoutBlock: Identifiable {
     }
 
     // Helper per il titolo del blocco
-    var title: String {
+    func title(customMethod: CustomTrainingMethod? = nil) -> String {
         switch blockType {
         case .method:
             if let method = methodType {
                 return method.rawValue
             }
             return BlockType.method.rawValue
+        case .customMethod:
+            return customMethod?.name ?? "Metodo Custom"
         case .rest:
             return BlockType.rest.rawValue
         case .simple:
@@ -58,7 +62,7 @@ final class WorkoutBlock: Identifiable {
     // Helper per il sottotitolo
     var subtitle: String {
         switch blockType {
-        case .method:
+        case .method, .customMethod:
             return "\(exerciseItems.count) esercizi • \(globalSets) serie"
         case .rest:
             return formattedRestTime ?? "Durata personalizzata"

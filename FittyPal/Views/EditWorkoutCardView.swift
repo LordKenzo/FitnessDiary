@@ -20,6 +20,7 @@ struct EditWorkoutCardView: View {
     @State private var workoutBlocks: [WorkoutBlockData] = []
     @State private var showingExercisePicker = false
     @State private var showingMethodSelection = false
+    @State private var showingCustomMethodSelection = false
     @State private var showingAddBlockMenu = false
 
     init(card: WorkoutCard, folders: [WorkoutFolder], clients: [Client]) {
@@ -38,6 +39,8 @@ struct EditWorkoutCardView: View {
             WorkoutBlockData(
                 blockType: block.blockType,
                 methodType: block.methodType,
+                customMethodID: block.customMethodID,
+                customMethodName: nil, // Will be loaded at runtime if needed
                 order: block.order,
                 globalSets: block.globalSets,
                 globalRestTime: block.globalRestTime,
@@ -154,6 +157,11 @@ struct EditWorkoutCardView: View {
                     addMethodBlock(method)
                 }
             }
+            .sheet(isPresented: $showingCustomMethodSelection) {
+                CustomMethodSelectionView { customMethod in
+                    addCustomMethodBlock(customMethod)
+                }
+            }
             .confirmationDialog("Aggiungi Blocco", isPresented: $showingAddBlockMenu) {
                 Button {
                     showingExercisePicker = true
@@ -165,6 +173,12 @@ struct EditWorkoutCardView: View {
                     showingMethodSelection = true
                 } label: {
                     Label("Con Metodo", systemImage: "bolt.horizontal.fill")
+                }
+
+                Button {
+                    showingCustomMethodSelection = true
+                } label: {
+                    Label("Con Metodo Custom", systemImage: "bolt.circle.fill")
                 }
 
                 Button {
@@ -445,6 +459,10 @@ struct EditWorkoutCardView: View {
 
     private func addMethodBlock(_ method: MethodType) {
         WorkoutBlockHelper.addMethodBlock(to: &workoutBlocks, method: method)
+    }
+
+    private func addCustomMethodBlock(_ customMethod: CustomTrainingMethod) {
+        WorkoutBlockHelper.addCustomMethodBlock(to: &workoutBlocks, customMethod: customMethod)
     }
 
     private func addRestBlock() {

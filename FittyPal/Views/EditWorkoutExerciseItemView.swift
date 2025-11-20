@@ -10,6 +10,7 @@ struct EditWorkoutExerciseItemView: View {
     let isInMethod: Bool // se true, nasconde il tempo di recupero (gestito dal blocco)
     var methodValidation: LoadProgressionValidation? // validazione da applicare se in un metodo
     var methodType: MethodType? // tipo di metodo (per gestire cluster set)
+    var customMethodID: UUID? // ID del metodo custom, se presente
     let cardTargetExpression: StrengthExpressionType?
 
     @State private var notes: String
@@ -17,6 +18,7 @@ struct EditWorkoutExerciseItemView: View {
     @State private var restSeconds: Int
     @State private var showingExercisePicker = false
     @State private var userProfile: UserProfile?
+    @State private var customMethod: CustomTrainingMethod?
     @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
 
     private var oneRepMax: Double? {
@@ -46,12 +48,13 @@ struct EditWorkoutExerciseItemView: View {
         return exerciseItemData.validateLoadProgression(for: validation)
     }
 
-    init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false, methodValidation: LoadProgressionValidation? = nil, methodType: MethodType? = nil, cardTargetExpression: StrengthExpressionType? = nil) {
+    init(exerciseItemData: Binding<WorkoutExerciseItemData>, exercises: [Exercise], isInMethod: Bool = false, methodValidation: LoadProgressionValidation? = nil, methodType: MethodType? = nil, customMethodID: UUID? = nil, cardTargetExpression: StrengthExpressionType? = nil) {
         self._exerciseItemData = exerciseItemData
         self.exercises = exercises
         self.isInMethod = isInMethod
         self.methodValidation = methodValidation
         self.methodType = methodType
+        self.customMethodID = customMethodID
         self.cardTargetExpression = cardTargetExpression
         _notes = State(initialValue: exerciseItemData.wrappedValue.notes ?? "")
 
@@ -63,6 +66,11 @@ struct EditWorkoutExerciseItemView: View {
     var body: some View {
         Form {
             exerciseSection
+
+            // Custom method info section
+            if let method = customMethod {
+                customMethodInfoSection(method: method)
+            }
 
             // Target expression solo per metodi repsOnly (non per EMOM, AMRAP, Circuit, Tabata)
             if methodType?.supportedSetType != .durationOnly {
@@ -92,6 +100,7 @@ struct EditWorkoutExerciseItemView: View {
         .toolbar(content: toolbarContent)
         .onAppear {
             loadUserProfile()
+            loadCustomMethod()
         }
         .appScreenBackground()
     }
@@ -167,6 +176,58 @@ struct EditWorkoutExerciseItemView: View {
                         .foregroundStyle(.yellow)
                 }
             }
+        }
+    }
+
+    private func customMethodInfoSection(method: CustomTrainingMethod) -> some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "bolt.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.purple)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(method.name)
+                            .font(.headline)
+                        Text("\(method.totalReps) ripetizioni con carico e pause variabili")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Divider()
+
+                Text("Per ogni serie imposta solo il carico base (kg o %1RM). Le ripetizioni, i carichi variabili e le pause saranno applicati automaticamente dal metodo durante l'esecuzione.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                // Preview delle configurazioni
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(method.repConfigurations.sorted(by: { $0.repOrder < $1.repOrder })) { config in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Rep \(config.repOrder)")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                                Text(config.formattedLoadPercentage)
+                                    .font(.caption)
+                                    .foregroundStyle(.purple)
+                                if config.restAfterRep > 0 {
+                                    Text(config.formattedRestTime)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .padding(8)
+                            .background(Color.purple.opacity(0.1))
+                            .cornerRadius(6)
+                        }
+                    }
+                }
+            }
+        } header: {
+            Text("Metodo Personalizzato")
         }
     }
 
@@ -258,7 +319,10 @@ struct EditWorkoutExerciseItemView: View {
 
     @ViewBuilder
     private var setsFooter: some View {
-        if isInMethod {
+        if isInMethod && customMethod != nil {
+            Text("Imposta solo il carico base. Le ripetizioni (\(customMethod?.totalReps ?? 0)) e le variazioni di carico/pause sono gestite dal metodo personalizzato.")
+                .font(.caption)
+        } else if isInMethod {
             Text("Il numero di serie è gestito dal blocco metodologia")
                 .font(.caption)
         }
@@ -267,6 +331,16 @@ struct EditWorkoutExerciseItemView: View {
     private func loadUserProfile() {
         let descriptor = FetchDescriptor<UserProfile>()
         userProfile = try? modelContext.fetch(descriptor).first
+    }
+
+    private func loadCustomMethod() {
+        guard let methodID = customMethodID else { return }
+        let descriptor = FetchDescriptor<CustomTrainingMethod>(
+            predicate: #Predicate { method in
+                method.id == methodID
+            }
+        )
+        customMethod = try? modelContext.fetch(descriptor).first
     }
 
     @ToolbarContentBuilder
@@ -288,10 +362,13 @@ struct EditWorkoutExerciseItemView: View {
     }
 
     private func addSet() {
+        // Per custom methods, le reps sono definite dal metodo
+        let repsCount = customMethod?.totalReps ?? 10
+
         let newSet = WorkoutSetData(
             order: exerciseItemData.sets.count,
             setType: .reps,
-            reps: 10,
+            reps: repsCount,
             weight: nil,
             loadType: .absolute,
             percentageOfMax: nil
