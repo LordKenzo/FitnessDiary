@@ -344,3 +344,34 @@
 "confirm.cancel" = "Cancel";
 "confirm.save" = "Save";
 "confirm.discard" = "Discard";
+
+// MARK: - Dashboard Preferences
+"preferences.dashboard.workouts" = "Recent workouts for averages";
+"preferences.dashboard.workouts.count" = "%d workouts";
+
+// MARK: - Updated Metrics
+"metrics.sessions.recent" = "Last %d workouts";
+
+// MARK: - Updated Quick Actions
+"quick.action.repeat.workout" = "Repeat Last Workout";
+"quick.action.create.exercise" = "Create Exercise";
+"quick.action.set.theme" = "Set Theme";
+
+// MARK: - Insights Section
+"section.insights" = "Insights";
+"section.insights.subtitle" = "Your data at a glance";
+"insight.avg.rpe" = "Average RPE";
+"insight.tonnage" = "Total Tonnage";
+"insight.weather" = "Weather";
+"insight.weather.placeholder" = "Not available";
+"insight.motivation" = "Motivational Quote";
+
+// MARK: - Motivational Quotes
+"quote.progress" = "Progress is not linear, it's built on consistency.";
+"quote.consistency" = "Consistency beats talent when talent isn't consistent.";
+"quote.strength" = "Strength doesn't come from the body, it comes from the will.";
+"quote.discipline" = "Discipline is doing what needs to be done even when you don't feel like it.";
+"quote.mindset" = "Your only limit is your mind.";
+"quote.journey" = "Enjoy the journey, not just the destination.";
+"quote.commitment" = "Commitment is what transforms a promise into reality.";
+"quote.perseverance" = "Perseverance is not a long race, it's many short races one after the other.";

@@ -4,6 +4,7 @@ import SwiftData
 struct DashboardView: View {
     private let calendar = Calendar.current
     @Query private var storedSessionLogs: [WorkoutSessionLog]
+    @AppStorage("dashboardWorkoutsCount") private var dashboardWorkoutsCount = 14
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @Environment(\.colorScheme) private var colorScheme
 
@@ -13,21 +14,39 @@ struct DashboardView: View {
         storedSessionLogs.sorted { $0.date > $1.date }
     }
 
+    private var recentSessions: [WorkoutSessionLog] {
+        Array(sessionLogs.prefix(dashboardWorkoutsCount))
+    }
+
     private var focusMuscles: [String] {
-        [
-            L("muscle.chest"),
-            L("muscle.back"),
-            L("muscle.legs"),
-            L("muscle.core"),
-            L("muscle.shoulders")
-        ]
+        var muscleFrequency: [String: Int] = [:]
+
+        for session in recentSessions {
+            guard let card = session.card else { continue }
+            for block in card.blocks {
+                for item in block.exerciseItems {
+                    guard let exercise = item.exercise else { continue }
+                    for muscle in exercise.primaryMuscles {
+                        muscleFrequency[muscle.name, default: 0] += 2
+                    }
+                    for muscle in exercise.secondaryMuscles {
+                        muscleFrequency[muscle.name, default: 0] += 1
+                    }
+                }
+            }
+        }
+
+        return muscleFrequency
+            .sorted { $0.value > $1.value }
+            .prefix(5)
+            .map { $0.key }
     }
 
     private var quickActions: [QuickAction] {
         [
-            QuickAction(title: L("quick.action.start.workout"), icon: "play.circle.fill", tint: .green),
-            QuickAction(title: L("quick.action.manual.log"), icon: "square.and.pencil", tint: .orange),
-            QuickAction(title: L("quick.action.set.goal"), icon: "target", tint: .purple)
+            QuickAction(title: L("quick.action.repeat.workout"), icon: "arrow.clockwise.circle.fill", tint: .blue),
+            QuickAction(title: L("quick.action.create.exercise"), icon: "plus.circle.fill", tint: .green),
+            QuickAction(title: L("quick.action.set.theme"), icon: "paintbrush.fill", tint: .purple)
         ]
     }
 
@@ -55,7 +74,7 @@ struct DashboardView: View {
                         trendSection
                         focusSection
                         quickActionsSection
-                        placeholderInsights
+                        insightsSection
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 24)
@@ -270,18 +289,94 @@ struct DashboardView: View {
         .dashboardCardStyle()
     }
 
-    private var placeholderInsights: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(title: L("section.future.insights"), subtitle: L("section.future.insights.subtitle"))
-            Text(localized: "section.future.insights.description")
-                .font(.callout)
-                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(AppTheme.chipBackground(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    private var insightsSection: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            sectionHeader(title: L("section.insights"), subtitle: L("section.insights.subtitle"))
+
+            VStack(spacing: 16) {
+                insightRow(
+                    icon: "waveform.path.ecg",
+                    title: L("insight.avg.rpe"),
+                    value: averageRPEString,
+                    tint: .orange
+                )
+
+                Divider()
+                    .overlay(AppTheme.stroke(for: colorScheme))
+
+                insightRow(
+                    icon: "scalemass.fill",
+                    title: L("insight.tonnage"),
+                    value: String(format: "%.0f kg", totalTonnage),
+                    tint: .blue
+                )
+
+                Divider()
+                    .overlay(AppTheme.stroke(for: colorScheme))
+
+                insightRow(
+                    icon: "cloud.sun.fill",
+                    title: L("insight.weather"),
+                    value: L("insight.weather.placeholder"),
+                    tint: .cyan
+                )
+
+                Divider()
+                    .overlay(AppTheme.stroke(for: colorScheme))
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        LinearGradient(
+                            colors: [Color.purple.opacity(0.9), Color.pink.opacity(0.6)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .mask {
+                            Image(systemName: "quote.bubble.fill")
+                                .font(.system(size: 22, weight: .bold))
+                        }
+                        .frame(width: 40, height: 40)
+
+                        Text(L("insight.motivation"))
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                    }
+
+                    Text(motivationalQuote)
+                        .font(.callout.italic())
+                        .foregroundStyle(.primary)
+                        .padding(.leading, 52)
+                }
+            }
         }
         .dashboardCardStyle()
+    }
+
+    private func insightRow(icon: String, title: String, value: String, tint: Color) -> some View {
+        HStack(spacing: 12) {
+            LinearGradient(
+                colors: [tint.opacity(0.9), tint.opacity(0.6)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .mask {
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .bold))
+            }
+            .frame(width: 40, height: 40)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+
+                Text(value)
+                    .font(.title3.bold())
+                    .foregroundStyle(.primary)
+            }
+
+            Spacer()
+        }
     }
 
     private func sectionHeader(title: String, subtitle: String) -> some View {
@@ -298,13 +393,13 @@ struct DashboardView: View {
         [
             MetricCard(
                 title: L("metrics.sessions"),
-                value: "\(sessionsLast30Days.count)",
-                subtitle: L("metrics.sessions.subtitle"),
+                value: "\(recentSessions.count)",
+                subtitle: String(format: L("metrics.sessions.recent"), dashboardWorkoutsCount),
                 icon: "calendar.circle"
             ),
             MetricCard(
                 title: L("metrics.duration"),
-                value: durationFormatter.string(from: totalDurationLast30Days) ?? "0h",
+                value: durationFormatter.string(from: totalDurationRecent) ?? "0h",
                 subtitle: L("metrics.duration.subtitle"),
                 icon: "clock.fill"
             ),
@@ -323,27 +418,54 @@ struct DashboardView: View {
         ]
     }
 
-    private var sessionsLast30Days: [WorkoutSessionLog] {
-        guard let threshold = calendar.date(byAdding: .day, value: -30, to: .now) else { return [] }
-        return sessionLogs.filter { $0.date >= threshold }
-    }
-
-    private var totalDurationLast30Days: TimeInterval {
-        sessionsLast30Days.reduce(0) { $0 + $1.durationSeconds }
+    private var totalDurationRecent: TimeInterval {
+        recentSessions.reduce(0) { $0 + $1.durationSeconds }
     }
 
     private var averageRPEString: String {
-        let recentRPE = sessionsLast30Days.compactMap(\.rpe)
+        let recentRPE = recentSessions.compactMap(\.rpe)
         guard !recentRPE.isEmpty else { return "—" }
         let average = Double(recentRPE.reduce(0, +)) / Double(recentRPE.count)
         return String(format: "%.1f", average)
     }
 
     private var dominantMood: WorkoutMood? {
-        let counts = sessionsLast30Days.reduce(into: [:]) { partialResult, log in
+        let counts = recentSessions.reduce(into: [:]) { partialResult, log in
             partialResult[log.mood, default: 0] += 1
         }
         return counts.max(by: { $0.value < $1.value })?.key
+    }
+
+    private var totalTonnage: Double {
+        var tonnage: Double = 0
+        for session in recentSessions {
+            guard let card = session.card else { continue }
+            for block in card.blocks {
+                for item in block.exerciseItems {
+                    for set in item.sets {
+                        if let weight = set.weight, let reps = set.reps {
+                            tonnage += weight * Double(reps)
+                        }
+                    }
+                }
+            }
+        }
+        return tonnage
+    }
+
+    private var motivationalQuote: String {
+        let quotes = [
+            L("quote.progress"),
+            L("quote.consistency"),
+            L("quote.strength"),
+            L("quote.discipline"),
+            L("quote.mindset"),
+            L("quote.journey"),
+            L("quote.commitment"),
+            L("quote.perseverance")
+        ]
+        let dayOfYear = calendar.ordinality(of: .day, in: .year, for: .now) ?? 1
+        return quotes[dayOfYear % quotes.count]
     }
 
     private var weeklyTrend: [CGFloat] {
