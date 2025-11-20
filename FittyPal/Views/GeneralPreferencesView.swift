@@ -52,22 +52,6 @@ struct GeneralPreferencesView: View {
                 .pickerStyle(.menu)
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(L("preferences.theme.title"))
-                    .font(.subheadline.weight(.semibold))
-
-                Picker("", selection: Binding(
-                    get: { appColorTheme },
-                    set: { appColorTheme = $0 }
-                )) {
-                    ForEach(AppColorTheme.allCases) { theme in
-                        Text(localized: theme.localizationKey)
-                            .tag(theme)
-                    }
-                }
-                .pickerStyle(.segmented)
-            }
-
             Toggle(L("preferences.debug.log"), isOn: $debugWorkoutLogEnabled)
                 .tint(.blue)
 

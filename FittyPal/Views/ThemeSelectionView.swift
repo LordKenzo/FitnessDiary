@@ -124,10 +124,16 @@ private struct ThemePreviewCard: View {
         case .forest:
             return Color(red: primary ? 100/255 : 120/255, green: primary ? 200/255 : 180/255, blue: primary ? 100/255 : 120/255)
                 .opacity(primary ? 0.25 : 0.18)
+        case .sunrise:
+            return Color(red: primary ? 200/255 : 180/255, green: primary ? 160/255 : 180/255, blue: primary ? 255/255 : 240/255)
+                .opacity(primary ? 0.30 : 0.20)
         case .lavender:
             return Color(red: primary ? 200/255 : 180/255, green: primary ? 160/255 : 180/255, blue: primary ? 255/255 : 240/255)
                 .opacity(primary ? 0.30 : 0.20)
         case .fittypal:
+            return Color(red: primary ? 80/255 : 100/255, green: primary ? 220/255 : 200/255, blue: primary ? 180/255 : 160/255)
+                .opacity(primary ? 0.35 : 0.25)
+        case .yellowstone:
             return Color(red: primary ? 80/255 : 100/255, green: primary ? 220/255 : 200/255, blue: primary ? 180/255 : 160/255)
                 .opacity(primary ? 0.35 : 0.25)
         case .christmas:

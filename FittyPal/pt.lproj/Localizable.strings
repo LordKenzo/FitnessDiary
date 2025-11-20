@@ -84,9 +84,11 @@
 "preferences.theme.vibrant" = "Colorido";
 "preferences.theme.ocean" = "Oceano";
 "preferences.theme.sunset" = "Pôr do sol";
+"preferences.theme.sunrise" = "Nascer do sol";
 "preferences.theme.forest" = "Floresta";
 "preferences.theme.lavender" = "Lavanda";
 "preferences.theme.fittypal" = "FittyPal";
+"preferences.theme.yellowstone" = "Yellowstone";
 "preferences.theme.christmas" = "Natal";
 "preferences.countdown" = "Contagem regressiva inicial";
 "preferences.countdown.seconds" = "%d seg";
