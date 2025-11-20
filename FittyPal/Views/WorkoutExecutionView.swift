@@ -969,7 +969,7 @@ struct WorkoutExecutionView: View {
 
                     ProgressView(value: {
                         let index = min(viewModel.currentGroupIndex, groups.count - 1)
-                        guard index >= 0, index < groups.count else { return 0 }
+                        guard index >= 0, index < groups.count else { return 0.0 }
                         let totalRest = groups[index].restAfterGroup
                         guard totalRest > 0 else { return 1.0 }
                         return 1.0 - (viewModel.groupRestRemaining / totalRest)
