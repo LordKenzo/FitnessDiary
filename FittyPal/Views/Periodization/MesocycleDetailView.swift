@@ -32,6 +32,7 @@ struct MesocycleDetailView: View {
         }
         .navigationTitle(mesocycle.name)
         .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Chiudi") {

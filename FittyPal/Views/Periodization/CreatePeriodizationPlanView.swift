@@ -75,6 +75,7 @@ struct CreatePeriodizationPlanView: View {
             }
             .navigationTitle("Nuovo Piano")
             .navigationBarTitleDisplayMode(.inline)
+            .appScreenBackground()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Annulla") {

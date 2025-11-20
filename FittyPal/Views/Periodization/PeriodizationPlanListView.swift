@@ -27,6 +27,7 @@ struct PeriodizationPlanListView: View {
                 }
             }
             .navigationTitle("Periodizzazione")
+            .appScreenBackground()
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {

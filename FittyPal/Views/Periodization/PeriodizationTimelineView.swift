@@ -33,6 +33,7 @@ struct PeriodizationTimelineView: View {
         }
         .navigationTitle(plan.name)
         .navigationBarTitleDisplayMode(.large)
+        .appScreenBackground()
         .sheet(item: $selectedMesocycle) { mesocycle in
             NavigationStack {
                 MesocycleDetailView(mesocycle: mesocycle)

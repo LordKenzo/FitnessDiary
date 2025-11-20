@@ -33,6 +33,7 @@ struct MicrocycleDetailView: View {
         }
         .navigationTitle("Settimana \(microcycle.order)")
         .navigationBarTitleDisplayMode(.inline)
+        .appScreenBackground()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Chiudi") {
