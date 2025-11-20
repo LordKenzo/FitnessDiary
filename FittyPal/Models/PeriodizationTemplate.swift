@@ -14,7 +14,7 @@ import SwiftData
 final class PeriodizationTemplate {
     var id: UUID
     var name: String
-    var description: String?
+    var periodizationDescription: String?
     var createdAt: Date
 
     // Configurazione template
@@ -61,7 +61,7 @@ final class PeriodizationTemplate {
     ) {
         self.id = id
         self.name = name
-        self.description = description
+        self.periodizationDescription = description
         self.createdAt = Date()
         self.periodizationModel = periodizationModel
         self.primaryStrengthProfile = primaryStrengthProfile

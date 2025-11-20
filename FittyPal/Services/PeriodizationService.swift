@@ -183,7 +183,7 @@ class PeriodizationService {
             primaryStrengthProfile: template.primaryStrengthProfile,
             secondaryStrengthProfile: template.secondaryStrengthProfile,
             weeklyFrequency: template.weeklyFrequency,
-            notes: template.description,
+            notes: template.periodizationDescription,
             templateId: template.id,
             userProfile: userProfile,
             client: client
