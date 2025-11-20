@@ -48,7 +48,7 @@ struct ContentView: View {
             // Dark themes: subtle dark tint with blur
             appearance.backgroundColor = UIColor.black.withAlphaComponent(0.2)
 
-        case .sunset, .lavender:
+        case .sunset, .lavender, .fittypal, .christmas:
             // Light themes: subtle white tint with blur + dark icons
             appearance.backgroundColor = UIColor.white.withAlphaComponent(0.4)
 

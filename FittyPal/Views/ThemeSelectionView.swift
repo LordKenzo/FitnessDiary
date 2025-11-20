@@ -18,7 +18,7 @@ struct ThemeSelectionView: View {
 
                     // Theme cards
                     VStack(spacing: 16) {
-                        ForEach(AppColorTheme.allCases) { theme in
+                        ForEach(ThemeManager.availableThemes) { theme in
                             ThemePreviewCard(
                                 theme: theme,
                                 isSelected: themeManager.currentTheme == theme
@@ -127,6 +127,12 @@ private struct ThemePreviewCard: View {
         case .lavender:
             return Color(red: primary ? 200/255 : 180/255, green: primary ? 160/255 : 180/255, blue: primary ? 255/255 : 240/255)
                 .opacity(primary ? 0.30 : 0.20)
+        case .fittypal:
+            return Color(red: primary ? 80/255 : 100/255, green: primary ? 220/255 : 200/255, blue: primary ? 180/255 : 160/255)
+                .opacity(primary ? 0.35 : 0.25)
+        case .christmas:
+            return Color(red: primary ? 220/255 : 180/255, green: primary ? 50/255 : 180/255, blue: primary ? 50/255 : 50/255)
+                .opacity(primary ? 0.30 : 0.22)
         }
     }
 }

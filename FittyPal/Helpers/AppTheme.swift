@@ -6,6 +6,8 @@ enum AppColorTheme: String, CaseIterable, Identifiable, Sendable {
     case sunset
     case forest
     case lavender
+    case fittypal
+    case christmas
 
     var id: String { rawValue }
 
@@ -16,6 +18,8 @@ enum AppColorTheme: String, CaseIterable, Identifiable, Sendable {
         case .sunset: return "Sunset"
         case .forest: return "Forest"
         case .lavender: return "Lavender"
+        case .fittypal: return "FittyPal"
+        case .christmas: return "Christmas"
         }
     }
 
@@ -26,13 +30,15 @@ enum AppColorTheme: String, CaseIterable, Identifiable, Sendable {
         case .sunset: return "preferences.theme.sunset"
         case .forest: return "preferences.theme.forest"
         case .lavender: return "preferences.theme.lavender"
+        case .fittypal: return "preferences.theme.fittypal"
+        case .christmas: return "preferences.theme.christmas"
         }
     }
 
     var colorScheme: ColorScheme {
         switch self {
         case .vibrant, .ocean, .forest: return .dark
-        case .sunset, .lavender: return .light
+        case .sunset, .lavender, .fittypal, .christmas: return .light
         }
     }
 
@@ -43,6 +49,38 @@ enum AppColorTheme: String, CaseIterable, Identifiable, Sendable {
         case .sunset: return "sunset.fill"
         case .forest: return "leaf.fill"
         case .lavender: return "cloud.fill"
+        case .fittypal: return "heart.fill"
+        case .christmas: return "gift.fill"
+        }
+    }
+
+    /// Seasonal themes are only available during specific date ranges
+    var isSeasonal: Bool {
+        switch self {
+        case .christmas: return true
+        default: return false
+        }
+    }
+
+    /// Check if this seasonal theme is currently available
+    func isAvailable() -> Bool {
+        guard isSeasonal else { return true }
+
+        let calendar = Calendar.current
+        let now = Date()
+        let components = calendar.dateComponents([.month, .day], from: now)
+
+        switch self {
+        case .christmas:
+            // Debug: Available Nov 20-21
+            // Production: Available Dec 1-31
+            if let month = components.month, let day = components.day {
+                return (month == 11 && day >= 20 && day <= 21) // Debug
+                // return (month == 12) // Production
+            }
+            return false
+        default:
+            return true
         }
     }
 }
@@ -62,10 +100,21 @@ class ThemeManager {
     private init() {
         if let savedTheme = UserDefaults.standard.string(forKey: "selectedTheme"),
            let theme = AppColorTheme(rawValue: savedTheme) {
-            self.currentTheme = theme
+            // Check if saved theme is seasonal and no longer available
+            if theme.isSeasonal && !theme.isAvailable() {
+                // Switch to FittyPal after seasonal theme expires
+                self.currentTheme = .fittypal
+            } else {
+                self.currentTheme = theme
+            }
         } else {
             self.currentTheme = .vibrant
         }
+    }
+
+    /// Get available themes (filtering out unavailable seasonal themes)
+    static var availableThemes: [AppColorTheme] {
+        AppColorTheme.allCases.filter { $0.isAvailable() }
     }
 }
 
@@ -120,6 +169,26 @@ enum AppTheme {
                     Color(red: 240/255, green: 235/255, blue: 255/255),
                     Color(red: 225/255, green: 215/255, blue: 250/255),
                     Color(red: 210/255, green: 195/255, blue: 245/255)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .fittypal:
+            return LinearGradient(
+                colors: [
+                    Color(red: 242/255, green: 255/255, blue: 252/255),
+                    Color(red: 204/255, green: 252/255, blue: 238/255),
+                    Color(red: 141/255, green: 233/255, blue: 198/255)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        case .christmas:
+            return LinearGradient(
+                colors: [
+                    Color(red: 255/255, green: 245/255, blue: 245/255),  // Light red/white
+                    Color(red: 230/255, green: 255/255, blue: 235/255),  // Light green/white
+                    Color(red: 255/255, green: 235/255, blue: 235/255)   // Light red
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -263,6 +332,12 @@ struct AppBackgroundView<Content: View>: View {
         case .lavender:
             return Color(red: primary ? 200/255 : 180/255, green: primary ? 160/255 : 180/255, blue: primary ? 255/255 : 240/255)
                 .opacity(primary ? 0.30 : 0.20)
+        case .fittypal:
+            return Color(red: primary ? 80/255 : 100/255, green: primary ? 220/255 : 200/255, blue: primary ? 180/255 : 160/255)
+                .opacity(primary ? 0.35 : 0.25)
+        case .christmas:
+            return Color(red: primary ? 220/255 : 180/255, green: primary ? 50/255 : 180/255, blue: primary ? 50/255 : 50/255)
+                .opacity(primary ? 0.30 : 0.22)
         }
     }
 
@@ -278,6 +353,10 @@ struct AppBackgroundView<Content: View>: View {
             return Color(red: 150/255, green: 220/255, blue: 100/255).opacity(0.22)
         case .lavender:
             return Color(red: 220/255, green: 180/255, blue: 255/255).opacity(0.25)
+        case .fittypal:
+            return Color(red: 100/255, green: 240/255, blue: 200/255).opacity(0.28)
+        case .christmas:
+            return Color(red: 80/255, green: 180/255, blue: 80/255).opacity(0.25)
         }
     }
 }

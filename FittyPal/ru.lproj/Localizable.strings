@@ -86,6 +86,8 @@
 "preferences.theme.sunset" = "Закат";
 "preferences.theme.forest" = "Лес";
 "preferences.theme.lavender" = "Лаванда";
+"preferences.theme.fittypal" = "FittyPal";
+"preferences.theme.christmas" = "Рождество";
 "preferences.countdown" = "Начальный отсчет";
 "preferences.countdown.seconds" = "%d сек";
 "preferences.language" = "Язык";

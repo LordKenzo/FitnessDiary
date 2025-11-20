@@ -86,6 +86,8 @@
 "preferences.theme.sunset" = "Sunset";
 "preferences.theme.forest" = "Forest";
 "preferences.theme.lavender" = "Lavender";
+"preferences.theme.fittypal" = "FittyPal";
+"preferences.theme.christmas" = "Christmas";
 "preferences.countdown" = "Initial countdown";
 "preferences.countdown.seconds" = "%d sec";
 "preferences.language" = "Language";
