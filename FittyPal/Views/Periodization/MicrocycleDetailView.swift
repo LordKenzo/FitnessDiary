@@ -15,7 +15,6 @@ struct MicrocycleDetailView: View {
     let microcycle: Microcycle
 
     @State private var selectedDay: TrainingDay?
-    @State private var showingWorkoutPicker = false
 
     var body: some View {
         ScrollView {
@@ -41,11 +40,9 @@ struct MicrocycleDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingWorkoutPicker) {
-            if let day = selectedDay {
-                WorkoutCardPickerView(trainingDay: day) { card in
-                    assignWorkoutToDay(card: card, day: day)
-                }
+        .sheet(item: $selectedDay) { day in
+            WorkoutCardPickerView(trainingDay: day) { card in
+                assignWorkoutToDay(card: card, day: day)
             }
         }
     }
@@ -182,7 +179,6 @@ struct MicrocycleDetailView: View {
                 ForEach(microcycle.sortedTrainingDays) { day in
                     TrainingDayCardView(day: day) {
                         selectedDay = day
-                        showingWorkoutPicker = true
                     }
                 }
             }
