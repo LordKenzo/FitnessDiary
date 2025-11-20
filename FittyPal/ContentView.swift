@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var bluetoothManager = BluetoothHeartRateManager()
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @Environment(ThemeManager.self) private var themeManager
+    @State private var isAtBottom: Bool = false
 
     var body: some View {
         TabView {
@@ -29,28 +30,36 @@ struct ContentView: View {
                 }
         }
         .appScreenBackground()
+        .environment(\.isAtBottomKey, $isAtBottom)
         .onAppear {
-            configureTabBarAppearance(for: themeManager.currentTheme)
+            configureTabBarAppearance(for: themeManager.currentTheme, isAtBottom: isAtBottom)
         }
         .onChange(of: themeManager.currentTheme) { _, newTheme in
-            configureTabBarAppearance(for: newTheme)
+            configureTabBarAppearance(for: newTheme, isAtBottom: isAtBottom)
+        }
+        .onChange(of: isAtBottom) { _, newValue in
+            configureTabBarAppearance(for: themeManager.currentTheme, isAtBottom: newValue)
         }
     }
 
-    private func configureTabBarAppearance(for theme: AppColorTheme) {
+    private func configureTabBarAppearance(for theme: AppColorTheme, isAtBottom: Bool) {
         let appearance = UITabBarAppearance()
 
         // Use transparent background with blur for all themes
         appearance.configureWithTransparentBackground()
 
+        // Adjust opacity based on scroll position
+        let darkOpacity: CGFloat = isAtBottom ? 0.1 : 0.2
+        let lightOpacity: CGFloat = isAtBottom ? 0.1 : 0.4
+
         switch theme {
         case .vibrant, .ocean, .forest:
             // Dark themes: subtle dark tint with blur
-            appearance.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+            appearance.backgroundColor = UIColor.black.withAlphaComponent(darkOpacity)
 
         case .sunset, .lavender, .fittypal, .christmas:
             // Light themes: subtle white tint with blur + dark icons
-            appearance.backgroundColor = UIColor.white.withAlphaComponent(0.4)
+            appearance.backgroundColor = UIColor.white.withAlphaComponent(lightOpacity)
 
             // Use dark icons for light themes for better contrast
             let itemAppearance = UITabBarItemAppearance()
@@ -76,6 +85,58 @@ struct ContentView: View {
                 tabBar.scrollEdgeAppearance = appearance
             }
         }
+    }
+}
+
+// MARK: - Environment Key for Bottom Detection
+private struct IsAtBottomKey: EnvironmentKey {
+    static let defaultValue: Binding<Bool> = .constant(false)
+}
+
+extension EnvironmentValues {
+    var isAtBottomKey: Binding<Bool> {
+        get { self[IsAtBottomKey.self] }
+        set { self[IsAtBottomKey.self] = newValue }
+    }
+}
+
+// MARK: - Scroll Position Tracker
+struct ScrollPositionTracker: ViewModifier {
+    @Environment(\.isAtBottomKey) private var isAtBottom
+    let threshold: CGFloat = 50 // Distance from bottom to trigger
+
+    func body(content: Content) -> some View {
+        content
+            .background(
+                GeometryReader { geometry in
+                    Color.clear.preference(
+                        key: ScrollOffsetPreferenceKey.self,
+                        value: geometry.frame(in: .named("scrollView")).minY
+                    )
+                }
+            )
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { minY in
+                // When minY is very negative, we're at the bottom
+                let isNearBottom = minY < -threshold
+                if isAtBottom.wrappedValue != isNearBottom {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isAtBottom.wrappedValue = isNearBottom
+                    }
+                }
+            }
+    }
+}
+
+private struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+extension View {
+    func trackScrollPosition() -> some View {
+        modifier(ScrollPositionTracker())
     }
 }
 
