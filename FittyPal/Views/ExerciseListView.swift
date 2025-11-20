@@ -64,22 +64,14 @@ struct ExerciseListView: View {
                             .onTapGesture {
                                 quickLookExercise = exercise
                             }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button {
-                                    editingExercise = exercise
-                                } label: {
-                                    Label(L("common.edit"), systemImage: "pencil")
-                                }
-
-                                Button(role: .destructive) {
-                                    deleteExercise(exercise)
-                                } label: {
-                                    Label(L("common.delete"), systemImage: "trash")
-                                }
+                            .overlay(alignment: .topTrailing) {
+                                menuButton(for: exercise)
+                                    .padding(18)
                             }
                     }
                 }
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
             .padding(.vertical, 24)
         }
@@ -161,7 +153,26 @@ struct ExerciseListView: View {
         }
         modelContext.delete(exercise)
     }
-    
+
+    @ViewBuilder
+    private func menuButton(for exercise: Exercise) -> some View {
+        Menu {
+            Button(L("common.edit")) {
+                editingExercise = exercise
+            }
+
+            Button(role: .destructive) {
+                deleteExercise(exercise)
+            } label: {
+                Label(L("common.delete"), systemImage: "trash")
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.title3)
+                .foregroundStyle(.secondary)
+        }
+    }
+
     private func removeAllFilters() {
         filterPrimaryMetabolism = nil
         filterBiomechanicalStructure = nil

@@ -42,6 +42,7 @@ struct EquipmentListView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
             .padding(.vertical, 24)
         }
@@ -192,17 +193,38 @@ struct AddEquipmentView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    TextField(L("equipment.name"), text: $name)
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Name Section
+                    SectionCard(title: L("equipment.name")) {
+                        TextField(L("equipment.name"), text: $name)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .textFieldStyle(.plain)
+                            .padding(12)
+                    }
 
-                    Picker(L("equipment.category"), selection: $selectedCategory) {
-                        ForEach(EquipmentCategory.allCases, id: \.self) { category in
-                            Label(category.rawValue, systemImage: category.icon)
-                                .tag(category)
+                    // Category Section
+                    SectionCard(title: L("equipment.category")) {
+                        LazyVGrid(columns: [
+                            GridItem(.flexible()),
+                            GridItem(.flexible()),
+                            GridItem(.flexible())
+                        ], spacing: 12) {
+                            ForEach(EquipmentCategory.allCases, id: \.self) { category in
+                                CategoryChip(
+                                    icon: category.icon,
+                                    label: category.rawValue,
+                                    isSelected: selectedCategory == category,
+                                    action: { selectedCategory = category }
+                                )
+                            }
                         }
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 24)
             }
             .navigationTitle(L("equipment.new.title"))
             .navigationBarTitleDisplayMode(.inline)
@@ -217,10 +239,12 @@ struct AddEquipmentView: View {
                     Button(L("common.save")) {
                         saveEquipment()
                     }
+                    .fontWeight(.semibold)
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func saveEquipment() {
@@ -238,23 +262,57 @@ struct EditEquipmentView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    TextField(L("equipment.name"), text: $equipment.name)
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Name Section
+                    SectionCard(title: L("equipment.name")) {
+                        TextField(L("equipment.name"), text: $equipment.name)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .textFieldStyle(.plain)
+                            .padding(12)
+                    }
 
-                    Picker(L("equipment.category"), selection: $equipment.category) {
-                        ForEach(EquipmentCategory.allCases, id: \.self) { category in
-                            Label(category.rawValue, systemImage: category.icon)
-                                .tag(category)
+                    // Category Section
+                    SectionCard(title: L("equipment.category")) {
+                        LazyVGrid(columns: [
+                            GridItem(.flexible()),
+                            GridItem(.flexible()),
+                            GridItem(.flexible())
+                        ], spacing: 12) {
+                            ForEach(EquipmentCategory.allCases, id: \.self) { category in
+                                CategoryChip(
+                                    icon: category.icon,
+                                    label: category.rawValue,
+                                    isSelected: equipment.category == category,
+                                    action: { equipment.category = category }
+                                )
+                            }
                         }
                     }
-                }
 
-                Section {
-                    Button(L("equipment.delete.action"), role: .destructive) {
+                    // Delete Button
+                    Button(role: .destructive) {
                         deleteEquipment()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Label(L("equipment.delete.action"), systemImage: "trash")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                            Spacer()
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color.red.opacity(0.15))
+                        )
                     }
+                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 24)
             }
             .navigationTitle(L("equipment.edit.title"))
             .navigationBarTitleDisplayMode(.inline)
@@ -263,9 +321,11 @@ struct EditEquipmentView: View {
                     Button(L("common.done")) {
                         dismiss()
                     }
+                    .fontWeight(.semibold)
                 }
             }
         }
+        .appScreenBackground()
     }
 
     private func deleteEquipment() {

@@ -25,6 +25,12 @@ struct SettingsView: View {
                             ) {
                                 GeneralPreferencesView()
                             }
+                            SettingsNavigationRow(
+                                title: L("preferences.theme.title"),
+                                iconName: "paintpalette"
+                            ) {
+                                ThemeSelectionView()
+                            }
                         }
                         SettingsSectionCard(title: L("settings.section.account")) {
                             SettingsNavigationRow(

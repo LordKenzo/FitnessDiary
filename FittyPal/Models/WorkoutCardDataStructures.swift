@@ -20,6 +20,49 @@ struct WorkoutBlockData: Identifiable {
     var tabataRecoveryBetweenRounds: TimeInterval?
 
     var exerciseItems: [WorkoutExerciseItemData]
+
+    // MARK: - Display Properties
+    // Lightweight computed properties for UI display without full model conversion
+
+    var title: String {
+        switch blockType {
+        case .method:
+            if let method = methodType {
+                return method.displayName
+            }
+            return "Metodo"
+        case .rest:
+            return "Riposo"
+        case .simple:
+            return exerciseItems.first?.exercise.name ?? "Esercizio"
+        }
+    }
+
+    var subtitle: String {
+        switch blockType {
+        case .method:
+            return "\(exerciseItems.count) esercizi • \(globalSets) serie"
+        case .rest:
+            return formattedRestTime ?? "Durata personalizzata"
+        case .simple:
+            let totalSets = exerciseItems.first?.sets.count ?? 0
+            return "\(totalSets) serie"
+        }
+    }
+
+    var formattedRestTime: String? {
+        guard let restTime = globalRestTime, restTime > 0 else { return nil }
+        let minutes = Int(restTime) / 60
+        let seconds = Int(restTime) % 60
+
+        if minutes > 0 && seconds > 0 {
+            return "\(minutes)m \(seconds)s"
+        } else if minutes > 0 {
+            return "\(minutes)m"
+        } else {
+            return "\(seconds)s"
+        }
+    }
 }
 
 /// Temporary structure for editing a workout exercise item within a block

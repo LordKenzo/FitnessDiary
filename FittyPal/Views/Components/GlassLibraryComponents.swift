@@ -8,9 +8,8 @@ struct GlassSectionCard<Content: View>: View {
     var subtitle: String? = nil
     var iconName: String
     @ViewBuilder var content: () -> Content
-
     @Environment(\.colorScheme) private var colorScheme
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(spacing: 14) {
@@ -22,7 +21,7 @@ struct GlassSectionCard<Content: View>: View {
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(colorScheme == .dark ? .white : .black)
                     )
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.title3.weight(.semibold))
@@ -33,7 +32,7 @@ struct GlassSectionCard<Content: View>: View {
                     }
                 }
             }
-
+            
             VStack(spacing: 12) {
                 content()
             }
@@ -48,9 +47,8 @@ struct GlassListRow<Trailing: View>: View {
     var iconName: String
     var iconTint: Color = .accentColor
     @ViewBuilder var trailing: () -> Trailing
-
     @Environment(\.colorScheme) private var colorScheme
-
+    
     var body: some View {
         HStack(spacing: 16) {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -61,21 +59,20 @@ struct GlassListRow<Trailing: View>: View {
                         .foregroundStyle(iconTint)
                 )
                 .frame(width: 52, height: 52)
-
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(.primary)
-
                 if let subtitle {
                     Text(subtitle)
                         .font(.caption)
                         .foregroundStyle(AppTheme.subtleText(for: colorScheme))
                 }
             }
-
+            
             Spacer(minLength: 12)
-
+            
             trailing()
         }
         .padding(16)
@@ -105,25 +102,31 @@ struct GlassEmptyStateCard<Actions: View>: View {
     let title: String
     let description: String
     @ViewBuilder var actions: () -> Actions
-
     @Environment(\.colorScheme) private var colorScheme
-
+    
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: systemImage)
                 .font(.system(size: 48, weight: .semibold))
                 .foregroundStyle(.orange)
-
+                .frame(maxWidth: .infinity, alignment: .center)
+            
             VStack(spacing: 6) {
                 Text(title)
                     .font(.title3.weight(.semibold))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                
                 Text(description)
                     .font(.callout)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
-
-            actions()
+            
+            if !(actions() is EmptyView) {
+                actions()
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
         }
         .multilineTextAlignment(.center)
         .dashboardCardStyle()
