@@ -198,10 +198,10 @@ class PeriodizationService {
     /// Salva un piano come template
     /// - Parameter plan: Piano da salvare come template
     /// - Returns: Template creato
-    func savePlanAsTemplate(_ plan: PeriodizationPlan, name: String, description: String? = nil) -> PeriodizationTemplate {
+    func savePlanAsTemplate(_ plan: PeriodizationPlan, name: String, periodizationDescription: String? = nil) -> PeriodizationTemplate {
         let template = PeriodizationTemplate(
             name: name,
-            description: description,
+            periodizationDescription: periodizationDescription,
             periodizationModel: plan.periodizationModel,
             primaryStrengthProfile: plan.primaryStrengthProfile,
             secondaryStrengthProfile: plan.secondaryStrengthProfile,

@@ -46,7 +46,7 @@ final class PeriodizationTemplate {
     init(
         id: UUID = UUID(),
         name: String,
-        description: String? = nil,
+        periodizationDescription: String? = nil,
         periodizationModel: PeriodizationModel,
         primaryStrengthProfile: StrengthExpressionType,
         secondaryStrengthProfile: StrengthExpressionType? = nil,
@@ -61,7 +61,7 @@ final class PeriodizationTemplate {
     ) {
         self.id = id
         self.name = name
-        self.periodizationDescription = description
+        self.periodizationDescription = periodizationDescription
         self.createdAt = Date()
         self.periodizationModel = periodizationModel
         self.primaryStrengthProfile = primaryStrengthProfile
