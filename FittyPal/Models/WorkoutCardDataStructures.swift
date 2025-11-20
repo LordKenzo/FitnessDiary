@@ -8,6 +8,8 @@ struct WorkoutBlockData: Identifiable {
     let id = UUID()
     var blockType: BlockType
     var methodType: MethodType?
+    var customMethodID: UUID?
+    var customMethodName: String? // Cached name for display
     var order: Int
     var globalSets: Int
     var globalRestTime: TimeInterval?
@@ -31,6 +33,8 @@ struct WorkoutBlockData: Identifiable {
                 return method.displayName
             }
             return "Metodo"
+        case .customMethod:
+            return customMethodName ?? "Metodo Custom"
         case .rest:
             return "Riposo"
         case .simple:
@@ -40,7 +44,7 @@ struct WorkoutBlockData: Identifiable {
 
     var subtitle: String {
         switch blockType {
-        case .method:
+        case .method, .customMethod:
             return "\(exerciseItems.count) esercizi • \(globalSets) serie"
         case .rest:
             return formattedRestTime ?? "Durata personalizzata"

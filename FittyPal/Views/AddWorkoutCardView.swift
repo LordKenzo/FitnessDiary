@@ -19,6 +19,7 @@ struct AddWorkoutCardView: View {
     @State private var workoutBlocks: [WorkoutBlockData] = []
     @State private var showingExercisePicker = false
     @State private var showingMethodSelection = false
+    @State private var showingCustomMethodSelection = false
     @State private var showingAddBlockMenu = false
 
     var body: some View {
@@ -89,6 +90,11 @@ struct AddWorkoutCardView: View {
                     addMethodBlock(method)
                 }
             }
+            .sheet(isPresented: $showingCustomMethodSelection) {
+                CustomMethodSelectionView { customMethod in
+                    addCustomMethodBlock(customMethod)
+                }
+            }
             .confirmationDialog("Aggiungi Blocco", isPresented: $showingAddBlockMenu) {
                 Button {
                     showingExercisePicker = true
@@ -100,6 +106,12 @@ struct AddWorkoutCardView: View {
                     showingMethodSelection = true
                 } label: {
                     Label("Con Metodo", systemImage: "bolt.horizontal.fill")
+                }
+
+                Button {
+                    showingCustomMethodSelection = true
+                } label: {
+                    Label("Con Metodo Custom", systemImage: "bolt.circle.fill")
                 }
 
                 Button {
@@ -353,6 +365,10 @@ struct AddWorkoutCardView: View {
 
     private func addMethodBlock(_ method: MethodType) {
         WorkoutBlockHelper.addMethodBlock(to: &workoutBlocks, method: method)
+    }
+
+    private func addCustomMethodBlock(_ customMethod: CustomTrainingMethod) {
+        WorkoutBlockHelper.addCustomMethodBlock(to: &workoutBlocks, customMethod: customMethod)
     }
 
     private func addRestBlock() {

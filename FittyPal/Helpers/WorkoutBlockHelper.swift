@@ -37,6 +37,22 @@ class WorkoutBlockHelper {
         blocks.append(newBlock)
     }
 
+    /// Adds a custom method block to the blocks array
+    static func addCustomMethodBlock(to blocks: inout [WorkoutBlockData], customMethod: CustomTrainingMethod) {
+        let newBlock = WorkoutBlockData(
+            blockType: .customMethod,
+            methodType: nil,
+            customMethodID: customMethod.id,
+            customMethodName: customMethod.name,
+            order: blocks.count,
+            globalSets: 3,
+            globalRestTime: 120,
+            notes: nil,
+            exerciseItems: []
+        )
+        blocks.append(newBlock)
+    }
+
     /// Adds a rest block to the blocks array
     static func addRestBlock(to blocks: inout [WorkoutBlockData]) {
         let newBlock = WorkoutBlockData(
@@ -73,6 +89,7 @@ class WorkoutBlockHelper {
             order: blockData.order,
             blockType: blockData.blockType,
             methodType: blockData.methodType,
+            customMethodID: blockData.customMethodID,
             globalSets: blockData.globalSets,
             globalRestTime: blockData.globalRestTime,
             notes: blockData.notes,

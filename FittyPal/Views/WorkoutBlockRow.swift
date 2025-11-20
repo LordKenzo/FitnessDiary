@@ -71,6 +71,8 @@ private extension WorkoutBlockRow {
     var blockColor: Color {
         if block.blockType == .method, let method = block.methodType {
             return method.color
+        } else if block.blockType == .customMethod {
+            return .purple
         } else if block.blockType == .rest {
             return .orange
         }
@@ -80,6 +82,8 @@ private extension WorkoutBlockRow {
     var blockIcon: String {
         if block.blockType == .method, let method = block.methodType {
             return method.icon
+        } else if block.blockType == .customMethod {
+            return "bolt.circle.fill"
         } else if block.blockType == .rest {
             return "moon.zzz.fill"
         }
@@ -89,11 +93,13 @@ private extension WorkoutBlockRow {
     var blockTitle: String {
         switch block.blockType {
         case .method:
-            return block.methodType?.rawValue ?? block.title
+            return block.methodType?.rawValue ?? block.title()
+        case .customMethod:
+            return block.title()
         case .rest:
             return BlockType.rest.rawValue
         case .simple:
-            return block.title
+            return block.title()
         }
     }
 

@@ -81,6 +81,12 @@ struct SettingsView: View {
                             ) {
                                 ExerciseListView()
                             }
+                            SettingsNavigationRow(
+                                title: "Metodi Custom",
+                                iconName: "bolt.circle.fill"
+                            ) {
+                                CustomMethodsListView()
+                            }
                         }
                         SettingsSectionCard(title: L("settings.section.legal")) {
                             if let privacyURL = SupportResources.privacyPolicyURL {
