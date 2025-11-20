@@ -7,26 +7,26 @@
 
 import Foundation
 import CoreLocation
-import Observation
+import Combine
 
 @MainActor
-@Observable
 class LocationManager: NSObject, ObservableObject {
     static let shared = LocationManager()
 
-    private let locationManager = CLLocationManager()
+    @Published var currentLocation: CLLocation?
+    @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
 
-    var currentLocation: CLLocation?
-    var authorizationStatus: CLAuthorizationStatus = .notDetermined
     var isAuthorized: Bool {
         authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways
     }
 
+    private let locationManager = CLLocationManager()
+
     private override init() {
         super.init()
+        authorizationStatus = locationManager.authorizationStatus
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
-        authorizationStatus = locationManager.authorizationStatus
     }
 
     func requestPermission() {
@@ -46,8 +46,11 @@ class LocationManager: NSObject, ObservableObject {
 
 extension LocationManager: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        Task { @MainActor in
-            guard let location = locations.last else { return }
+        guard let location = locations.last else { return }
+
+        // Update properties on main actor
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
             self.currentLocation = location
 
             // Fetch weather when location is updated
@@ -59,15 +62,20 @@ extension LocationManager: CLLocationManagerDelegate {
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        #if DEBUG
         print("Location error: \(error.localizedDescription)")
+        #endif
     }
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        Task { @MainActor in
-            self.authorizationStatus = manager.authorizationStatus
+        let status = manager.authorizationStatus
+
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
+            self.authorizationStatus = status
 
             if self.isAuthorized {
-                manager.requestLocation()
+                self.requestLocation()
             }
         }
     }
