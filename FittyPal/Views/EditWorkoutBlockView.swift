@@ -104,6 +104,32 @@ struct EditWorkoutBlockView: View {
                 }
             }
 
+            // Custom Method parameters section
+            if blockData.blockType == .customMethod {
+                Section("Parametri Blocco") {
+                    Stepper("Serie: \(globalSets)", value: $globalSets, in: 1...20)
+                        .onChange(of: globalSets) { _, _ in
+                            syncExerciseSetsInRealTime()
+                        }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundStyle(.purple)
+                            Text("Recupero gestito dal metodo personalizzato")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Text("Le pause tra ripetizioni e i carichi variabili sono definiti nel metodo custom.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    TextField("Note (opzionale)", text: $notes, axis: .vertical)
+                        .lineLimit(2...4)
+                }
+            }
+
             if blockData.blockType == .rest {
                 Section("Durata Riposo") {
                     VStack(alignment: .leading, spacing: 8) {
@@ -212,9 +238,10 @@ struct EditWorkoutBlockView: View {
                             EditWorkoutExerciseItemView(
                                 exerciseItemData: $blockData.exerciseItems[index],
                                 exercises: exercises,
-                                isInMethod: blockData.blockType == .method,
+                                isInMethod: blockData.blockType == .method || blockData.blockType == .customMethod,
                                 methodValidation: blockData.methodType?.loadProgressionValidation,
                                 methodType: blockData.methodType,
+                                customMethodID: blockData.customMethodID,
                                 cardTargetExpression: cardTargetExpression
                             )
                         } label: {
