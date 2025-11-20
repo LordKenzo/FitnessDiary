@@ -287,7 +287,9 @@ class PeriodizationGenerator {
 
             // 3. Per ogni microciclo, genera giorni
             for microcycle in microcycles {
-                let days = generateTrainingDays(for: microcycle, weeklyFrequency: plan.weeklyFrequency)
+                // Usa i giorni configurati nel piano se disponibili, altrimenti usa il pattern di default
+                let trainingDays = plan.hasTrainingDaysConfigured ? plan.trainingDaysRaw : nil
+                let days = generateTrainingDays(for: microcycle, weeklyFrequency: plan.weeklyFrequency, trainingDays: trainingDays)
                 microcycle.trainingDays = days
             }
         }

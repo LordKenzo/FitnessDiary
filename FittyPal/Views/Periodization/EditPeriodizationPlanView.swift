@@ -26,6 +26,8 @@ struct EditPeriodizationPlanView: View {
     @State private var weeklyFrequency: Int = 3
     @State private var notes: String = ""
     @State private var selectedFolders: [PeriodizationFolder] = []
+    @State private var selectedTrainingDays: [Weekday] = []
+    @State private var showingWeekdaySelection = false
 
     var body: some View {
         NavigationStack {
@@ -46,6 +48,9 @@ struct EditPeriodizationPlanView: View {
 
                 // Sezione Frequenza
                 frequencySection
+
+                // Sezione Giorni Allenamento
+                trainingDaysSection
 
                 // Sezione Mesocicli
                 if !plan.mesocycles.isEmpty {
@@ -143,12 +148,74 @@ struct EditPeriodizationPlanView: View {
     private var frequencySection: some View {
         Section {
             Stepper("Frequenza: \(weeklyFrequency)x/settimana", value: $weeklyFrequency, in: 1...7)
+                .onChange(of: weeklyFrequency) { oldValue, newValue in
+                    // Se cambio frequenza, resetto i giorni selezionati
+                    if selectedTrainingDays.count != newValue {
+                        selectedTrainingDays = []
+                    }
+                }
 
             Text(frequencyDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         } header: {
             Text("Frequenza Settimanale")
+        }
+    }
+
+    private var trainingDaysSection: some View {
+        Section {
+            Button {
+                showingWeekdaySelection = true
+            } label: {
+                HStack {
+                    Image(systemName: "calendar")
+                        .foregroundStyle(.blue)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Giorni di Allenamento")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.primary)
+
+                        if selectedTrainingDays.isEmpty {
+                            Text("Seleziona \(weeklyFrequency) giorni")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        } else if selectedTrainingDays.count != weeklyFrequency {
+                            Text("\(selectedTrainingDays.count)/\(weeklyFrequency) giorni selezionati")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        } else {
+                            HStack(spacing: 6) {
+                                ForEach(selectedTrainingDays) { day in
+                                    Text(day.shortName)
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.blue.opacity(0.1))
+                                        .foregroundStyle(.blue)
+                                        .clipShape(Capsule())
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+        } header: {
+            Text("Pianificazione")
+        } footer: {
+            Text("Scegli in quali giorni della settimana ti allenerai. Questi giorni saranno validi per tutto il piano.")
+        }
+        .sheet(isPresented: $showingWeekdaySelection) {
+            WeekdaySelectionView(selectedDays: $selectedTrainingDays, requiredCount: weeklyFrequency)
         }
     }
 
@@ -300,6 +367,7 @@ struct EditPeriodizationPlanView: View {
         weeklyFrequency = plan.weeklyFrequency
         notes = plan.notes ?? ""
         selectedFolders = plan.folders
+        selectedTrainingDays = plan.trainingDays
     }
 
     // MARK: - Actions
@@ -313,6 +381,7 @@ struct EditPeriodizationPlanView: View {
         plan.weeklyFrequency = weeklyFrequency
         plan.notes = notes.isEmpty ? nil : notes
         plan.folders = selectedFolders
+        plan.trainingDays = selectedTrainingDays
 
         try? modelContext.save()
         dismiss()

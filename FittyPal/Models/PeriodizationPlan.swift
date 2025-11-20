@@ -28,6 +28,10 @@ final class PeriodizationPlan {
     // RF1: Frequenza settimanale (numero allenamenti/settimana)
     var weeklyFrequency: Int
 
+    // Giorni settimanali di allenamento (rawValues di Weekday)
+    // Esempio: [2, 4, 6] = Lunedì, Mercoledì, Venerdì
+    var trainingDaysRaw: [Int] = []
+
     // Opzionale: note e descrizione
     var notes: String?
 
@@ -79,6 +83,21 @@ final class PeriodizationPlan {
     }
 
     // MARK: - Computed Properties
+
+    /// Giorni di allenamento come enum Weekday
+    var trainingDays: [Weekday] {
+        get {
+            trainingDaysRaw.compactMap { Weekday(rawValue: $0) }.sorted { $0.rawValue < $1.rawValue }
+        }
+        set {
+            trainingDaysRaw = newValue.map { $0.rawValue }
+        }
+    }
+
+    /// Verifica se i giorni di allenamento sono configurati
+    var hasTrainingDaysConfigured: Bool {
+        !trainingDaysRaw.isEmpty
+    }
 
     /// Durata totale in giorni
     var durationInDays: Int {
