@@ -48,6 +48,10 @@ extension LocationManager: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
 
+        #if DEBUG
+        print("📍 Location updated: \(location.coordinate.latitude), \(location.coordinate.longitude)")
+        #endif
+
         // Update properties on main actor
         Task { @MainActor [weak self] in
             guard let self = self else { return }
@@ -70,12 +74,32 @@ extension LocationManager: CLLocationManagerDelegate {
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let status = manager.authorizationStatus
 
+        #if DEBUG
+        let statusName: String
+        switch status {
+        case .notDetermined: statusName = "Not Determined"
+        case .restricted: statusName = "Restricted"
+        case .denied: statusName = "Denied"
+        case .authorizedAlways: statusName = "Authorized Always"
+        case .authorizedWhenInUse: statusName = "Authorized When In Use"
+        @unknown default: statusName = "Unknown"
+        }
+        print("📍 Location authorization changed: \(statusName)")
+        #endif
+
         Task { @MainActor [weak self] in
             guard let self = self else { return }
             self.authorizationStatus = status
 
             if self.isAuthorized {
+                #if DEBUG
+                print("   ✅ Location authorized, requesting location...")
+                #endif
                 self.requestLocation()
+            } else {
+                #if DEBUG
+                print("   ❌ Location not authorized")
+                #endif
             }
         }
     }

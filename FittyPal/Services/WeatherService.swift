@@ -95,8 +95,16 @@ class WeatherService: ObservableObject {
 
     /// Fetch weather for coordinates
     func fetchWeather(latitude: Double, longitude: Double) async {
+        #if DEBUG
+        print("🌤️ Fetching weather for: \(latitude), \(longitude)")
+        print("   API configured: \(APIConfiguration.isWeatherAPIConfigured)")
+        #endif
+
         guard APIConfiguration.isWeatherAPIConfigured else {
             errorMessage = "Weather API not configured"
+            #if DEBUG
+            print("❌ Weather API not configured!")
+            #endif
             return
         }
 
@@ -106,9 +114,16 @@ class WeatherService: ObservableObject {
         let query = "\(latitude),\(longitude)"
         let urlString = "\(baseURL)/current.json?key=\(apiKey)&q=\(query)&aqi=no"
 
+        #if DEBUG
+        print("   URL: \(urlString.replacingOccurrences(of: apiKey, with: "***KEY***"))")
+        #endif
+
         guard let url = URL(string: urlString) else {
             errorMessage = "Invalid URL"
             isLoading = false
+            #if DEBUG
+            print("❌ Invalid URL")
+            #endif
             return
         }
 
@@ -118,12 +133,24 @@ class WeatherService: ObservableObject {
             guard let httpResponse = response as? HTTPURLResponse else {
                 errorMessage = "Invalid response"
                 isLoading = false
+                #if DEBUG
+                print("❌ Invalid HTTP response")
+                #endif
                 return
             }
 
+            #if DEBUG
+            print("   HTTP Status: \(httpResponse.statusCode)")
+            #endif
+
             guard httpResponse.statusCode == 200 else {
+                let responseBody = String(data: data, encoding: .utf8) ?? "No body"
                 errorMessage = "HTTP Error: \(httpResponse.statusCode)"
                 isLoading = false
+                #if DEBUG
+                print("❌ HTTP Error \(httpResponse.statusCode)")
+                print("   Response: \(responseBody)")
+                #endif
                 return
             }
 
@@ -133,9 +160,22 @@ class WeatherService: ObservableObject {
             self.location = weatherResponse.location
             self.isLoading = false
 
+            #if DEBUG
+            print("✅ Weather fetched successfully!")
+            print("   Location: \(weatherResponse.location.name)")
+            print("   Temperature: \(weatherResponse.current.temp_c)°C")
+            print("   Condition: \(weatherResponse.current.condition.text)")
+            #endif
+
         } catch {
             errorMessage = error.localizedDescription
             isLoading = false
+            #if DEBUG
+            print("❌ Error fetching weather: \(error)")
+            if let decodingError = error as? DecodingError {
+                print("   Decoding error details: \(decodingError)")
+            }
+            #endif
         }
     }
 
