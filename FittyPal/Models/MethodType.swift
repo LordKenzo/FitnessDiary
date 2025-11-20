@@ -33,6 +33,11 @@ enum MethodType: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    // Nome visualizzato per l'UI
+    var displayName: String {
+        return rawValue
+    }
+
     // Icona SF Symbol per ogni metodologia
     var icon: String {
         switch self {
