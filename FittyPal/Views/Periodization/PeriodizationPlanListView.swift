@@ -15,6 +15,7 @@ struct PeriodizationPlanListView: View {
     @State private var selectedPlan: PeriodizationPlan?
     @State private var showingPlanDetail = false
     @State private var showingEditPlan = false
+    @State private var showingAddFolder = false
     
     var body: some View {
         NavigationStack {
@@ -29,10 +30,20 @@ struct PeriodizationPlanListView: View {
             .appScreenBackground()
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingCreatePlan = true
+                    Menu {
+                        Button {
+                            showingCreatePlan = true
+                        } label: {
+                            Label("Nuovo Piano", systemImage: "calendar.badge.plus")
+                        }
+
+                        Button {
+                            showingAddFolder = true
+                        } label: {
+                            Label("Nuovo Folder", systemImage: "folder.badge.plus")
+                        }
                     } label: {
-                        Label("Nuovo Piano", systemImage: "plus")
+                        Image(systemName: "plus")
                     }
                 }
             }
@@ -41,6 +52,9 @@ struct PeriodizationPlanListView: View {
             }
             .sheet(item: $selectedPlan) { plan in
                 EditPeriodizationPlanView(plan: plan)
+            }
+            .sheet(isPresented: $showingAddFolder) {
+                AddPeriodizationFolderView()
             }
         }
     }
