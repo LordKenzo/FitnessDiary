@@ -55,6 +55,19 @@ struct EditCustomMethodView: View {
                 } footer: {
                     Text("Imposta la percentuale di carico (relativa alla prima rep) e la pausa dopo ogni ripetizione.")
                 }
+
+                // Preview section showing how reps will be grouped during execution
+                Section {
+                    executionGroupsPreview
+                } header: {
+                    HStack {
+                        Image(systemName: "eye")
+                            .foregroundColor(.purple)
+                        Text("Anteprima Esecuzione")
+                    }
+                } footer: {
+                    Text("Così verranno raggruppate le ripetizioni durante l'allenamento. Ripetizioni consecutive con stesso carico e stessa pausa vengono confermate insieme.")
+                }
             }
         }
         .navigationTitle(method == nil ? "Nuovo Metodo" : "Modifica Metodo")
@@ -77,6 +90,42 @@ struct EditCustomMethodView: View {
             loadMethodData()
         }
     }
+
+    // MARK: - Execution Preview
+
+    private var executionGroupsPreview: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Create temporary method to test grouping
+            let tempConfigs = repConfigurations.map { state in
+                CustomRepConfiguration(
+                    id: state.id,
+                    repOrder: state.repOrder,
+                    loadPercentage: state.loadPercentage,
+                    restAfterRep: state.restAfterRep
+                )
+            }
+
+            let tempMethod = CustomTrainingMethod(
+                name: "Preview",
+                repConfigurations: tempConfigs
+            )
+
+            let groups = tempMethod.createRepGroups(baseLoad: 100.0)
+
+            if groups.isEmpty {
+                Text("Configura le ripetizioni per vedere l'anteprima")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .italic()
+            } else {
+                ForEach(Array(groups.enumerated()), id: \.offset) { index, group in
+                    GroupPreviewCard(group: group, groupNumber: index + 1)
+                }
+            }
+        }
+    }
+
+    // MARK: - Data Management
 
     private func loadMethodData() {
         if let method = method {
@@ -270,6 +319,100 @@ struct RepConfigurationRow: View {
                             .foregroundColor(.secondary)
                     }
                 }
+            }
+        }
+    }
+}
+
+// MARK: - Group Preview Card
+
+struct GroupPreviewCard: View {
+    let group: RepGroup
+    let groupNumber: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Group header
+            HStack {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.purple)
+                        .font(.caption)
+                    Text("Gruppo \(groupNumber)")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.purple)
+                }
+
+                Spacer()
+
+                Text(group.repRange)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            // Group details
+            HStack(alignment: .top, spacing: 12) {
+                // Load info
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "scalemass")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text("Carico")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    HStack(spacing: 4) {
+                        Text("\(group.formattedLoad) kg")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        if group.loadPercentage != 0 {
+                            Text("(\(group.formattedLoadPercentage))")
+                                .font(.caption)
+                                .foregroundColor(group.loadPercentage > 0 ? .green : .red)
+                        }
+                    }
+                }
+
+                Divider()
+
+                // Rest info
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "timer")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text("Pausa dopo")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Text(formatRestTime(group.restAfterGroup))
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+
+                Spacer()
+            }
+        }
+        .padding(12)
+        .background(Color.purple.opacity(0.08))
+        .cornerRadius(10)
+    }
+
+    private func formatRestTime(_ time: TimeInterval) -> String {
+        let seconds = Int(time)
+        if seconds == 0 {
+            return "Nessuna"
+        } else if seconds < 60 {
+            return "\(seconds)s"
+        } else {
+            let minutes = seconds / 60
+            let remainingSeconds = seconds % 60
+            if remainingSeconds == 0 {
+                return "\(minutes)m"
+            } else {
+                return "\(minutes)m \(remainingSeconds)s"
             }
         }
     }
