@@ -363,8 +363,6 @@
 "section.insights.subtitle" = "Your data at a glance";
 "insight.avg.rpe" = "Average RPE";
 "insight.tonnage" = "Total Tonnage";
-"insight.weather" = "Weather";
-"insight.weather.placeholder" = "Not available";
 "insight.motivation" = "Motivational Quote";
 
 // MARK: - Motivational Quotes
@@ -376,9 +374,3 @@
 "quote.journey" = "Enjoy the journey, not just the destination.";
 "quote.commitment" = "Commitment is what transforms a promise into reality.";
 "quote.perseverance" = "Perseverance is not a long race, it's many short races one after the other.";
-
-// MARK: - Weather and Workout Suggestions
-"insight.weather.location.denied" = "Location permission denied";
-"workout.suggestion.outdoor.short" = "Outdoor";
-"workout.suggestion.indoor.short" = "Indoor";
-"workout.suggestion.caution.short" = "Caution";
