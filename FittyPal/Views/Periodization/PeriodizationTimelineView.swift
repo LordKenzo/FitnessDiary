@@ -18,6 +18,8 @@ struct PeriodizationTimelineView: View {
     @State private var showingMesocycleDetail = false
     @State private var isGenerating = false
     @State private var showingEditPlan = false
+    @State private var editMode: EditMode = .inactive
+    @State private var editingMesocycle: Mesocycle?
 
     var body: some View {
         ScrollView {
@@ -37,11 +39,21 @@ struct PeriodizationTimelineView: View {
         .navigationBarTitleDisplayMode(.large)
         .appScreenBackground()
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                if !plan.mesocycles.isEmpty {
+                    Button(editMode == .active ? "Fine" : "Modifica") {
+                        withAnimation {
+                            editMode = editMode == .active ? .inactive : .active
+                        }
+                    }
+                }
+            }
+
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingEditPlan = true
                 } label: {
-                    Label("Modifica", systemImage: "pencil")
+                    Label("Modifica Piano", systemImage: "pencil")
                 }
             }
         }
@@ -52,6 +64,9 @@ struct PeriodizationTimelineView: View {
         }
         .sheet(isPresented: $showingEditPlan) {
             EditPeriodizationPlanView(plan: plan)
+        }
+        .sheet(item: $editingMesocycle) { mesocycle in
+            EditMesocycleView(mesocycle: mesocycle)
         }
     }
 
@@ -150,21 +165,46 @@ struct PeriodizationTimelineView: View {
 
     private var mesocyclesTimelineSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Timeline Mesocicli")
-                .font(.headline)
-                .fontWeight(.bold)
+            HStack {
+                Text("Timeline Mesocicli")
+                    .font(.headline)
+                    .fontWeight(.bold)
+
+                if editMode == .active {
+                    Spacer()
+                    Text("Trascina per riordinare")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             if plan.mesocycles.isEmpty {
                 emptyStateView
+            } else if editMode == .active {
+                // Edit mode: lista con drag-and-drop
+                VStack(spacing: 12) {
+                    ForEach(sortedMesocycles) { mesocycle in
+                        MesocycleBarView(mesocycle: mesocycle, editMode: true)
+                            .onTapGesture {
+                                editingMesocycle = mesocycle
+                            }
+                    }
+                    .onMove(perform: moveMesocycles)
+                }
             } else {
-                ForEach(plan.mesocycles.sorted(by: { $0.order < $1.order })) { mesocycle in
-                    MesocycleBarView(mesocycle: mesocycle)
+                // View mode: lista normale navigabile
+                ForEach(sortedMesocycles) { mesocycle in
+                    MesocycleBarView(mesocycle: mesocycle, editMode: false)
                         .onTapGesture {
                             selectedMesocycle = mesocycle
                         }
                 }
             }
         }
+    }
+
+    private var sortedMesocycles: [Mesocycle] {
+        plan.mesocycles.sorted(by: { $0.order < $1.order })
     }
 
     private var emptyStateView: some View {
@@ -230,6 +270,19 @@ struct PeriodizationTimelineView: View {
             isGenerating = false
         }
     }
+
+    private func moveMesocycles(from source: IndexSet, to destination: Int) {
+        var mesocycles = sortedMesocycles
+        mesocycles.move(fromOffsets: source, toOffset: destination)
+
+        // Aggiorna l'order di ogni mesociclo
+        for (index, mesocycle) in mesocycles.enumerated() {
+            mesocycle.order = index + 1
+        }
+
+        // Salva
+        try? modelContext.save()
+    }
 }
 
 // MARK: - Mesocycle Bar View
@@ -237,11 +290,19 @@ struct PeriodizationTimelineView: View {
 /// Vista istogramma per singolo mesociclo
 struct MesocycleBarView: View {
     let mesocycle: Mesocycle
+    var editMode: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Header con numero e nome
             HStack {
+                if editMode {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.trailing, 4)
+                }
+
                 Text("M\(mesocycle.order)")
                     .font(.caption)
                     .fontWeight(.bold)
@@ -257,9 +318,9 @@ struct MesocycleBarView: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
+                Image(systemName: editMode ? "pencil.circle" : "chevron.right")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(editMode ? .blue : .secondary)
             }
 
             // Barra visuale con informazioni
