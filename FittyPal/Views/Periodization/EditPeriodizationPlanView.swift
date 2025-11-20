@@ -12,6 +12,7 @@ import SwiftData
 struct EditPeriodizationPlanView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query(sort: \PeriodizationFolder.order) private var folders: [PeriodizationFolder]
 
     let plan: PeriodizationPlan
 
@@ -24,12 +25,18 @@ struct EditPeriodizationPlanView: View {
     @State private var useSecondaryProfile: Bool = false
     @State private var weeklyFrequency: Int = 3
     @State private var notes: String = ""
+    @State private var selectedFolders: [PeriodizationFolder] = []
 
     var body: some View {
         NavigationStack {
             Form {
                 // Sezione Info Base
                 basicInfoSection
+
+                // Sezione Organizzazione
+                if !folders.isEmpty {
+                    organizationSection
+                }
 
                 // Sezione Date
                 datesSection
@@ -193,6 +200,64 @@ struct EditPeriodizationPlanView: View {
         }
     }
 
+    private var organizationSection: some View {
+        Section {
+            NavigationLink {
+                PeriodizationFolderSelectionView(
+                    selectedFolders: $selectedFolders,
+                    folders: folders
+                )
+            } label: {
+                HStack {
+                    Image(systemName: "folder.fill")
+                        .foregroundStyle(.orange)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Folder")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+
+                        if selectedFolders.isEmpty {
+                            Text("Nessuna cartella selezionata")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            HStack(spacing: 6) {
+                                ForEach(selectedFolders.prefix(2)) { folder in
+                                    HStack(spacing: 4) {
+                                        Circle()
+                                            .fill(folder.color)
+                                            .frame(width: 8, height: 8)
+                                        Text(folder.name)
+                                            .font(.caption)
+                                    }
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(folder.color.opacity(0.1))
+                                    .clipShape(Capsule())
+                                }
+
+                                if selectedFolders.count > 2 {
+                                    Text("+\(selectedFolders.count - 2)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+        } header: {
+            Text("Organizzazione")
+        }
+    }
+
     // MARK: - Helpers
 
     private var isFormValid: Bool {
@@ -234,6 +299,7 @@ struct EditPeriodizationPlanView: View {
         useSecondaryProfile = plan.secondaryStrengthProfile != nil
         weeklyFrequency = plan.weeklyFrequency
         notes = plan.notes ?? ""
+        selectedFolders = plan.folders
     }
 
     // MARK: - Actions
@@ -246,6 +312,7 @@ struct EditPeriodizationPlanView: View {
         plan.secondaryStrengthProfile = useSecondaryProfile ? secondaryProfile : nil
         plan.weeklyFrequency = weeklyFrequency
         plan.notes = notes.isEmpty ? nil : notes
+        plan.folders = selectedFolders
 
         try? modelContext.save()
         dismiss()
