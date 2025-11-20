@@ -37,9 +37,6 @@ struct CreatePeriodizationPlanView: View {
     @State private var autoGenerate: Bool = true
     @State private var mesocycleDurationWeeks: Int = 4
 
-    // Navigation
-    @State private var createdPlan: PeriodizationPlan?
-    @State private var navigateToTimeline = false
 
     init(userProfile: UserProfile? = nil, client: Client? = nil) {
         self.userProfile = userProfile
@@ -88,11 +85,6 @@ struct CreatePeriodizationPlanView: View {
                         createPlan()
                     }
                     .disabled(!isFormValid)
-                }
-            }
-            .navigationDestination(isPresented: $navigateToTimeline) {
-                if let plan = createdPlan {
-                    PeriodizationTimelineView(plan: plan)
                 }
             }
         }
@@ -309,9 +301,8 @@ struct CreatePeriodizationPlanView: View {
         // Salva
         try? modelContext.save()
 
-        // Naviga alla timeline
-        createdPlan = plan
-        navigateToTimeline = true
+        // Chiudi la vista - l'utente tornerà alla lista
+        dismiss()
     }
 }
 

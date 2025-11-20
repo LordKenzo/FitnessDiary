@@ -19,7 +19,9 @@ struct WorkoutCardPickerView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            ZStack {
+                Color(.systemBackground).ignoresSafeArea()
+
                 if filteredCards.isEmpty {
                     emptyStateView
                 } else {
@@ -70,7 +72,7 @@ struct WorkoutCardPickerView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
         }
-        .frame(maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Helpers

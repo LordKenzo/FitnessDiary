@@ -77,45 +77,58 @@ struct PeriodizationPlanListView: View {
     }
 
     private var plansList: some View {
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                // Piani attivi
-                if !activePlans.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Piani Attivi")
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .padding(.horizontal)
-
-                        ForEach(activePlans) { plan in
-                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
-                                PlanCardView(plan: plan, isActive: true)
+        List {
+            // Piani attivi
+            if !activePlans.isEmpty {
+                Section {
+                    ForEach(activePlans) { plan in
+                        NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
+                            PlanCardView(plan: plan, isActive: true)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                deletePlan(plan)
+                            } label: {
+                                Label("Elimina", systemImage: "trash")
                             }
-                            .buttonStyle(.plain)
                         }
                     }
-                }
-
-                // Piani passati/futuri
-                if !inactivePlans.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Altri Piani")
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .padding(.horizontal)
-                            .padding(.top, activePlans.isEmpty ? 0 : 12)
-
-                        ForEach(inactivePlans) { plan in
-                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
-                                PlanCardView(plan: plan, isActive: false)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
+                } header: {
+                    Text("Piani Attivi")
+                        .font(.headline)
+                        .fontWeight(.bold)
                 }
             }
-            .padding(.vertical)
+
+            // Piani passati/futuri
+            if !inactivePlans.isEmpty {
+                Section {
+                    ForEach(inactivePlans) { plan in
+                        NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
+                            PlanCardView(plan: plan, isActive: false)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                deletePlan(plan)
+                            } label: {
+                                Label("Elimina", systemImage: "trash")
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Altri Piani")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                }
+            }
         }
+        .listStyle(.plain)
     }
 
     // MARK: - Helpers
@@ -126,6 +139,13 @@ struct PeriodizationPlanListView: View {
 
     private var inactivePlans: [PeriodizationPlan] {
         allPlans.filter { !$0.isCurrentlyActive() }
+    }
+
+    // MARK: - Actions
+
+    private func deletePlan(_ plan: PeriodizationPlan) {
+        modelContext.delete(plan)
+        try? modelContext.save()
     }
 }
 

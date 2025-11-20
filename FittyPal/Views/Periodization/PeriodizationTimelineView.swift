@@ -17,6 +17,7 @@ struct PeriodizationTimelineView: View {
     @State private var selectedMesocycle: Mesocycle?
     @State private var showingMesocycleDetail = false
     @State private var isGenerating = false
+    @State private var showingEditPlan = false
 
     var body: some View {
         ScrollView {
@@ -35,10 +36,22 @@ struct PeriodizationTimelineView: View {
         .navigationTitle(plan.name)
         .navigationBarTitleDisplayMode(.large)
         .appScreenBackground()
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingEditPlan = true
+                } label: {
+                    Label("Modifica", systemImage: "pencil")
+                }
+            }
+        }
         .sheet(item: $selectedMesocycle) { mesocycle in
             NavigationStack {
                 MesocycleDetailView(mesocycle: mesocycle)
             }
+        }
+        .sheet(isPresented: $showingEditPlan) {
+            EditPeriodizationPlanView(plan: plan)
         }
     }
 
