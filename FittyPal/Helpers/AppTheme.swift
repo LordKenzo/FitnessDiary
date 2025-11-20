@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum AppColorTheme: String, CaseIterable, Identifiable {
+enum AppColorTheme: String, CaseIterable, Identifiable, Sendable {
     case vibrant
     case ocean
     case sunset
@@ -48,6 +48,7 @@ enum AppColorTheme: String, CaseIterable, Identifiable {
 }
 
 /// Theme Manager - Singleton to manage app-wide theme
+@MainActor
 @Observable
 class ThemeManager {
     static let shared = ThemeManager()
