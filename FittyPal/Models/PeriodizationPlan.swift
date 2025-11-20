@@ -41,6 +41,9 @@ final class PeriodizationPlan {
     @Relationship(deleteRule: .cascade, inverse: \Mesocycle.plan)
     var mesocycles: [Mesocycle] = []
 
+    @Relationship(deleteRule: .nullify)
+    var folders: [PeriodizationFolder] = [] // array di folder (un piano può stare in più folder)
+
     var userProfile: UserProfile?
     var client: Client?
 
@@ -106,5 +109,17 @@ final class PeriodizationPlan {
         let elapsed = date.timeIntervalSince(startDate)
 
         return (elapsed / totalDuration) * 100.0
+    }
+
+    // MARK: - Folder Helpers
+
+    /// Helper per sapere se il piano è in un folder specifico
+    func isInFolder(_ folder: PeriodizationFolder) -> Bool {
+        folders.contains { $0.id == folder.id }
+    }
+
+    /// Helper per sapere se il piano non ha folder
+    var hasNoFolders: Bool {
+        folders.isEmpty
     }
 }
