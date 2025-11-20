@@ -344,3 +344,33 @@
 "confirm.cancel" = "Annulla";
 "confirm.save" = "Salva";
 "confirm.discard" = "Scarta";
+
+// MARK: - Dashboard Preferences
+"preferences.dashboard.workouts" = "Ultimi allenamenti per medie";
+"preferences.dashboard.workouts.count" = "%d allenamenti";
+
+// MARK: - Updated Metrics
+"metrics.sessions.recent" = "Ultimi %d allenamenti";
+
+// MARK: - Updated Quick Actions
+"quick.action.repeat.workout" = "Ripeti Ultimo Allenamento";
+"quick.action.create.exercise" = "Crea Esercizio";
+"quick.action.set.theme" = "Imposta Tema";
+"quick.action.no.workouts" = "Nessun allenamento recente";
+
+// MARK: - Insights Section
+"section.insights" = "Insight";
+"section.insights.subtitle" = "I tuoi dati in sintesi";
+"insight.avg.rpe" = "RPE Medio";
+"insight.tonnage" = "Tonnellaggio Totale";
+"insight.motivation" = "Frase Motivante";
+
+// MARK: - Motivational Quotes
+"quote.progress" = "Il progresso non è lineare, è fatto di costanza.";
+"quote.consistency" = "La costanza batte il talento quando il talento non è costante.";
+"quote.strength" = "La forza non viene dal corpo, viene dalla volontà.";
+"quote.discipline" = "La disciplina è fare ciò che devi fare anche quando non ne hai voglia.";
+"quote.mindset" = "Il tuo unico limite è la tua mente.";
+"quote.journey" = "Goditi il viaggio, non solo la destinazione.";
+"quote.commitment" = "L'impegno è ciò che trasforma una promessa in realtà.";
+"quote.perseverance" = "La perseveranza non è una lunga corsa, è una serie di brevi corse una dopo l'altra.";

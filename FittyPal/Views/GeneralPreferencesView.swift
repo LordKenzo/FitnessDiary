@@ -6,6 +6,7 @@ struct GeneralPreferencesView: View {
     @AppStorage("workoutCountdownSeconds") private var workoutCountdownSeconds = 10
     @AppStorage("cloneLoadEnabled") private var cloneLoadEnabled = true
     @AppStorage("appColorTheme") private var appColorThemeRaw = AppColorTheme.vibrant.rawValue
+    @AppStorage("dashboardWorkoutsCount") private var dashboardWorkoutsCount = 14
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @Environment(\.colorScheme) private var colorScheme
 
@@ -77,7 +78,26 @@ struct GeneralPreferencesView: View {
                     step: 1
                 )
             }
-         
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(localized: "preferences.dashboard.workouts")
+                    Spacer()
+                    Text(String(format: L("preferences.dashboard.workouts.count"), dashboardWorkoutsCount))
+                        .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                        .monospacedDigit()
+                }
+
+                Slider(
+                    value: Binding(
+                        get: { Double(dashboardWorkoutsCount) },
+                        set: { dashboardWorkoutsCount = Int($0) }
+                    ),
+                    in: 7...30,
+                    step: 1
+                )
+            }
+
         }
         .dashboardCardStyle()
 }
