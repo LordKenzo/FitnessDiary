@@ -403,6 +403,14 @@ struct MesocycleBarView: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .overlay(alignment: .trailing) {
+            if editMode {
+                // Copri l'handle nativo di iOS a destra
+                Rectangle()
+                    .fill(Color(.systemBackground))
+                    .frame(width: 40)
+            }
+        }
     }
 
     private var phaseColor: Color {
