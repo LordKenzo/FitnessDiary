@@ -94,7 +94,6 @@ struct ClassicMethodDetailView: View {
                 .padding(.bottom, 24)
             }
         }
-        .background(AppTheme.background(for: colorScheme))
         .navigationBarTitleDisplayMode(.inline)
     }
 

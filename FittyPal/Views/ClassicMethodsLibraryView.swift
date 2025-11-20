@@ -74,7 +74,6 @@ struct ClassicMethodsLibraryView: View {
             }
             .padding(.vertical, 24)
         }
-        .background(AppTheme.background(for: colorScheme))
         .navigationTitle("Metodi Classici")
         .navigationBarTitleDisplayMode(.inline)
     }
