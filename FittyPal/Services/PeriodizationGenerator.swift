@@ -227,8 +227,6 @@ class PeriodizationGenerator {
         // Usa pattern predefinito se non specificato
         let selectedDays = trainingDays ?? defaultTrainingDaysPattern(frequency: weeklyFrequency)
 
-        var currentDate = microcycle.startDate
-
         for dayOfWeek in 1...7 {
             guard let date = Calendar.current.date(byAdding: .day, value: dayOfWeek - 1, to: microcycle.startDate) else {
                 continue
