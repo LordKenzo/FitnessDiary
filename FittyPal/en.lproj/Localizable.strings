@@ -356,6 +356,7 @@
 "quick.action.repeat.workout" = "Repeat Last Workout";
 "quick.action.create.exercise" = "Create Exercise";
 "quick.action.set.theme" = "Set Theme";
+"quick.action.no.workouts" = "No recent workouts";
 
 // MARK: - Insights Section
 "section.insights" = "Insights";

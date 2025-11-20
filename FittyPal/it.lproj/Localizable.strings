@@ -356,6 +356,7 @@
 "quick.action.repeat.workout" = "Ripeti Ultimo Allenamento";
 "quick.action.create.exercise" = "Crea Esercizio";
 "quick.action.set.theme" = "Imposta Tema";
+"quick.action.no.workouts" = "Nessun allenamento recente";
 
 // MARK: - Insights Section
 "section.insights" = "Insight";

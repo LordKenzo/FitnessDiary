@@ -4,9 +4,14 @@ import SwiftData
 struct DashboardView: View {
     private let calendar = Calendar.current
     @Query private var storedSessionLogs: [WorkoutSessionLog]
+    @Query private var muscles: [Muscle]
+    @Query private var equipment: [Equipment]
     @AppStorage("dashboardWorkoutsCount") private var dashboardWorkoutsCount = 14
     @ObservedObject private var localizationManager = LocalizationManager.shared
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showAddExercise = false
+    @State private var showThemeSelection = false
+    @State private var workoutToRepeat: WorkoutCard?
 
     init() {}
 
@@ -253,33 +258,33 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 18) {
             sectionHeader(title: L("section.quick.actions"), subtitle: L("section.quick.actions.subtitle"))
             ForEach(Array(quickActions.enumerated()), id: \.element.id) { index, action in
-                Button {
-                    // Future integration point
-                } label: {
-                    HStack(spacing: 14) {
-                        LinearGradient(colors: [action.tint.opacity(0.9), action.tint.opacity(0.6)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                            .mask {
-                                Image(systemName: action.icon)
-                                    .font(.system(size: 24, weight: .bold))
+                Group {
+                    if index == 0 {
+                        // Ripeti ultimo allenamento
+                        Button {
+                            if let lastCard = sessionLogs.first?.card {
+                                workoutToRepeat = lastCard
                             }
-                            .frame(width: 52, height: 52)
-                            .background(action.tint.opacity(colorScheme == .dark ? 0.25 : 0.15))
-                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(action.title)
-                                .font(.headline)
-                            Text(localized: "quick.action.coming.soon")
-                                .font(.caption)
-                                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                        } label: {
+                            quickActionRow(action: action, index: index)
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.footnote.bold())
-                            .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                        .disabled(sessionLogs.first?.card == nil)
+                        .opacity(sessionLogs.first?.card == nil ? 0.5 : 1)
+                    } else if index == 1 {
+                        // Crea esercizio
+                        Button {
+                            showAddExercise = true
+                        } label: {
+                            quickActionRow(action: action, index: index)
+                        }
+                    } else {
+                        // Imposta tema
+                        NavigationLink(destination: ThemeSelectionView()) {
+                            quickActionRow(action: action, index: index)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .padding(.vertical, 10)
                 }
-                .buttonStyle(.plain)
                 if index < quickActions.count - 1 {
                     Divider()
                         .overlay(AppTheme.stroke(for: colorScheme))
@@ -287,6 +292,43 @@ struct DashboardView: View {
             }
         }
         .dashboardCardStyle()
+        .sheet(isPresented: $showAddExercise) {
+            NavigationStack {
+                AddExerciseView(muscles: muscles, equipment: equipment)
+            }
+        }
+        .sheet(item: $workoutToRepeat) { card in
+            NavigationStack {
+                WorkoutCardDetailSheet(card: card)
+            }
+        }
+    }
+
+    private func quickActionRow(action: QuickAction, index: Int) -> some View {
+        HStack(spacing: 14) {
+            LinearGradient(colors: [action.tint.opacity(0.9), action.tint.opacity(0.6)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                .mask {
+                    Image(systemName: action.icon)
+                        .font(.system(size: 24, weight: .bold))
+                }
+                .frame(width: 52, height: 52)
+                .background(action.tint.opacity(colorScheme == .dark ? 0.25 : 0.15))
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(action.title)
+                    .font(.headline)
+                if index == 0 && sessionLogs.first?.card == nil {
+                    Text(localized: "quick.action.no.workouts")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                }
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.footnote.bold())
+                .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+        }
+        .padding(.vertical, 10)
     }
 
     private var insightsSection: some View {
@@ -623,6 +665,129 @@ private struct FlowLayout: View {
                     .clipShape(Capsule())
             }
         }
+    }
+}
+
+// MARK: - Workout Card Detail Sheet
+private struct WorkoutCardDetailSheet: View {
+    let card: WorkoutCard
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                // Header
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(card.name)
+                        .font(.title.bold())
+
+                    if let description = card.cardDescription {
+                        Text(description)
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                // Stats
+                HStack(spacing: 16) {
+                    StatBadge(icon: "list.bullet", value: "\(card.totalExercises)", label: "Esercizi")
+                    StatBadge(icon: "repeat", value: "\(card.totalSets)", label: "Serie")
+                    StatBadge(icon: "clock", value: "\(card.estimatedDurationMinutes) min", label: "Durata")
+                }
+
+                Divider()
+
+                // Blocks preview
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Blocchi Allenamento")
+                        .font(.headline)
+
+                    ForEach(Array(card.blocks.enumerated()), id: \.element.id) { index, block in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Image(systemName: "number.square.fill")
+                                    .foregroundStyle(.blue)
+                                Text(block.blockType.rawValue)
+                                    .font(.subheadline.weight(.medium))
+
+                                if let method = block.methodType {
+                                    Text("•")
+                                        .foregroundStyle(.secondary)
+                                    Text(method.rawValue)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+
+                            Text("\(block.exerciseItems.count) esercizi • \(block.globalSets) serie")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(AppTheme.chipBackground(for: colorScheme))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+
+                Divider()
+
+                // Call to action
+                VStack(spacing: 12) {
+                    Text("Per eseguire questo allenamento, vai alla tab Allenamento")
+                        .font(.callout)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+
+                    Button {
+                        dismiss()
+                    } label: {
+                        Label("Chiudi", systemImage: "xmark.circle.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding(.top, 8)
+            }
+            .padding(24)
+        }
+        .navigationTitle("Dettagli Allenamento")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+}
+
+private struct StatBadge: View {
+    let icon: String
+    let value: String
+    let label: String
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(.blue)
+            Text(value)
+                .font(.headline)
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(AppTheme.chipBackground(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
