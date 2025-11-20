@@ -181,16 +181,23 @@ struct PeriodizationTimelineView: View {
             if plan.mesocycles.isEmpty {
                 emptyStateView
             } else if editMode == .active {
-                // Edit mode: lista con drag-and-drop
-                VStack(spacing: 12) {
+                // Edit mode: List con drag-and-drop
+                List {
                     ForEach(sortedMesocycles) { mesocycle in
                         MesocycleBarView(mesocycle: mesocycle, editMode: true)
+                            .listRowInsets(EdgeInsets())
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                             .onTapGesture {
                                 editingMesocycle = mesocycle
                             }
                     }
                     .onMove(perform: moveMesocycles)
                 }
+                .listStyle(.plain)
+                .frame(height: CGFloat(sortedMesocycles.count) * 130)
+                .environment(\.editMode, .constant(.active))
+                .scrollDisabled(true)
             } else {
                 // View mode: lista normale navigabile
                 ForEach(sortedMesocycles) { mesocycle in
@@ -295,31 +302,30 @@ struct MesocycleBarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Header con numero e nome
-            HStack {
+            HStack(spacing: 12) {
                 if editMode {
                     Image(systemName: "line.3.horizontal")
-                        .font(.caption)
+                        .font(.title3)
                         .foregroundStyle(.secondary)
-                        .padding(.trailing, 4)
                 }
 
                 Text("M\(mesocycle.order)")
-                    .font(.caption)
+                    .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
                     .background(phaseColor)
-                    .cornerRadius(6)
+                    .cornerRadius(8)
 
                 Text(mesocycle.name)
-                    .font(.subheadline)
+                    .font(.body)
                     .fontWeight(.semibold)
 
                 Spacer()
 
-                Image(systemName: editMode ? "pencil.circle" : "chevron.right")
-                    .font(.caption)
+                Image(systemName: editMode ? "pencil.circle.fill" : "chevron.right")
+                    .font(editMode ? .title2 : .body)
                     .foregroundStyle(editMode ? .blue : .secondary)
             }
 
@@ -328,7 +334,7 @@ struct MesocycleBarView: View {
                 // Background
                 RoundedRectangle(cornerRadius: 8)
                     .fill(phaseColor.opacity(0.2))
-                    .frame(height: 60)
+                    .frame(height: 80)
 
                 // Progress overlay
                 GeometryReader { geometry in
@@ -336,7 +342,7 @@ struct MesocycleBarView: View {
                         .fill(phaseColor.opacity(0.4))
                         .frame(width: geometry.size.width * (mesocycle.progressPercentage() / 100.0))
                 }
-                .frame(height: 60)
+                .frame(height: 80)
 
                 // Contenuto
                 HStack {
@@ -367,7 +373,7 @@ struct MesocycleBarView: View {
                 }
                 .padding(.horizontal, 12)
             }
-            .frame(height: 60)
+            .frame(height: 80)
 
             // Info aggiuntive
             HStack(spacing: 12) {
@@ -386,7 +392,7 @@ struct MesocycleBarView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding()
+        .padding(16)
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
