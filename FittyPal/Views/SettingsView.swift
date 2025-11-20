@@ -82,6 +82,12 @@ struct SettingsView: View {
                                 ExerciseListView()
                             }
                             SettingsNavigationRow(
+                                title: "Metodi Classici",
+                                iconName: "book.fill"
+                            ) {
+                                ClassicMethodsLibraryView()
+                            }
+                            SettingsNavigationRow(
                                 title: "Metodi Custom",
                                 iconName: "bolt.circle.fill"
                             ) {
