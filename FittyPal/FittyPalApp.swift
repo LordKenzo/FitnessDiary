@@ -27,6 +27,6 @@ struct FittyPalApp: App {
                     .environment(themeManager)
             }
         }
-        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self, WorkoutCard.self, WorkoutFolder.self, WorkoutBlock.self, WorkoutExerciseItem.self, WorkoutSet.self, StrengthExpressionParameters.self, WorkoutSessionLog.self, CustomTrainingMethod.self, CustomRepConfiguration.self])
+        .modelContainer(for: [UserProfile.self, Muscle.self, Equipment.self, Exercise.self, Client.self, WorkoutCard.self, WorkoutFolder.self, WorkoutBlock.self, WorkoutExerciseItem.self, WorkoutSet.self, StrengthExpressionParameters.self, WorkoutSessionLog.self, CustomTrainingMethod.self, CustomRepConfiguration.self, PeriodizationPlan.self, Mesocycle.self, Microcycle.self, TrainingDay.self, PeriodizationTemplate.self])
     }
 }
