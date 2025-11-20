@@ -14,6 +14,9 @@ struct WorkoutCardListView: View {
     @State private var filterOwner: FilterOwner = .all
     @State private var selectedClient: Client?
     @State private var expandedFolders: Set<UUID> = []
+    @State private var showingDeletionAlert = false
+    @State private var deletionAlertMessage = ""
+    @State private var cardToDelete: WorkoutCard?
     @ObservedObject private var localizationManager = LocalizationManager.shared
     private static let noFolderID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
 
@@ -160,6 +163,11 @@ struct WorkoutCardListView: View {
                 .sheet(item: $selectedFolder) { folder in
                     EditFolderView(folder: folder)
                 }
+                .alert("Impossibile Eliminare", isPresented: $showingDeletionAlert) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(deletionAlertMessage)
+                }
             }
         }
     }
@@ -168,6 +176,45 @@ struct WorkoutCardListView: View {
 
 
     private func deleteCard(_ card: WorkoutCard) {
+        // Verifica se la scheda è assegnata a clienti
+        if !card.assignedTo.isEmpty {
+            let clientNames = card.assignedTo.map { $0.fullName }.joined(separator: ", ")
+            deletionAlertMessage = "Impossibile eliminare la scheda \"\(card.name)\" perché è assegnata ai seguenti clienti: \(clientNames)"
+            showingDeletionAlert = true
+            return
+        }
+
+        // Verifica se la scheda è usata in periodizzazioni attive
+        let descriptor = FetchDescriptor<TrainingDay>()
+        if let trainingDays = try? modelContext.fetch(descriptor) {
+            // Trova i giorni che usano questa scheda
+            let daysUsingCard = trainingDays.filter { $0.workoutCard?.id == card.id }
+
+            if !daysUsingCard.isEmpty {
+                // Trova le periodizzazioni attive che contengono questi giorni
+                var activePlanNames: [String] = []
+
+                for day in daysUsingCard {
+                    if let microcycle = day.microcycle,
+                       let mesocycle = microcycle.mesocycle,
+                       let plan = mesocycle.plan,
+                       plan.isCurrentlyActive() {
+                        if !activePlanNames.contains(plan.name) {
+                            activePlanNames.append(plan.name)
+                        }
+                    }
+                }
+
+                if !activePlanNames.isEmpty {
+                    let planList = activePlanNames.joined(separator: ", ")
+                    deletionAlertMessage = "Impossibile eliminare la scheda \"\(card.name)\" perché è utilizzata nelle seguenti periodizzazioni attive: \(planList)"
+                    showingDeletionAlert = true
+                    return
+                }
+            }
+        }
+
+        // Se tutti i controlli passano, elimina la scheda
         modelContext.delete(card)
     }
 
