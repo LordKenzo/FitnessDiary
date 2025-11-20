@@ -108,4 +108,45 @@ final class Microcycle {
         guard totalPlannedDays > 0 else { return 0.0 }
         return (Double(completedDays) / Double(totalPlannedDays)) * 100.0
     }
+
+    // MARK: - Volume Statistics
+
+    /// Numero totale di esercizi pianificati nella settimana
+    var totalWeeklyExercises: Int {
+        trainingDays
+            .filter { !$0.isRestDay }
+            .compactMap { $0.workoutCard }
+            .reduce(0) { $0 + $1.totalExercises }
+    }
+
+    /// Numero totale di serie pianificate nella settimana
+    var totalWeeklySets: Int {
+        trainingDays
+            .filter { !$0.isRestDay }
+            .compactMap { $0.workoutCard }
+            .reduce(0) { $0 + $1.totalSets }
+    }
+
+    /// Durata totale stimata della settimana in minuti
+    var totalWeeklyDurationMinutes: Int {
+        trainingDays
+            .filter { !$0.isRestDay }
+            .compactMap { $0.workoutCard }
+            .reduce(0) { $0 + $1.estimatedDurationMinutes }
+    }
+
+    /// Numero di schede assegnate (giorni con workout card)
+    var assignedWorkoutCount: Int {
+        trainingDays.filter { !$0.isRestDay && $0.workoutCard != nil }.count
+    }
+
+    /// Verifica se tutte le schede sono state assegnate
+    var hasAllWorkoutsAssigned: Bool {
+        assignedWorkoutCount == totalPlannedDays
+    }
+
+    /// Verifica se almeno una scheda è stata assegnata
+    var hasAnyWorkoutAssigned: Bool {
+        assignedWorkoutCount > 0
+    }
 }
