@@ -4,7 +4,6 @@
 //
 //  Created by Claude on 20/11/2025.
 //
-
 import SwiftUI
 import SwiftData
 
@@ -12,11 +11,11 @@ import SwiftData
 struct PeriodizationPlanListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PeriodizationPlan.startDate, order: .reverse) private var allPlans: [PeriodizationPlan]
-
     @State private var showingCreatePlan = false
     @State private var selectedPlan: PeriodizationPlan?
     @State private var showingPlanDetail = false
-
+    @State private var showingEditPlan = false
+    
     var body: some View {
         NavigationStack {
             Group {
@@ -40,27 +39,26 @@ struct PeriodizationPlanListView: View {
             .sheet(isPresented: $showingCreatePlan) {
                 CreatePeriodizationPlanView()
             }
+            .sheet(item: $selectedPlan) { plan in
+                EditPeriodizationPlanView(plan: plan)
+            }
         }
     }
-
+    
     // MARK: - Views
-
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Image(systemName: "calendar.badge.checkmark")
                 .font(.system(size: 64))
                 .foregroundStyle(.secondary)
-
             Text("Nessun Piano di Periodizzazione")
                 .font(.title2)
                 .fontWeight(.bold)
-
             Text("Crea il tuo primo piano per organizzare l'allenamento nel tempo")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
-
             Button {
                 showingCreatePlan = true
             } label: {
@@ -75,7 +73,7 @@ struct PeriodizationPlanListView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-
+    
     private var plansList: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
@@ -86,10 +84,11 @@ struct PeriodizationPlanListView: View {
                             .font(.headline)
                             .fontWeight(.bold)
                             .padding(.horizontal)
-
                         ForEach(activePlans) { plan in
                             NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
-                                PlanCardView(plan: plan, isActive: true, onDelete: {
+                                PlanCardView(plan: plan, isActive: true, onEdit: {
+                                    selectedPlan = plan
+                                }, onDelete: {
                                     deletePlan(plan)
                                 })
                             }
@@ -97,7 +96,6 @@ struct PeriodizationPlanListView: View {
                         }
                     }
                 }
-
                 // Piani passati/futuri
                 if !inactivePlans.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
@@ -106,10 +104,11 @@ struct PeriodizationPlanListView: View {
                             .fontWeight(.bold)
                             .padding(.horizontal)
                             .padding(.top, activePlans.isEmpty ? 0 : 12)
-
                         ForEach(inactivePlans) { plan in
                             NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
-                                PlanCardView(plan: plan, isActive: false, onDelete: {
+                                PlanCardView(plan: plan, isActive: false, onEdit: {
+                                    selectedPlan = plan
+                                }, onDelete: {
                                     deletePlan(plan)
                                 })
                             }
@@ -121,19 +120,17 @@ struct PeriodizationPlanListView: View {
             .padding(.vertical)
         }
     }
-
+    
     // MARK: - Helpers
-
     private var activePlans: [PeriodizationPlan] {
         allPlans.filter { $0.isCurrentlyActive() }
     }
-
+    
     private var inactivePlans: [PeriodizationPlan] {
         allPlans.filter { !$0.isCurrentlyActive() }
     }
-
+    
     // MARK: - Actions
-
     private func deletePlan(_ plan: PeriodizationPlan) {
         modelContext.delete(plan)
         try? modelContext.save()
@@ -141,14 +138,14 @@ struct PeriodizationPlanListView: View {
 }
 
 // MARK: - Plan Card View
-
 /// Card per visualizzare un piano nella lista
 struct PlanCardView: View {
     @Environment(\.colorScheme) private var colorScheme
     let plan: PeriodizationPlan
     let isActive: Bool
+    let onEdit: () -> Void
     let onDelete: () -> Void
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
@@ -158,12 +155,10 @@ struct PlanCardView: View {
                         .font(.headline)
                         .fontWeight(.bold)
                         .foregroundStyle(.primary)
-
                     HStack(spacing: 8) {
                         Label(plan.periodizationModel.rawValue, systemImage: plan.periodizationModel.icon)
                             .font(.caption)
                             .foregroundStyle(.secondary)
-
                         if isActive {
                             Label("Attivo", systemImage: "circle.fill")
                                 .font(.caption)
@@ -172,12 +167,8 @@ struct PlanCardView: View {
                     }
                 }
 
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.secondary)
             }
-
+            
             // Info Profilo
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -188,7 +179,6 @@ struct PlanCardView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
-
                 if let secondary = plan.secondaryStrengthProfile {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Secondario")
@@ -199,9 +189,7 @@ struct PlanCardView: View {
                             .fontWeight(.semibold)
                     }
                 }
-
                 Spacer()
-
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Frequenza")
                         .font(.caption2)
@@ -211,36 +199,30 @@ struct PlanCardView: View {
                         .fontWeight(.semibold)
                 }
             }
-
+            
             Divider()
-
+            
             // Progress e Date
             VStack(spacing: 8) {
                 HStack {
                     Text(formatDate(plan.startDate))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-
                     Image(systemName: "arrow.right")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-
                     Text(formatDate(plan.endDate))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-
                     Spacer()
-
                     Text("\(plan.durationInWeeks) settimane")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
                 if isActive {
                     HStack {
                         ProgressView(value: plan.progressPercentage() / 100.0)
                             .tint(.blue)
-
                         Text("\(Int(plan.progressPercentage()))%")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -248,14 +230,13 @@ struct PlanCardView: View {
                     }
                 }
             }
-
+            
             // Stats mesocicli
             if !plan.mesocycles.isEmpty {
                 HStack(spacing: 12) {
                     Label("\(plan.mesocycles.count) mesocicli", systemImage: "square.stack.3d.up")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-
                     let totalMicrocycles = plan.mesocycles.reduce(0) { $0 + $1.microcycles.count }
                     if totalMicrocycles > 0 {
                         Label("\(totalMicrocycles) settimane", systemImage: "calendar")
@@ -274,10 +255,15 @@ struct PlanCardView: View {
         )
         .overlay(alignment: .topTrailing) {
             Menu {
+                Button {
+                    onEdit()
+                } label: {
+                    Label("Modifica", systemImage: "pencil")
+                }
                 Button(role: .destructive) {
                     onDelete()
                 } label: {
-                    Label(L("common.delete"), systemImage: "trash")
+                    Label("Elimina", systemImage: "trash")
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")
@@ -288,7 +274,7 @@ struct PlanCardView: View {
         }
         .padding(.horizontal)
     }
-
+    
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "it_IT")
@@ -302,7 +288,6 @@ struct PlanCardView: View {
     guard let container = try? ModelContainer(for: PeriodizationPlan.self, configurations: config) else {
         return Text("Failed to create preview container")
     }
-
     // Piano esempio 1 (attivo)
     let plan1 = PeriodizationPlan(
         name: "Forza Massimale 2025",
@@ -314,7 +299,6 @@ struct PlanCardView: View {
         weeklyFrequency: 4,
         isActive: true
     )
-
     // Piano esempio 2 (passato)
     let plan2 = PeriodizationPlan(
         name: "Ipertrofia Estate",
@@ -325,10 +309,8 @@ struct PlanCardView: View {
         weeklyFrequency: 5,
         isActive: false
     )
-
     container.mainContext.insert(plan1)
     container.mainContext.insert(plan2)
-
     return NavigationStack {
         PeriodizationPlanListView()
     }

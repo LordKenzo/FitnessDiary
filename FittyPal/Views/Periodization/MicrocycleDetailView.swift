@@ -335,9 +335,7 @@ struct WorkoutCardPreview: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+
             }
 
             // Statistiche scheda
