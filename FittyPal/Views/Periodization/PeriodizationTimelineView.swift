@@ -206,10 +206,13 @@ struct PeriodizationTimelineView: View {
     private func generateMesocycles() {
         isGenerating = true
 
+        // Cattura plan prima di entrare nel background thread
+        let currentPlan = self.plan
+
         // Esegui in background per non bloccare la UI
         DispatchQueue.global(qos: .userInitiated).async {
             let generator = PeriodizationGenerator()
-            let _ = generator.generateCompletePlan(plan)
+            let _ = generator.generateCompletePlan(currentPlan)
 
             DispatchQueue.main.async {
                 // Salva il contesto
