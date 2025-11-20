@@ -93,17 +93,17 @@ final class Microcycle {
         trainingDays.sorted { $0.date < $1.date }
     }
 
-    /// Giorni completati
+    /// Giorni completati (esclusi giorni di riposo)
     var completedDays: Int {
-        trainingDays.filter { $0.completed }.count
+        trainingDays.filter { !$0.isRestDay && $0.completed }.count
     }
 
-    /// Giorni totali pianificati
+    /// Giorni totali pianificati (esclusi giorni di riposo)
     var totalPlannedDays: Int {
-        trainingDays.count
+        trainingDays.filter { !$0.isRestDay }.count
     }
 
-    /// Percentuale completamento settimana
+    /// Percentuale completamento settimana (solo giorni allenamento)
     var completionPercentage: Double {
         guard totalPlannedDays > 0 else { return 0.0 }
         return (Double(completedDays) / Double(totalPlannedDays)) * 100.0

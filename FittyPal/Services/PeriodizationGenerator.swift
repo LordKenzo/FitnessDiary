@@ -40,7 +40,7 @@ class PeriodizationGenerator {
         durationWeeks: Int
     ) -> [Mesocycle] {
         let totalWeeks = plan.durationInWeeks
-        let mesocycleCount = max(1, totalWeeks / durationWeeks)
+        let mesocycleCount = max(1, Int(ceil(Double(totalWeeks) / Double(durationWeeks))))
 
         var mesocycles: [Mesocycle] = []
         var currentDate = plan.startDate
@@ -85,7 +85,7 @@ class PeriodizationGenerator {
         durationWeeks: Int
     ) -> [Mesocycle] {
         let totalWeeks = plan.durationInWeeks
-        let mesocycleCount = max(1, totalWeeks / durationWeeks)
+        let mesocycleCount = max(1, Int(ceil(Double(totalWeeks) / Double(durationWeeks))))
 
         var mesocycles: [Mesocycle] = []
         var currentDate = plan.startDate
@@ -135,7 +135,7 @@ class PeriodizationGenerator {
         durationWeeks: Int
     ) -> [Mesocycle] {
         let totalWeeks = plan.durationInWeeks
-        let mesocycleCount = max(1, totalWeeks / durationWeeks)
+        let mesocycleCount = max(1, Int(ceil(Double(totalWeeks) / Double(durationWeeks))))
 
         var mesocycles: [Mesocycle] = []
         var currentDate = plan.startDate

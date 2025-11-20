@@ -153,6 +153,8 @@ class LoadProgressionCalculator {
         progressedLoad: Double,
         maxIncrementPercentage: Double = 0.10
     ) -> Bool {
+        guard baseLoad > 0 else { return false }
+
         let increment = (progressedLoad - baseLoad) / baseLoad
 
         return increment <= maxIncrementPercentage

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 /// Modello di periodizzazione dell'allenamento
 enum PeriodizationModel: String, Codable, CaseIterable {
@@ -171,6 +172,38 @@ enum SplitType: String, Codable, CaseIterable {
             return "figure.strengthtraining.traditional"
         case .custom:
             return "slider.horizontal.3"
+        }
+    }
+}
+
+// MARK: - SwiftUI Color Extensions
+
+extension PhaseType {
+    /// Colore SwiftUI per la fase
+    var swiftUIColor: Color {
+        switch self {
+        case .accumulation:
+            return .blue
+        case .intensification:
+            return .orange
+        case .transformation:
+            return .purple
+        case .deload:
+            return .green
+        }
+    }
+}
+
+extension LoadLevel {
+    /// Colore SwiftUI per il livello di carico
+    var swiftUIColor: Color {
+        switch self {
+        case .high:
+            return .red
+        case .medium:
+            return .orange
+        case .low:
+            return .green
         }
     }
 }

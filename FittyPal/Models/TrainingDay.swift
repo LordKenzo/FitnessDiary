@@ -53,7 +53,13 @@ final class TrainingDay {
         self.id = id
         self.date = date
         // Calcola automaticamente dayOfWeek se non specificato
-        self.dayOfWeek = dayOfWeek ?? Calendar.current.component(.weekday, from: date)
+        // Normalizza: Calendar.weekday restituisce 1=Sunday, convertiamo a 1=Monday
+        if let explicitDayOfWeek = dayOfWeek {
+            self.dayOfWeek = explicitDayOfWeek
+        } else {
+            let weekday = Calendar.current.component(.weekday, from: date) // 1=Sunday
+            self.dayOfWeek = ((weekday + 5) % 7) + 1  // Converti a 1=Monday
+        }
         self.plannedSplitType = plannedSplitType
         self.isRestDay = isRestDay
         self.workoutCard = workoutCard
