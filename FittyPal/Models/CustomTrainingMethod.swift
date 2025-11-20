@@ -117,12 +117,20 @@ final class CustomRepConfiguration: Identifiable {
 // MARK: - Rep Grouping for Execution
 
 /// Represents a group of consecutive reps with the same load and rest configuration
-struct RepGroup: Identifiable {
+struct RepGroup: Identifiable, Equatable {
     let id = UUID()
     let reps: [CustomRepConfiguration]
     let load: Double // Calculated load for this group
     let loadPercentage: Double // Percentage variation
     let restAfterGroup: TimeInterval // Rest after completing this group
+
+    static func == (lhs: RepGroup, rhs: RepGroup) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.load == rhs.load &&
+        lhs.loadPercentage == rhs.loadPercentage &&
+        lhs.restAfterGroup == rhs.restAfterGroup &&
+        lhs.reps.count == rhs.reps.count
+    }
 
     var firstRepNumber: Int {
         reps.first?.repOrder ?? 0
