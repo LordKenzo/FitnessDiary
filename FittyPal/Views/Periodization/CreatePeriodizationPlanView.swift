@@ -317,7 +317,9 @@ struct CreatePeriodizationPlanView: View {
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: PeriodizationPlan.self, configurations: config)
+    guard let container = try? ModelContainer(for: PeriodizationPlan.self, configurations: config) else {
+        return Text("Failed to create preview container")
+    }
 
     return CreatePeriodizationPlanView()
         .modelContainer(container)

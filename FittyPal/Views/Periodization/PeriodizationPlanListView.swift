@@ -272,7 +272,9 @@ struct PlanCardView: View {
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: PeriodizationPlan.self, configurations: config)
+    guard let container = try? ModelContainer(for: PeriodizationPlan.self, configurations: config) else {
+        return Text("Failed to create preview container")
+    }
 
     // Piano esempio 1 (attivo)
     let plan1 = PeriodizationPlan(

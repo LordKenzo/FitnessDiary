@@ -162,7 +162,11 @@ class PeriodizationService {
     ///   - startDate: Data di inizio
     ///   - userProfile: Profilo utente (opzionale)
     ///   - client: Cliente (opzionale)
-    /// - Returns: Piano generato
+    /// - Returns: Piano generato (non inserito nel modelContext)
+    /// - Important: Il piano restituito NON è inserito nel modelContext. Il caller deve:
+    ///   1. Inserire il piano: `modelContext.insert(plan)`
+    ///   2. Salvare: `try? modelContext.save()`
+    ///   3. Incrementare usage count solo dopo save riuscito: `template.incrementUsage()`
     func createPlanFromTemplate(
         _ template: PeriodizationTemplate,
         startDate: Date,
@@ -188,9 +192,6 @@ class PeriodizationService {
             userProfile: userProfile,
             client: client
         )
-
-        // Incrementa contatore uso template
-        template.incrementUsage()
 
         return plan
     }

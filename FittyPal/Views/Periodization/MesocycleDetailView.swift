@@ -203,16 +203,7 @@ struct MesocycleDetailView: View {
     // MARK: - Helpers
 
     private var phaseColor: Color {
-        switch mesocycle.phaseType {
-        case .accumulation:
-            return .blue
-        case .intensification:
-            return .orange
-        case .transformation:
-            return .purple
-        case .deload:
-            return .green
-        }
+        mesocycle.phaseType.swiftUIColor
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -329,14 +320,7 @@ struct MicrocycleBarView: View {
     }
 
     private var loadLevelColor: Color {
-        switch microcycle.loadLevel {
-        case .high:
-            return .red
-        case .medium:
-            return .orange
-        case .low:
-            return .green
-        }
+        microcycle.loadLevel.swiftUIColor
     }
 
     private func formatDateRange(start: Date, end: Date) -> String {
@@ -353,7 +337,9 @@ struct MicrocycleBarView: View {
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Mesocycle.self, configurations: config)
+    guard let container = try? ModelContainer(for: Mesocycle.self, configurations: config) else {
+        return Text("Failed to create preview container")
+    }
 
     let mesocycle = Mesocycle(
         order: 1,

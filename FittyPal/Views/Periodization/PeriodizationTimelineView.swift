@@ -281,22 +281,15 @@ struct MesocycleBarView: View {
     }
 
     private var phaseColor: Color {
-        switch mesocycle.phaseType {
-        case .accumulation:
-            return .blue
-        case .intensification:
-            return .orange
-        case .transformation:
-            return .purple
-        case .deload:
-            return .green
-        }
+        mesocycle.phaseType.swiftUIColor
     }
 }
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: PeriodizationPlan.self, configurations: config)
+    guard let container = try? ModelContainer(for: PeriodizationPlan.self, configurations: config) else {
+        return Text("Failed to create preview container")
+    }
 
     let plan = PeriodizationPlan(
         name: "Piano Forza 2025",

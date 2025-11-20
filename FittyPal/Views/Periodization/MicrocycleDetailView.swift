@@ -189,14 +189,7 @@ struct MicrocycleDetailView: View {
     // MARK: - Helpers
 
     private var loadLevelColor: Color {
-        switch microcycle.loadLevel {
-        case .high:
-            return .red
-        case .medium:
-            return .orange
-        case .low:
-            return .green
-        }
+        microcycle.loadLevel.swiftUIColor
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -354,7 +347,9 @@ struct WorkoutCardPreview: View {
 
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Microcycle.self, configurations: config)
+    guard let container = try? ModelContainer(for: Microcycle.self, configurations: config) else {
+        return Text("Failed to create preview container")
+    }
 
     let microcycle = Microcycle(
         order: 1,
