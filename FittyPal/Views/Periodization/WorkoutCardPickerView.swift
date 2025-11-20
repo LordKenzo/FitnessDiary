@@ -18,33 +18,28 @@ struct WorkoutCardPickerView: View {
     let onSelect: (WorkoutCard) -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header custom
-            HStack {
-                Text("Seleziona Scheda")
-                    .font(.headline)
-                    .fontWeight(.bold)
-
-                Spacer()
-
-                Button("Annulla") {
-                    dismiss()
+        NavigationStack {
+            Group {
+                if filteredCards.isEmpty {
+                    emptyStateView
+                } else {
+                    cardsList
                 }
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .overlay(alignment: .bottom) {
-                Divider()
-            }
-
-            // Content
-            if filteredCards.isEmpty {
-                emptyStateView
-            } else {
-                cardsList
+            .navigationTitle("Seleziona Scheda")
+            .navigationBarTitleDisplayMode(.inline)
+            .appScreenBackground()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Annulla") {
+                        dismiss()
+                    }
+                }
             }
         }
-        .appScreenBackground()
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(.regularMaterial)
     }
 
     // MARK: - Views
