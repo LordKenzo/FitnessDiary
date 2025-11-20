@@ -16,5 +16,9 @@
 	<array>
 		<string>bluetooth-central</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>FittyPal usa la tua posizione per mostrarti le condizioni meteo e suggerirti il miglior tipo di allenamento (outdoor/indoor).</string>
+	<key>NSLocationUsageDescription</key>
+	<string>FittyPal uses your location to show weather conditions and suggest the best workout type.</string>
 </dict>
 </plist>

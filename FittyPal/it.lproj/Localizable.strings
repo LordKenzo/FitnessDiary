@@ -376,3 +376,9 @@
 "quote.journey" = "Goditi il viaggio, non solo la destinazione.";
 "quote.commitment" = "L'impegno è ciò che trasforma una promessa in realtà.";
 "quote.perseverance" = "La perseveranza non è una lunga corsa, è una serie di brevi corse una dopo l'altra.";
+
+// MARK: - Weather and Workout Suggestions
+"insight.weather.location.denied" = "Permesso localizzazione negato";
+"workout.suggestion.outdoor.short" = "Outdoor";
+"workout.suggestion.indoor.short" = "Indoor";
+"workout.suggestion.caution.short" = "Attenzione";

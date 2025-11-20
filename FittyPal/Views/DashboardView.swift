@@ -8,6 +8,8 @@ struct DashboardView: View {
     @Query private var equipment: [Equipment]
     @AppStorage("dashboardWorkoutsCount") private var dashboardWorkoutsCount = 14
     @ObservedObject private var localizationManager = LocalizationManager.shared
+    @StateObject private var weatherService = WeatherService.shared
+    @StateObject private var locationManager = LocationManager.shared
     @Environment(\.colorScheme) private var colorScheme
     @State private var showAddExercise = false
     @State private var showThemeSelection = false
@@ -89,6 +91,14 @@ struct DashboardView: View {
                 .background(Color.clear)
                 .navigationTitle(L("dashboard.title"))
                 .toolbarBackground(.hidden, for: .navigationBar)
+            }
+        }
+        .onAppear {
+            // Request location for weather
+            if !locationManager.isAuthorized {
+                locationManager.requestPermission()
+            } else {
+                locationManager.requestLocation()
             }
         }
     }
@@ -356,12 +366,7 @@ struct DashboardView: View {
                 Divider()
                     .overlay(AppTheme.stroke(for: colorScheme))
 
-                insightRow(
-                    icon: "cloud.sun.fill",
-                    title: L("insight.weather"),
-                    value: L("insight.weather.placeholder"),
-                    tint: .cyan
-                )
+                weatherInsightRow
 
                 Divider()
                     .overlay(AppTheme.stroke(for: colorScheme))
@@ -418,6 +423,86 @@ struct DashboardView: View {
             }
 
             Spacer()
+        }
+    }
+
+    private var weatherInsightRow: some View {
+        HStack(spacing: 12) {
+            // Icon/Emoji
+            ZStack {
+                LinearGradient(
+                    colors: [Color.cyan.opacity(0.9), Color.cyan.opacity(0.6)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .frame(width: 40, height: 40)
+
+                Text(weatherService.getWeatherEmoji())
+                    .font(.system(size: 24))
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(L("insight.weather"))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+
+                if weatherService.isLoading {
+                    Text(L("common.loading"))
+                        .font(.title3.bold())
+                        .foregroundStyle(.secondary)
+                } else if let _ = weatherService.currentWeather {
+                    HStack(spacing: 4) {
+                        Text(weatherService.getTemperatureString())
+                            .font(.title3.bold())
+                            .foregroundStyle(.primary)
+
+                        Text(weatherService.getWorkoutSuggestion().emoji)
+                            .font(.title3)
+                    }
+                } else if !locationManager.isAuthorized {
+                    Text(L("insight.weather.location.denied"))
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                } else {
+                    Text(L("insight.weather.placeholder"))
+                        .font(.title3.bold())
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            // Workout suggestion chip
+            if let _ = weatherService.currentWeather, !weatherService.isLoading {
+                let suggestion = weatherService.getWorkoutSuggestion()
+                VStack(spacing: 2) {
+                    Text(suggestion.emoji)
+                        .font(.title2)
+                    Text(suggestionShortText(suggestion))
+                        .font(.caption2)
+                        .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(suggestionColor(suggestion).opacity(0.15))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+        }
+    }
+
+    private func suggestionShortText(_ suggestion: WorkoutSuggestion) -> String {
+        switch suggestion {
+        case .outdoor: return L("workout.suggestion.outdoor.short")
+        case .indoor: return L("workout.suggestion.indoor.short")
+        case .caution: return L("workout.suggestion.caution.short")
+        }
+    }
+
+    private func suggestionColor(_ suggestion: WorkoutSuggestion) -> Color {
+        switch suggestion {
+        case .outdoor: return .green
+        case .indoor: return .blue
+        case .caution: return .orange
         }
     }
 
