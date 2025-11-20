@@ -185,7 +185,7 @@ struct PeriodizationTimelineView: View {
                 List {
                     ForEach(sortedMesocycles) { mesocycle in
                         MesocycleBarView(mesocycle: mesocycle, editMode: true)
-                            .listRowInsets(EdgeInsets())
+                            .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
                             .onTapGesture {
@@ -195,7 +195,8 @@ struct PeriodizationTimelineView: View {
                     .onMove(perform: moveMesocycles)
                 }
                 .listStyle(.plain)
-                .frame(height: CGFloat(sortedMesocycles.count) * 130)
+                .listRowSpacing(12)
+                .frame(height: CGFloat(sortedMesocycles.count) * 145 + 20)
                 .environment(\.editMode, .constant(.active))
                 .scrollDisabled(true)
             } else {
@@ -303,12 +304,6 @@ struct MesocycleBarView: View {
         VStack(alignment: .leading, spacing: 8) {
             // Header con numero e nome
             HStack(spacing: 12) {
-                if editMode {
-                    Image(systemName: "line.3.horizontal")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                }
-
                 Text("M\(mesocycle.order)")
                     .font(.subheadline)
                     .fontWeight(.bold)
@@ -324,9 +319,15 @@ struct MesocycleBarView: View {
 
                 Spacer()
 
-                Image(systemName: editMode ? "pencil.circle.fill" : "chevron.right")
-                    .font(editMode ? .title2 : .body)
-                    .foregroundStyle(editMode ? .blue : .secondary)
+                if editMode {
+                    Image(systemName: "pencil.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.blue)
+                } else {
+                    Image(systemName: "chevron.right")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             // Barra visuale con informazioni
