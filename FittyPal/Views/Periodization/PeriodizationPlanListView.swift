@@ -77,58 +77,49 @@ struct PeriodizationPlanListView: View {
     }
 
     private var plansList: some View {
-        List {
-            // Piani attivi
-            if !activePlans.isEmpty {
-                Section {
-                    ForEach(activePlans) { plan in
-                        NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
-                            PlanCardView(plan: plan, isActive: true)
-                        }
-                        .buttonStyle(.plain)
-                        .listRowInsets(EdgeInsets())
-                        .listRowSeparator(.hidden)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) {
-                                deletePlan(plan)
-                            } label: {
-                                Label("Elimina", systemImage: "trash")
-                            }
-                        }
-                    }
-                } header: {
-                    Text("Piani Attivi")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                }
-            }
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                // Piani attivi
+                if !activePlans.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Piani Attivi")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .padding(.horizontal)
 
-            // Piani passati/futuri
-            if !inactivePlans.isEmpty {
-                Section {
-                    ForEach(inactivePlans) { plan in
-                        NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
-                            PlanCardView(plan: plan, isActive: false)
-                        }
-                        .buttonStyle(.plain)
-                        .listRowInsets(EdgeInsets())
-                        .listRowSeparator(.hidden)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) {
-                                deletePlan(plan)
-                            } label: {
-                                Label("Elimina", systemImage: "trash")
+                        ForEach(activePlans) { plan in
+                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
+                                PlanCardView(plan: plan, isActive: true, onDelete: {
+                                    deletePlan(plan)
+                                })
                             }
+                            .buttonStyle(.plain)
                         }
                     }
-                } header: {
-                    Text("Altri Piani")
-                        .font(.headline)
-                        .fontWeight(.bold)
+                }
+
+                // Piani passati/futuri
+                if !inactivePlans.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Altri Piani")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .padding(.horizontal)
+                            .padding(.top, activePlans.isEmpty ? 0 : 12)
+
+                        ForEach(inactivePlans) { plan in
+                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
+                                PlanCardView(plan: plan, isActive: false, onDelete: {
+                                    deletePlan(plan)
+                                })
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
             }
+            .padding(.vertical)
         }
-        .listStyle(.plain)
     }
 
     // MARK: - Helpers
@@ -153,8 +144,10 @@ struct PeriodizationPlanListView: View {
 
 /// Card per visualizzare un piano nella lista
 struct PlanCardView: View {
+    @Environment(\.colorScheme) private var colorScheme
     let plan: PeriodizationPlan
     let isActive: Bool
+    let onDelete: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -279,6 +272,20 @@ struct PlanCardView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(isActive ? Color.accentColor.opacity(0.3) : Color.clear, lineWidth: 1)
         )
+        .overlay(alignment: .topTrailing) {
+            Menu {
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label(L("common.delete"), systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.title3)
+                    .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                    .padding(6)
+            }
+        }
         .padding(.horizontal)
     }
 
@@ -322,6 +329,8 @@ struct PlanCardView: View {
     container.mainContext.insert(plan1)
     container.mainContext.insert(plan2)
 
-    return PeriodizationPlanListView()
-        .modelContainer(container)
+    return NavigationStack {
+        PeriodizationPlanListView()
+    }
+    .modelContainer(container)
 }
