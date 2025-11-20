@@ -1349,7 +1349,7 @@ private enum WorkoutExecutionStepFactory {
                         highlight: "Respira profondamente"
                     )
                 )
-            case .simple, .method:
+            case .simple, .method, .customMethod:
                 result.append(contentsOf: stepsForExercises(in: block, cardTarget: card.targetExpression))
             }
         }

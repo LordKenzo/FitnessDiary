@@ -405,6 +405,8 @@ struct EditWorkoutBlockView: View {
             } else {
                 blockData.globalRestTime = nil // Dropset non deve avere rest time
             }
+        case .customMethod:
+            blockData.globalRestTime = restTimeValue
         case .rest:
             blockData.globalRestTime = restTimeValue
         case .simple:
@@ -505,6 +507,8 @@ struct EditWorkoutBlockView: View {
         switch blockData.blockType {
         case .method:
             return "Modifica Metodo"
+        case .customMethod:
+            return "Modifica Metodo Personalizzato"
         case .rest:
             return "Modifica Riposo"
         case .simple:
@@ -516,6 +520,8 @@ struct EditWorkoutBlockView: View {
         switch blockData.blockType {
         case .method:
             return blockData.methodType?.icon ?? "bolt.horizontal.fill"
+        case .customMethod:
+            return "bolt.circle.fill"
         case .rest:
             return "moon.zzz.fill"
         case .simple:
@@ -527,6 +533,8 @@ struct EditWorkoutBlockView: View {
         switch blockData.blockType {
         case .method:
             return blockData.methodType?.color ?? .blue
+        case .customMethod:
+            return .purple
         case .rest:
             return .orange
         case .simple:
@@ -538,6 +546,8 @@ struct EditWorkoutBlockView: View {
         switch blockData.blockType {
         case .method:
             return blockData.methodType?.rawValue ?? BlockType.method.rawValue
+        case .customMethod:
+            return blockData.customMethodName ?? "Metodo Personalizzato"
         case .rest:
             return BlockType.rest.rawValue
         case .simple:
@@ -549,6 +559,8 @@ struct EditWorkoutBlockView: View {
         switch blockData.blockType {
         case .method:
             return blockData.methodType?.description
+        case .customMethod:
+            return "Metodo personalizzato con carico e pause variabili per ripetizione"
         case .rest:
             return "Aggiungi una pausa temporizzata tra i blocchi"
         case .simple:
