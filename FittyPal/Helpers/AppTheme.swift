@@ -127,11 +127,7 @@ enum AppTheme {
         }
     }
 
-    // MARK: - Legacy ColorScheme-based functions (for compatibility)
-    static func backgroundGradient(for scheme: ColorScheme) -> LinearGradient {
-        backgroundGradient(for: ThemeManager.shared.currentTheme)
-    }
-
+    // MARK: - ColorScheme-based functions (for components that don't need themes)
     static func heroGradient(for scheme: ColorScheme) -> LinearGradient {
         switch scheme {
         case .dark:
