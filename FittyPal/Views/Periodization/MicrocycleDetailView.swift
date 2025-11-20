@@ -15,6 +15,7 @@ struct MicrocycleDetailView: View {
     let microcycle: Microcycle
 
     @State private var selectedDay: TrainingDay?
+    @State private var showingEditParameters = false
 
     var body: some View {
         ScrollView {
@@ -34,7 +35,15 @@ struct MicrocycleDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .appScreenBackground()
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingEditParameters = true
+                } label: {
+                    Label("Modifica Parametri", systemImage: "slider.horizontal.3")
+                }
+            }
+
+            ToolbarItem(placement: .cancellationAction) {
                 Button("Chiudi") {
                     dismiss()
                 }
@@ -44,6 +53,9 @@ struct MicrocycleDetailView: View {
             WorkoutCardPickerView(trainingDay: day) { card in
                 assignWorkoutToDay(card: card, day: day)
             }
+        }
+        .sheet(isPresented: $showingEditParameters) {
+            EditMicrocycleView(microcycle: microcycle)
         }
     }
 
