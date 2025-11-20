@@ -32,6 +32,7 @@ struct ContentView: View {
         .appScreenBackground()
         .onPreferenceChange(IsAtBottomPreferenceKey.self) { newValue in
             Task { @MainActor in
+                print("🔵 Preference received: \(newValue), current: \(isAtBottom)")
                 if isAtBottom != newValue {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         isAtBottom = newValue
@@ -119,6 +120,8 @@ struct ScrollPositionTracker: ViewModifier {
 
                         // Check if we're at the bottom: content bottom - scroll offset <= visible height
                         let isNearBottom = (contentHeight + scrollOffset) <= (scrollViewHeight + threshold)
+
+                        let _ = print("📏 Content: \(contentHeight), Scroll: \(scrollViewHeight), Offset: \(scrollOffset), Bottom: \(isNearBottom)")
 
                         Color.clear.preference(
                             key: IsAtBottomPreferenceKey.self,
