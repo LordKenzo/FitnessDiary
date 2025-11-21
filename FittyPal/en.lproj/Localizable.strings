@@ -534,6 +534,7 @@
 "workout.demo.bike.steps" = "Light cadence 5'";
 "workout.demo.benchpress" = "Flat Bench Press";
 "workout.demo.recovery" = "Recovery";
+"workout.signal.incoming" = "Signal incoming";
 // Workout Summary
 "workout.totalDuration" = "Total Duration";
 "workout.tonnage.estimated" = "Estimated Tonnage";

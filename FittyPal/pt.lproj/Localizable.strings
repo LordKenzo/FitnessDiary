@@ -430,6 +430,7 @@
 "workout.demo.bike.steps" = "Cadência leve 5’";
 "workout.demo.benchpress" = "Supino Reto";
 "workout.demo.recovery" = "Recuperação";
+"workout.signal.incoming" = "Sinal recebido";
 // Resumo do treino
 "workout.totalDuration" = "Duração total";
 "workout.tonnage.estimated" = "Tonelagem estimada";

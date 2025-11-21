@@ -1497,7 +1497,7 @@ struct WorkoutExecutionView: View {
     private var heartRateText: String {
         if bluetoothManager.isConnected {
             let bpm = bluetoothManager.currentHeartRate
-            return bpm > 0 ? "\(bpm) bpm" : "Segnale in arrivo"
+            return bpm > 0 ? "\(bpm) bpm" : L("workout.signal.incoming")
         } else {
             return L("workout.connectsensor")
         }

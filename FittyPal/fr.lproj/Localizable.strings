@@ -430,6 +430,7 @@
 "workout.demo.bike.steps" = "Cadence légère 5’";
 "workout.demo.benchpress" = "Développé couché";
 "workout.demo.recovery" = "Récupération";
+"workout.signal.incoming" = "Signal entrant";
 // Récapitulatif de l'entraînement
 "workout.totalDuration" = "Durée totale";
 "workout.tonnage.estimated" = "Tonnage estimé";

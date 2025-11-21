@@ -430,6 +430,7 @@
 "workout.demo.bike.steps" = "Leichte Kadenz 5’";
 "workout.demo.benchpress" = "Flachbankdrücken";
 "workout.demo.recovery" = "Erholung";
+"workout.signal.incoming" = "Eingehendes Signal";
 // Trainingszusammenfassung
 "workout.totalDuration" = "Gesamtdauer";
 "workout.tonnage.estimated" = "Geschätztes Gesamtgewicht";

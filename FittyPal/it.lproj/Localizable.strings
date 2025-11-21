@@ -510,6 +510,7 @@
 "workout.demo.bike.steps"= "Cadenza agile 5'";
 "workout.demo.benchpress"= "Panca Piana";
 "workout.demo.recovery"= "Recupero";
+"workout.signal.incoming" = "Segnale in arrivo";
 // Riepilogo allenamento
 "workout.totalDuration" = "Durata totale";
 "workout.tonnage.estimated" = "Tonnellaggio stimato";

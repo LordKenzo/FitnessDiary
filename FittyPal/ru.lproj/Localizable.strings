@@ -429,6 +429,7 @@
 "workout.demo.bike.steps" = "Лёгкий темп 5’";
 "workout.demo.benchpress" = "Жим лёжа";
 "workout.demo.recovery" = "Отдых";
+"workout.signal.incoming" = "Входящий сигнал";
 // Итоги тренировки
 "workout.totalDuration" = "Общая продолжительность";
 "workout.tonnage.estimated" = "Примерный весовой объём";

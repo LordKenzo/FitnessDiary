@@ -75,7 +75,8 @@ final class TrainingDay {
     /// Nome del giorno della settimana
     var dayName: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "it_IT")
+        // formatter.locale = Locale(identifier: "it_IT")
+        formatter.locale = Locale.current
         formatter.dateFormat = "EEEE"
         return formatter.string(from: date).capitalized
     }
@@ -83,7 +84,7 @@ final class TrainingDay {
     /// Nome breve del giorno (es. Lun, Mar...)
     var shortDayName: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "it_IT")
+        formatter.locale = Locale.current
         formatter.dateFormat = "EEE"
         return formatter.string(from: date).capitalized
     }

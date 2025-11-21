@@ -383,7 +383,8 @@ struct MicrocycleDetailView: View {
     
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "it_IT")
+        // formatter.locale = Locale(identifier: "it_IT")
+        formatter.locale = Locale.current
         formatter.dateFormat = "dd MMM yyyy"
         return formatter.string(from: date)
     }
@@ -557,7 +558,8 @@ struct TrainingDayCardView: View {
 
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "it_IT")
+        // formatter.locale = Locale(identifier: "it_IT")
+        formatter.locale = Locale.current
         formatter.dateFormat = "dd MMM yyyy"
         return formatter.string(from: date)
     }
@@ -1047,7 +1049,8 @@ struct DuplicateWorkoutCardView: View {
 
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "it_IT")
+        // formatter.locale = Locale(identifier: "it_IT")
+        formatter.locale = Locale.current
         formatter.dateFormat = "dd MMM yyyy"
         return formatter.string(from: date)
     }

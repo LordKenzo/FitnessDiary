@@ -430,6 +430,7 @@
 "workout.demo.bike.steps" = "Cadencia ligera 5’";
 "workout.demo.benchpress" = "Press de Banca Plano";
 "workout.demo.recovery" = "Recuperación";
+"workout.signal.incoming" = "Señal entrante";
 // Resumen del entrenamiento
 "workout.totalDuration" = "Duración total";
 "workout.tonnage.estimated" = "Tonelaje estimado";
