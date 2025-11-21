@@ -18,6 +18,8 @@ struct PeriodizationTimelineView: View {
     @State private var editingMesocycle: Mesocycle?
     @State private var draggedMesocycle: Mesocycle?
     @State private var draggingOffset: CGSize = .zero
+    @State private var showErrorAlert = false
+    @State private var errorMessage: String?
     
     var body: some View {
         ScrollView {
@@ -79,6 +81,11 @@ struct PeriodizationTimelineView: View {
         }
         .sheet(item: $editingMesocycle) { mesocycle in
             EditMesocycleView(mesocycle: mesocycle)
+        }
+        .alert("Errore", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage ?? "Si è verificato un errore inatteso.")
         }
     }
     
@@ -276,7 +283,12 @@ struct PeriodizationTimelineView: View {
         Task { @MainActor in
             let generator = PeriodizationGenerator()
             let _ = generator.generateCompletePlan(plan)
-            try? modelContext.save()
+            do {
+                try modelContext.save()
+            } catch {
+                errorMessage = "Impossibile generare i mesocicli: \(error.localizedDescription)"
+                showErrorAlert = true
+            }
             isGenerating = false
         }
     }
@@ -287,7 +299,12 @@ struct PeriodizationTimelineView: View {
         for (index, mesocycle) in mesocycles.enumerated() {
             mesocycle.order = index + 1
         }
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorMessage = "Impossibile riordinare i mesocicli: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
     }
 }
 
