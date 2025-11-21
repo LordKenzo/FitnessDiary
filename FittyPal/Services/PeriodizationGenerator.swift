@@ -215,7 +215,7 @@ class PeriodizationGenerator {
     /// - Parameters:
     ///   - microcycle: Settimana di allenamento
     ///   - weeklyFrequency: Numero allenamenti/settimana
-    ///   - trainingDays: Giorni della settimana in cui allenarsi (1-7, default: lun/mer/ven = [2,4,6])
+    ///   - trainingDays: Giorni della settimana in cui allenarsi (1-7 dove 1=Domenica, 2=Lunedì, etc.)
     /// - Returns: Array di TrainingDay
     func generateTrainingDays(
         for microcycle: Microcycle,
@@ -223,20 +223,26 @@ class PeriodizationGenerator {
         trainingDays: [Int]? = nil
     ) -> [TrainingDay] {
         var days: [TrainingDay] = []
+        let calendar = Calendar.current
 
         // Usa pattern predefinito se non specificato
         let selectedDays = trainingDays ?? defaultTrainingDaysPattern(frequency: weeklyFrequency)
 
-        for dayOfWeek in 1...7 {
-            guard let date = Calendar.current.date(byAdding: .day, value: dayOfWeek - 1, to: microcycle.startDate) else {
+        // Itera su 7 giorni partendo dalla startDate
+        for dayOffset in 0..<7 {
+            guard let date = calendar.date(byAdding: .day, value: dayOffset, to: microcycle.startDate) else {
                 continue
             }
 
-            let isTrainingDay = selectedDays.contains(dayOfWeek)
+            // Ottieni il weekday effettivo di questa data (1=Domenica, 2=Lunedì, etc.)
+            let actualWeekday = calendar.component(.weekday, from: date)
+
+            // Controlla se questo weekday è nei giorni di allenamento selezionati
+            let isTrainingDay = selectedDays.contains(actualWeekday)
 
             let trainingDay = TrainingDay(
                 date: date,
-                dayOfWeek: dayOfWeek,
+                dayOfWeek: actualWeekday,
                 isRestDay: !isTrainingDay,
                 microcycle: microcycle
             )
