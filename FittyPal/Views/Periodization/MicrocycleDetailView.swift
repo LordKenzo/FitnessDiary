@@ -19,6 +19,8 @@ struct MicrocycleDetailView: View {
     @State private var showCalendarLayout = false
     @State private var sourceDayForDuplication: TrainingDay?
     @State private var showingDuplicateSheet = false
+    @State private var showErrorAlert = false
+    @State private var errorMessage: String?
     
     var body: some View {
         ScrollView {
@@ -84,13 +86,23 @@ struct MicrocycleDetailView: View {
                 )
             }
         }
+        .alert("Errore", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage ?? "Si è verificato un errore inatteso.")
+        }
     }
     
     // MARK: - Actions
     
     private func assignWorkoutToDay(card: WorkoutCard, day: TrainingDay) {
         day.workoutCard = card
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorMessage = "Impossibile assegnare la scheda: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
     }
     
     // MARK: - Sections
@@ -511,8 +523,7 @@ struct TrainingDayCardView: View {
                     }
                     
                     Button(role: .destructive) {
-                        day.workoutCard = nil
-                        try? modelContext.save()
+                        removeWorkoutFromDay(day)
                     } label: {
                         Label("Rimuovi scheda", systemImage: "trash")
                     }
@@ -546,12 +557,32 @@ struct TrainingDayCardView: View {
     
     private func markComplete() {
         day.markCompleted()
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorMessage = "Impossibile salvare il completamento: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
     }
-    
+
     private func markIncomplete() {
         day.markIncomplete()
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorMessage = "Impossibile aggiornare lo stato: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
+    }
+
+    private func removeWorkoutFromDay(_ day: TrainingDay) {
+        day.workoutCard = nil
+        do {
+            try modelContext.save()
+        } catch {
+            errorMessage = "Impossibile rimuovere la scheda: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
     }
 }
 
@@ -582,6 +613,8 @@ struct CalendarDayCard: View {
     @Environment(\.modelContext) private var modelContext
     let day: TrainingDay
     let onSelectWorkout: () -> Void
+    @State private var showErrorAlert = false
+    @State private var errorMessage: String?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -667,8 +700,7 @@ struct CalendarDayCard: View {
             if !day.isRestDay {
                 if day.workoutCard != nil {
                     Button(role: .destructive) {
-                        day.workoutCard = nil
-                        try? modelContext.save()
+                        removeWorkoutFromDay(day)
                     } label: {
                         Label("Rimuovi scheda", systemImage: "trash")
                     }
@@ -679,22 +711,37 @@ struct CalendarDayCard: View {
                 if day.completed {
                     Button {
                         day.markIncomplete()
-                        try? modelContext.save()
+                        do {
+                            try modelContext.save()
+                        } catch {
+                            errorMessage = "Impossibile aggiornare lo stato: \(error.localizedDescription)"
+                            showErrorAlert = true
+                        }
                     } label: {
                         Label("Segna come non completato", systemImage: "xmark.circle")
                     }
                 } else {
                     Button {
                         day.markCompleted()
-                        try? modelContext.save()
+                        do {
+                            try modelContext.save()
+                        } catch {
+                            errorMessage = "Impossibile salvare il completamento: \(error.localizedDescription)"
+                            showErrorAlert = true
+                        }
                     } label: {
                         Label("Segna come completato", systemImage: "checkmark.circle")
                     }
                 }
             }
         }
+        .alert("Errore", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage ?? "Si è verificato un errore inatteso.")
+        }
     }
-    
+
     private func formatDayNumber(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd"
@@ -820,8 +867,10 @@ struct DuplicateWorkoutCardView: View {
     
     let sourceDay: TrainingDay
     let microcycle: Microcycle
-    
+
     @State private var selectedDays: Set<UUID> = []
+    @State private var showErrorAlert = false
+    @State private var errorMessage: String?
     
     private var availableDays: [TrainingDay] {
         microcycle.sortedTrainingDays.filter { day in
@@ -960,8 +1009,13 @@ struct DuplicateWorkoutCardView: View {
             }
             .appScreenBackground()
         }
+        .alert("Errore", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage ?? "Si è verificato un errore inatteso.")
+        }
     }
-    
+
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "it_IT")
@@ -971,15 +1025,20 @@ struct DuplicateWorkoutCardView: View {
     
     private func duplicateWorkout() {
         guard let workout = sourceDay.workoutCard else { return }
-        
+
         for dayID in selectedDays {
             if let day = microcycle.trainingDays.first(where: { $0.id == dayID }) {
                 day.workoutCard = workout
             }
         }
-        
-        try? modelContext.save()
-        dismiss()
+
+        do {
+            try modelContext.save()
+            dismiss()
+        } catch {
+            errorMessage = "Impossibile duplicare la scheda: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
     }
 }
 
