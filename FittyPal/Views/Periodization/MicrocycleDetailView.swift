@@ -109,12 +109,12 @@ struct MicrocycleDetailView: View {
                 Text("Sett. \(microcycle.weekNumber)")
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.secondary)
+                    //.foregroundStyle(.secondary)
             }
             
             Text(microcycle.loadLevel.description)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                //.foregroundStyle(.secondary)
             
             Divider()
             
@@ -123,7 +123,7 @@ struct MicrocycleDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Intensità")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        //.foregroundStyle(.secondary)
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.fill")
                             .font(.caption)
@@ -137,7 +137,7 @@ struct MicrocycleDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Volume")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        //.foregroundStyle(.secondary)
                     HStack(spacing: 4) {
                         Image(systemName: "chart.bar.fill")
                             .font(.caption)
@@ -153,7 +153,7 @@ struct MicrocycleDetailView: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Progressione")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        //.foregroundStyle(.secondary)
                     Text("+\(String(format: "%.1f", microcycle.loadProgressionPercentage * 100))%")
                         .font(.headline)
                         .fontWeight(.semibold)
@@ -164,26 +164,26 @@ struct MicrocycleDetailView: View {
             HStack {
                 Label(formatDate(microcycle.startDate), systemImage: "calendar")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    //.foregroundStyle(.secondary)
                 
                 Image(systemName: "arrow.right")
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    //.foregroundStyle(.secondary)
                 
                 Label(formatDate(microcycle.endDate), systemImage: "calendar")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    //.foregroundStyle(.secondary)
             }
             
             if let notes = microcycle.notes, !notes.isEmpty {
                 Text(notes)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    //.foregroundStyle(.secondary)
                     .padding(.top, 4)
             }
         }
         .padding()
-        .background(loadLevelColor.opacity(0.1))
+        .background(loadLevelColor.opacity(0.2))
         .cornerRadius(12)
     }
     

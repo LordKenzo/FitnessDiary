@@ -72,7 +72,6 @@ struct MesocycleDetailView: View {
 
             Text(mesocycle.phaseType.description)
                 .font(.caption)
-                .foregroundStyle(.secondary)
 
             Divider()
 
@@ -81,7 +80,6 @@ struct MesocycleDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Focus")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
                     Text(mesocycle.focusStrengthProfile.rawValue)
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -92,7 +90,6 @@ struct MesocycleDetailView: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Durata")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
                     Text("\(mesocycle.durationInWeeks) settimane")
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -103,7 +100,6 @@ struct MesocycleDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Carico")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
                     Text("\(mesocycle.loadWeeks) settimane")
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -114,7 +110,6 @@ struct MesocycleDetailView: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Scarico")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
                     Text("\(mesocycle.deloadWeeks) settimana")
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -125,26 +120,22 @@ struct MesocycleDetailView: View {
             HStack {
                 Label(formatDate(mesocycle.startDate), systemImage: "calendar")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
 
                 Image(systemName: "arrow.right")
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
 
                 Label(formatDate(mesocycle.endDate), systemImage: "calendar")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             if let notes = mesocycle.notes, !notes.isEmpty {
                 Text(notes)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
                     .padding(.top, 4)
             }
         }
         .padding()
-        .background(phaseColor.opacity(0.1))
+        .background(phaseColor.opacity(0.2))
         .cornerRadius(12)
     }
 
