@@ -497,7 +497,7 @@
 "workout.currentstep" = "Current Phase";
 "workout.nostep" = "No phase available";
 "workout.load" = "Load";
-"workout.groupProgress" = "Group";
+"workout.groupProgress" = "Group %d of %d";
 "workout.confirmGroup" = "Confirm Group";
 "workout.skipGroup" = "Skip Group";
 "workout.allGroupDone" = "All groups completed!";
@@ -517,7 +517,7 @@
 "workout.continue" = "Resume";
 "workout.timer" = "Exercise Timer";
 "workout.skip" = "Skip";
-"workout.suggestreps" = "Suggested Reps";
+"workout.suggestreps" = "Suggested Reps: %d";
 "workout.seriesProgress" = "Set %d of %d";
 "workout.loadEffective" = "Effective Load";
 "workout.repsCompleted" = "Completed Reps";

@@ -392,7 +392,7 @@
 "workout.currentstep" = "Текущая фаза";
 "workout.nostep" = "Нет доступных фаз";
 "workout.load" = "Нагрузка";
-"workout.groupProgress" = "Группа";
+"workout.groupProgress" = "Группа %d из %d";
 "workout.confirmGroup" = "Подтвердить группу";
 "workout.skipGroup" = "Пропустить группу";
 "workout.allGroupDone" = "Все группы завершены!";
@@ -412,7 +412,7 @@
 "workout.continue" = "Продолжить";
 "workout.timer" = "Таймер упражнения";
 "workout.skip" = "Пропустить";
-"workout.suggestreps" = "Рекомендуемое количество повторений";
+"workout.suggestreps" = "Рекомендуемое количество повторений: %d";
 "workout.seriesProgress" = "Подход %d из %d";
 "workout.loadEffective" = "Фактическая нагрузка";
 "workout.repsCompleted" = "Выполненные повторения";

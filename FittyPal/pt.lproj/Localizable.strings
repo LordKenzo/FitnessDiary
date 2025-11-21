@@ -393,7 +393,7 @@
 "workout.currentstep" = "Fase atual";
 "workout.nostep" = "Nenhuma fase disponível";
 "workout.load" = "Carga";
-"workout.groupProgress" = "Grupo";
+"workout.groupProgress" = "Grupo %d de %d";
 "workout.confirmGroup" = "Confirmar grupo";
 "workout.skipGroup" = "Saltar grupo";
 "workout.allGroupDone" = "Todos os grupos completados!";
@@ -413,7 +413,7 @@
 "workout.continue" = "Retomar";
 "workout.timer" = "Temporizador de exercício";
 "workout.skip" = "Saltar";
-"workout.suggestreps" = "Repetições sugeridas";
+"workout.suggestreps" = "Repetições sugeridas: %d";
 "workout.seriesProgress" = "Série %d de %d";
 "workout.loadEffective" = "Carga efetiva";
 "workout.repsCompleted" = "Repetições completadas";

@@ -1353,7 +1353,7 @@ struct WorkoutExecutionView: View {
                     // Input fields for actual execution
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            Text(L("workour.loadEffective"))
+                            Text(L("workout.loadEffective"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Spacer()
@@ -1488,7 +1488,7 @@ struct WorkoutExecutionView: View {
             return "Target: \(targetZone.name)"
         }
 
-        return L("workout.zonecardio")
+        return L("workout.zone")
     }
 
     private var heartRateText: String {
