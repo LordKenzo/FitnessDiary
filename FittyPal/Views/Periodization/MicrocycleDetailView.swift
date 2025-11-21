@@ -670,15 +670,21 @@ struct CalendarDayCard: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                         .lineLimit(2)
-                    
+
                     HStack(spacing: 8) {
                         Label("\(workout.totalSets)", systemImage: "chart.bar")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
-                        
+
                         Label("\(workout.totalExercises)", systemImage: "figure.strengthtraining.traditional")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
+
+                        if day.completed {
+                            Label("Fatto", systemImage: "checkmark.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.green)
+                        }
                     }
                 }
             } else {
@@ -863,10 +869,16 @@ struct WorkoutCardPreview: View {
                 Label("\(workout.totalExercises) esercizi", systemImage: "figure.strengthtraining.traditional")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                
+
                 Label("\(workout.estimatedDurationMinutes) min", systemImage: "clock")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+
+                if day.completed {
+                    Label("Completato", systemImage: "checkmark.circle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.green)
+                }
             }
         }
         .padding()

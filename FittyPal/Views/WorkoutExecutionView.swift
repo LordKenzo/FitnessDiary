@@ -705,6 +705,7 @@ struct WorkoutExecutionView: View {
 
     private var periodizedWorkoutCards: [WorkoutCard] {
         guard let todayDay = todaysTrainingDay,
+              !todayDay.completed,
               let workout = todayDay.workoutCard else {
             return []
         }
@@ -1547,6 +1548,14 @@ struct WorkoutExecutionView: View {
             durationSeconds: viewModel.generalElapsedTime
         )
         modelContext.insert(log)
+
+        // Mark TrainingDay as completed if this workout belongs to today's periodization
+        if let todayDay = todaysTrainingDay,
+           let activeCardID = viewModel.activeCard?.id,
+           todayDay.workoutCard?.id == activeCardID {
+            todayDay.markCompleted(with: log)
+        }
+
         do {
             try modelContext.save()
             dismissCompletionSheet()
