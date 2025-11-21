@@ -13,25 +13,25 @@ struct MicrocycleDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     let microcycle: Microcycle
-
+    
     @State private var selectedDay: TrainingDay?
     @State private var showingEditParameters = false
     @State private var showCalendarLayout = false
     @State private var sourceDayForDuplication: TrainingDay?
     @State private var showingDuplicateSheet = false
-
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Header Settimana
                 weekHeaderSection
-
+                
                 // Progress completamento
                 completionProgressSection
-
+                
                 // Statistiche volume settimanale
                 weeklyVolumeSection
-
+                
                 // Lista giorni
                 daysListSection
             }
@@ -48,9 +48,9 @@ struct MicrocycleDetailView: View {
                     } label: {
                         Label("Modifica Parametri", systemImage: "slider.horizontal.3")
                     }
-
+                    
                     Divider()
-
+                    
                     Picker("Vista", selection: $showCalendarLayout) {
                         Label("Lista", systemImage: "list.bullet")
                             .tag(false)
@@ -61,7 +61,7 @@ struct MicrocycleDetailView: View {
                     Image(systemName: "ellipsis.circle")
                 }
             }
-
+            
             ToolbarItem(placement: .cancellationAction) {
                 Button("Chiudi") {
                     dismiss()
@@ -85,16 +85,16 @@ struct MicrocycleDetailView: View {
             }
         }
     }
-
+    
     // MARK: - Actions
-
+    
     private func assignWorkoutToDay(card: WorkoutCard, day: TrainingDay) {
         day.workoutCard = card
         try? modelContext.save()
     }
-
+    
     // MARK: - Sections
-
+    
     private var weekHeaderSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Livello carico
@@ -103,21 +103,21 @@ struct MicrocycleDetailView: View {
                     .font(.title3)
                     .fontWeight(.bold)
                     .foregroundStyle(loadLevelColor)
-
+                
                 Spacer()
-
+                
                 Text("Sett. \(microcycle.weekNumber)")
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
             }
-
+            
             Text(microcycle.loadLevel.description)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-
+            
             Divider()
-
+            
             // Fattori modulazione
             HStack(spacing: 20) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -133,7 +133,7 @@ struct MicrocycleDetailView: View {
                             .fontWeight(.semibold)
                     }
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Volume")
                         .font(.caption)
@@ -147,9 +147,9 @@ struct MicrocycleDetailView: View {
                             .fontWeight(.semibold)
                     }
                 }
-
+                
                 Spacer()
-
+                
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Progressione")
                         .font(.caption)
@@ -159,22 +159,22 @@ struct MicrocycleDetailView: View {
                         .fontWeight(.semibold)
                 }
             }
-
+            
             // Date
             HStack {
                 Label(formatDate(microcycle.startDate), systemImage: "calendar")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-
+                
                 Image(systemName: "arrow.right")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-
+                
                 Label(formatDate(microcycle.endDate), systemImage: "calendar")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-
+            
             if let notes = microcycle.notes, !notes.isEmpty {
                 Text(notes)
                     .font(.caption)
@@ -186,35 +186,35 @@ struct MicrocycleDetailView: View {
         .background(loadLevelColor.opacity(0.1))
         .cornerRadius(12)
     }
-
+    
     private var completionProgressSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text("Completamento")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-
+                
                 Spacer()
-
+                
                 Text("\(microcycle.completedDays)/\(microcycle.totalPlannedDays) allenamenti")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-
+            
             ProgressView(value: microcycle.completionPercentage / 100.0)
                 .tint(loadLevelColor)
         }
     }
-
+    
     private var weeklyVolumeSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Volume Settimanale")
                     .font(.headline)
                     .fontWeight(.bold)
-
+                
                 Spacer()
-
+                
                 if !microcycle.hasAllWorkoutsAssigned {
                     HStack(spacing: 4) {
                         Image(systemName: "exclamationmark.triangle.fill")
@@ -226,7 +226,7 @@ struct MicrocycleDetailView: View {
                     }
                 }
             }
-
+            
             if microcycle.hasAnyWorkoutAssigned {
                 // Statistiche aggregate
                 HStack(spacing: 16) {
@@ -243,7 +243,7 @@ struct MicrocycleDetailView: View {
                                 .fontWeight(.bold)
                         }
                     }
-
+                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Esercizi")
                             .font(.caption)
@@ -257,7 +257,7 @@ struct MicrocycleDetailView: View {
                                 .fontWeight(.bold)
                         }
                     }
-
+                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Durata Tot.")
                             .font(.caption)
@@ -272,15 +272,15 @@ struct MicrocycleDetailView: View {
                         }
                     }
                 }
-
+                
                 Divider()
-
+                
                 // Visualizzazione barre volume giornaliero
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Distribuzione Volume")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-
+                    
                     VolumeBarChartView(trainingDays: microcycle.sortedTrainingDays)
                 }
             } else {
@@ -288,7 +288,7 @@ struct MicrocycleDetailView: View {
                     Image(systemName: "chart.bar.xaxis")
                         .font(.title2)
                         .foregroundStyle(.secondary)
-
+                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Nessuna scheda assegnata")
                             .font(.subheadline)
@@ -309,16 +309,16 @@ struct MicrocycleDetailView: View {
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
-
+    
     private var daysListSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Giorni della Settimana")
                     .font(.headline)
                     .fontWeight(.bold)
-
+                
                 Spacer()
-
+                
                 Button {
                     showCalendarLayout.toggle()
                 } label: {
@@ -327,7 +327,7 @@ struct MicrocycleDetailView: View {
                         .foregroundStyle(.blue)
                 }
             }
-
+            
             if microcycle.trainingDays.isEmpty {
                 emptyDaysView
             } else {
@@ -348,13 +348,13 @@ struct MicrocycleDetailView: View {
             }
         }
     }
-
+    
     private var emptyDaysView: some View {
         VStack(spacing: 12) {
             Image(systemName: "calendar.badge.plus")
                 .font(.system(size: 40))
                 .foregroundStyle(.secondary)
-
+            
             Text("Nessun giorno generato")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -362,13 +362,13 @@ struct MicrocycleDetailView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 30)
     }
-
+    
     // MARK: - Helpers
-
+    
     private var loadLevelColor: Color {
         microcycle.loadLevel.swiftUIColor
     }
-
+    
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "it_IT")
@@ -385,7 +385,7 @@ struct TrainingDayCardView: View {
     let day: TrainingDay
     let onSelectWorkout: () -> Void
     let onDuplicate: () -> Void
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header giorno
@@ -394,14 +394,14 @@ struct TrainingDayCardView: View {
                     Text(day.dayName)
                         .font(.subheadline)
                         .fontWeight(.semibold)
-
+                    
                     Text(formatDate(day.date))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
+                
                 Spacer()
-
+                
                 if day.completed {
                     Button {
                         markIncomplete()
@@ -459,7 +459,7 @@ struct TrainingDayCardView: View {
                     }
                 }
             }
-
+            
             // Scheda associata
             if !day.isRestDay {
                 if let workout = day.workoutCard {
@@ -471,11 +471,11 @@ struct TrainingDayCardView: View {
                         HStack {
                             Image(systemName: "plus.circle.fill")
                                 .foregroundStyle(.blue)
-
+                            
                             Text("Associa scheda")
                                 .font(.subheadline)
                                 .foregroundStyle(.blue)
-
+                            
                             Spacer()
                         }
                         .padding()
@@ -484,7 +484,7 @@ struct TrainingDayCardView: View {
                     }
                 }
             }
-
+            
             // Note
             if let notes = day.notes, !notes.isEmpty {
                 Text(notes)
@@ -502,13 +502,14 @@ struct TrainingDayCardView: View {
         )
         .contextMenu {
             if !day.isRestDay {
-                if let workout = day.workoutCard {
+                // 🔧 FIX: niente binding a `workout` non usato
+                if day.workoutCard != nil {
                     Button {
                         onDuplicate()
                     } label: {
                         Label("Duplica su altri giorni", systemImage: "doc.on.doc")
                     }
-
+                    
                     Button(role: .destructive) {
                         day.workoutCard = nil
                         try? modelContext.save()
@@ -516,9 +517,9 @@ struct TrainingDayCardView: View {
                         Label("Rimuovi scheda", systemImage: "trash")
                     }
                 }
-
+                
                 Divider()
-
+                
                 if day.completed {
                     Button {
                         markIncomplete()
@@ -535,19 +536,19 @@ struct TrainingDayCardView: View {
             }
         }
     }
-
+    
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "it_IT")
         formatter.dateFormat = "dd MMM yyyy"
         return formatter.string(from: date)
     }
-
+    
     private func markComplete() {
         day.markCompleted()
         try? modelContext.save()
     }
-
+    
     private func markIncomplete() {
         day.markIncomplete()
         try? modelContext.save()
@@ -561,7 +562,7 @@ struct CalendarGridView: View {
     @Environment(\.modelContext) private var modelContext
     let trainingDays: [TrainingDay]
     let onSelectWorkout: (TrainingDay) -> Void
-
+    
     var body: some View {
         LazyVGrid(columns: [
             GridItem(.flexible()),
@@ -581,7 +582,7 @@ struct CalendarDayCard: View {
     @Environment(\.modelContext) private var modelContext
     let day: TrainingDay
     let onSelectWorkout: () -> Void
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Header
@@ -591,14 +592,14 @@ struct CalendarDayCard: View {
                         .font(.caption2)
                         .fontWeight(.bold)
                         .foregroundStyle(.secondary)
-
+                    
                     Text(formatDayNumber(day.date))
                         .font(.title2)
                         .fontWeight(.bold)
                 }
-
+                
                 Spacer()
-
+                
                 if day.completed {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
@@ -611,9 +612,9 @@ struct CalendarDayCard: View {
                         .foregroundStyle(.orange)
                 }
             }
-
+            
             Divider()
-
+            
             // Content
             if day.isRestDay {
                 HStack {
@@ -629,12 +630,12 @@ struct CalendarDayCard: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                         .lineLimit(2)
-
+                    
                     HStack(spacing: 8) {
                         Label("\(workout.totalSets)", systemImage: "chart.bar")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
-
+                        
                         Label("\(workout.totalExercises)", systemImage: "figure.strengthtraining.traditional")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -672,9 +673,9 @@ struct CalendarDayCard: View {
                         Label("Rimuovi scheda", systemImage: "trash")
                     }
                 }
-
+                
                 Divider()
-
+                
                 if day.completed {
                     Button {
                         day.markIncomplete()
@@ -693,7 +694,7 @@ struct CalendarDayCard: View {
             }
         }
     }
-
+    
     private func formatDayNumber(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd"
@@ -706,14 +707,14 @@ struct CalendarDayCard: View {
 /// Visualizzazione a barre del volume giornaliero
 struct VolumeBarChartView: View {
     let trainingDays: [TrainingDay]
-
+    
     private var maxSets: Int {
         trainingDays
             .filter { !$0.isRestDay }
             .compactMap { $0.workoutCard?.totalSets }
             .max() ?? 1
     }
-
+    
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             ForEach(trainingDays) { day in
@@ -727,7 +728,7 @@ struct VolumeBarChartView: View {
                     } else if let workout = day.workoutCard {
                         let sets = workout.totalSets
                         let height = max(16.0, CGFloat(sets) / CGFloat(maxSets) * 80.0)
-
+                        
                         Rectangle()
                             .fill(day.completed ? Color.green : Color.blue)
                             .frame(width: 32, height: height)
@@ -749,7 +750,7 @@ struct VolumeBarChartView: View {
                                     .foregroundStyle(.secondary)
                             )
                     }
-
+                    
                     // Label giorno
                     Text(day.shortDayName.prefix(3).uppercased())
                         .font(.caption2)
@@ -769,7 +770,7 @@ struct VolumeBarChartView: View {
 struct WorkoutCardPreview: View {
     let workout: WorkoutCard
     let day: TrainingDay
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -777,30 +778,28 @@ struct WorkoutCardPreview: View {
                     Text(workout.name)
                         .font(.subheadline)
                         .fontWeight(.semibold)
-
+                    
                     if let splitType = workout.splitType {
                         HStack(spacing: 4) {
                             Image(systemName: splitType.icon)
                                 .font(.caption2)
-
+                            
                             Text(splitType.rawValue)
                                 .font(.caption2)
                         }
                         .foregroundStyle(.secondary)
                     }
                 }
-
+                
                 Spacer()
-
-
             }
-
+            
             // Statistiche scheda
             HStack(spacing: 16) {
                 Label("\(workout.totalExercises) esercizi", systemImage: "figure.strengthtraining.traditional")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-
+                
                 Label("\(workout.estimatedDurationMinutes) min", systemImage: "clock")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -818,18 +817,18 @@ struct WorkoutCardPreview: View {
 struct DuplicateWorkoutCardView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-
+    
     let sourceDay: TrainingDay
     let microcycle: Microcycle
-
+    
     @State private var selectedDays: Set<UUID> = []
-
+    
     private var availableDays: [TrainingDay] {
         microcycle.sortedTrainingDays.filter { day in
             !day.isRestDay && day.id != sourceDay.id
         }
     }
-
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -840,22 +839,22 @@ struct DuplicateWorkoutCardView: View {
                             Image(systemName: "doc.on.doc")
                                 .font(.title2)
                                 .foregroundStyle(.blue)
-
+                            
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Duplica Scheda")
                                     .font(.headline)
                                     .fontWeight(.bold)
-
+                                
                                 Text(workout.name)
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
-
+                            
                             Spacer()
                         }
                         .padding(.horizontal, 20)
                         .padding(.vertical, 12)
-
+                        
                         HStack {
                             Image(systemName: "info.circle.fill")
                                 .foregroundStyle(.blue)
@@ -869,7 +868,7 @@ struct DuplicateWorkoutCardView: View {
                     }
                     .background(Color.blue.opacity(0.1))
                 }
-
+                
                 // Lista giorni
                 List {
                     Section {
@@ -887,7 +886,7 @@ struct DuplicateWorkoutCardView: View {
                                         Circle()
                                             .stroke(selectedDays.contains(day.id) ? Color.blue : Color.gray, lineWidth: 2)
                                             .frame(width: 24, height: 24)
-
+                                        
                                         if selectedDays.contains(day.id) {
                                             Image(systemName: "checkmark")
                                                 .font(.caption)
@@ -895,28 +894,28 @@ struct DuplicateWorkoutCardView: View {
                                                 .foregroundStyle(.blue)
                                         }
                                     }
-
+                                    
                                     VStack(alignment: .leading, spacing: 4) {
                                         HStack {
                                             Text(day.dayName)
                                                 .font(.subheadline)
                                                 .fontWeight(.medium)
                                                 .foregroundStyle(.primary)
-
+                                            
                                             if day.completed {
                                                 Image(systemName: "checkmark.circle.fill")
                                                     .font(.caption)
                                                     .foregroundStyle(.green)
                                             }
                                         }
-
+                                        
                                         Text(formatDate(day.date))
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     }
-
+                                    
                                     Spacer()
-
+                                    
                                     if let existingWorkout = day.workoutCard {
                                         VStack(alignment: .trailing, spacing: 4) {
                                             Text("Scheda attuale")
@@ -950,7 +949,7 @@ struct DuplicateWorkoutCardView: View {
                         dismiss()
                     }
                 }
-
+                
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Duplica") {
                         duplicateWorkout()
@@ -962,23 +961,23 @@ struct DuplicateWorkoutCardView: View {
             .appScreenBackground()
         }
     }
-
+    
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "it_IT")
         formatter.dateFormat = "dd MMM yyyy"
         return formatter.string(from: date)
     }
-
+    
     private func duplicateWorkout() {
         guard let workout = sourceDay.workoutCard else { return }
-
+        
         for dayID in selectedDays {
             if let day = microcycle.trainingDays.first(where: { $0.id == dayID }) {
                 day.workoutCard = workout
             }
         }
-
+        
         try? modelContext.save()
         dismiss()
     }
@@ -989,7 +988,7 @@ struct DuplicateWorkoutCardView: View {
     guard let container = try? ModelContainer(for: Microcycle.self, configurations: config) else {
         return Text("Failed to create preview container")
     }
-
+    
     let microcycle = Microcycle(
         order: 1,
         weekNumber: 1,
@@ -997,9 +996,9 @@ struct DuplicateWorkoutCardView: View {
         endDate: Calendar.current.date(byAdding: .weekOfYear, value: 1, to: Date())!,
         loadLevel: .high
     )
-
+    
     container.mainContext.insert(microcycle)
-
+    
     return NavigationStack {
         MicrocycleDetailView(microcycle: microcycle)
     }

@@ -32,17 +32,43 @@ struct PeriodizationTimelineView: View {
         .navigationBarTitleDisplayMode(.large)
         .appScreenBackground()
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                if !plan.mesocycles.isEmpty {
-                    Button(editMode == .active ? "Fine" : "Modifica") {
-                        withAnimation {
-                            editMode = editMode == .active ? .inactive : .active
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    // Riordino mesocicli (stesso comportamento di prima)
+                    if !plan.mesocycles.isEmpty {
+                        Button {
+                            withAnimation {
+                                editMode = editMode == .active ? .inactive : .active
+                            }
+                        } label: {
+                            Label(
+                                editMode == .active ? "Fine riordino" : "Riordina mesocicli",
+                                systemImage: "arrow.up.arrow.down"
+                            )
                         }
                     }
+                    
+                    // Modifica piano (apre EditPeriodizationPlanView)
+                    Button {
+                        showingEditPlan = true
+                    } label: {
+                        Label("Modifica piano", systemImage: "pencil")
+                    }
+                    
+                    // (Opzionale) Genera mesocicli se non ci sono ancora
+                    if plan.mesocycles.isEmpty {
+                        Button {
+                            generateMesocycles()
+                        } label: {
+                            Label("Genera mesocicli", systemImage: "calendar.badge.plus")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
             }
-
         }
+
         .sheet(item: $selectedMesocycle) { mesocycle in
             NavigationStack {
                 MesocycleDetailView(mesocycle: mesocycle)

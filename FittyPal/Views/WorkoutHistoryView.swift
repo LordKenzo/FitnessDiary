@@ -33,7 +33,7 @@ struct WorkoutHistoryView: View {
             }
         }
         .glassScrollBackground()
-        .navigationTitle("Storico Allenamenti")
+        .navigationTitle(L("workout.history.title"))
         .navigationBarTitleDisplayMode(.inline)
         .appScreenBackground()
     }

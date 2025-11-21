@@ -13,9 +13,9 @@ struct EditPeriodizationPlanView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \PeriodizationFolder.order) private var folders: [PeriodizationFolder]
-
+    
     let plan: PeriodizationPlan
-
+    
     // Form state
     @State private var name: String = ""
     @State private var startDate: Date = Date()
@@ -28,35 +28,35 @@ struct EditPeriodizationPlanView: View {
     @State private var selectedFolders: [PeriodizationFolder] = []
     @State private var selectedTrainingDays: [Weekday] = []
     @State private var showingWeekdaySelection = false
-
+    
     var body: some View {
         NavigationStack {
             Form {
                 // Sezione Info Base
                 basicInfoSection
-
+                
                 // Sezione Organizzazione
                 if !folders.isEmpty {
                     organizationSection
                 }
-
+                
                 // Sezione Date
                 datesSection
-
+                
                 // Sezione Profili Forza
                 strengthProfilesSection
-
+                
                 // Sezione Frequenza
                 frequencySection
-
+                
                 // Sezione Giorni Allenamento
                 trainingDaysSection
-
+                
                 // Sezione Mesocicli
                 if !plan.mesocycles.isEmpty {
                     mesocyclesSection
                 }
-
+                
                 // Sezione Note
                 notesSection
             }
@@ -69,7 +69,7 @@ struct EditPeriodizationPlanView: View {
                         dismiss()
                     }
                 }
-
+                
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Salva") {
                         savePlan()
@@ -81,14 +81,21 @@ struct EditPeriodizationPlanView: View {
         .onAppear {
             loadPlanData()
         }
+        // ⬇️ IMPORTANTE: sheet agganciato al root, NON alla Section
+        .sheet(isPresented: $showingWeekdaySelection) {
+            WeekdaySelectionView(
+                selectedDays: $selectedTrainingDays,
+                requiredCount: weeklyFrequency
+            )
+        }
     }
-
+    
     // MARK: - Sections
-
+    
     private var basicInfoSection: some View {
         Section {
             TextField("Nome piano", text: $name)
-
+            
             HStack {
                 Text("Modello")
                     .foregroundStyle(.secondary)
@@ -102,13 +109,13 @@ struct EditPeriodizationPlanView: View {
             Text("Il modello di periodizzazione non può essere modificato dopo la creazione")
         }
     }
-
+    
     private var datesSection: some View {
         Section {
             DatePicker("Data inizio", selection: $startDate, displayedComponents: .date)
-
+            
             DatePicker("Data fine", selection: $endDate, in: startDate..., displayedComponents: .date)
-
+            
             HStack {
                 Text("Durata")
                     .foregroundStyle(.secondary)
@@ -120,7 +127,7 @@ struct EditPeriodizationPlanView: View {
             Text("Date")
         }
     }
-
+    
     private var strengthProfilesSection: some View {
         Section {
             Picker("Profilo primario", selection: $primaryProfile) {
@@ -128,13 +135,13 @@ struct EditPeriodizationPlanView: View {
                     Text(profile.rawValue).tag(profile)
                 }
             }
-
+            
             Toggle("Profilo secondario", isOn: $useSecondaryProfile)
-
+            
             if useSecondaryProfile {
                 Picker("Secondario", selection: $secondaryProfile) {
                     Text("Nessuno").tag(nil as StrengthExpressionType?)
-
+                    
                     ForEach(StrengthExpressionType.allCases.filter { $0 != primaryProfile }, id: \.self) { profile in
                         Text(profile.rawValue).tag(profile as StrengthExpressionType?)
                     }
@@ -144,7 +151,7 @@ struct EditPeriodizationPlanView: View {
             Text("Profili di Forza")
         }
     }
-
+    
     private var frequencySection: some View {
         Section {
             Stepper("Frequenza: \(weeklyFrequency)x/settimana", value: $weeklyFrequency, in: 1...7)
@@ -154,7 +161,7 @@ struct EditPeriodizationPlanView: View {
                         selectedTrainingDays = []
                     }
                 }
-
+            
             Text(frequencyDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -162,7 +169,7 @@ struct EditPeriodizationPlanView: View {
             Text("Frequenza Settimanale")
         }
     }
-
+    
     private var trainingDaysSection: some View {
         Section {
             Button {
@@ -171,13 +178,13 @@ struct EditPeriodizationPlanView: View {
                 HStack {
                     Image(systemName: "calendar")
                         .foregroundStyle(.blue)
-
+                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Giorni di Allenamento")
                             .font(.subheadline)
                             .fontWeight(.medium)
                             .foregroundStyle(.primary)
-
+                        
                         if selectedTrainingDays.isEmpty {
                             Text("Seleziona \(weeklyFrequency) giorni")
                                 .font(.caption)
@@ -201,9 +208,9 @@ struct EditPeriodizationPlanView: View {
                             }
                         }
                     }
-
+                    
                     Spacer()
-
+                    
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
@@ -214,11 +221,9 @@ struct EditPeriodizationPlanView: View {
         } footer: {
             Text("Scegli in quali giorni della settimana ti allenerai. Questi giorni saranno validi per tutto il piano.")
         }
-        .sheet(isPresented: $showingWeekdaySelection) {
-            WeekdaySelectionView(selectedDays: $selectedTrainingDays, requiredCount: weeklyFrequency)
-        }
+        // ⛔️ NIENTE .sheet QUI
     }
-
+    
     private var mesocyclesSection: some View {
         Section {
             ForEach(plan.mesocycles.sorted(by: { $0.order < $1.order })) { mesocycle in
@@ -227,20 +232,20 @@ struct EditPeriodizationPlanView: View {
                         Text(mesocycle.name)
                             .font(.subheadline)
                             .fontWeight(.semibold)
-
+                        
                         HStack(spacing: 8) {
                             Label(mesocycle.phaseType.rawValue, systemImage: mesocycle.phaseType.icon)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-
+                            
                             Text("\(mesocycle.durationInWeeks) sett")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
-
+                    
                     Spacer()
-
+                    
                     Text("M\(mesocycle.order)")
                         .font(.caption)
                         .fontWeight(.bold)
@@ -257,7 +262,7 @@ struct EditPeriodizationPlanView: View {
             Text("Per riordinare o modificare i mesocicli, usa la vista timeline")
         }
     }
-
+    
     private var notesSection: some View {
         Section {
             TextField("Note (opzionale)", text: $notes, axis: .vertical)
@@ -266,7 +271,7 @@ struct EditPeriodizationPlanView: View {
             Text("Note")
         }
     }
-
+    
     private var organizationSection: some View {
         Section {
             NavigationLink {
@@ -278,12 +283,12 @@ struct EditPeriodizationPlanView: View {
                 HStack {
                     Image(systemName: "folder.fill")
                         .foregroundStyle(.orange)
-
+                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Folder")
                             .font(.subheadline)
                             .fontWeight(.medium)
-
+                        
                         if selectedFolders.isEmpty {
                             Text("Nessuna cartella selezionata")
                                 .font(.caption)
@@ -303,7 +308,7 @@ struct EditPeriodizationPlanView: View {
                                     .background(folder.color.opacity(0.1))
                                     .clipShape(Capsule())
                                 }
-
+                                
                                 if selectedFolders.count > 2 {
                                     Text("+\(selectedFolders.count - 2)")
                                         .font(.caption)
@@ -312,9 +317,9 @@ struct EditPeriodizationPlanView: View {
                             }
                         }
                     }
-
+                    
                     Spacer()
-
+                    
                     Image(systemName: "chevron.right")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
@@ -324,18 +329,18 @@ struct EditPeriodizationPlanView: View {
             Text("Organizzazione")
         }
     }
-
+    
     // MARK: - Helpers
-
+    
     private var isFormValid: Bool {
         !name.isEmpty && endDate >= startDate
     }
-
+    
     private var durationInWeeks: Int {
         let components = Calendar.current.dateComponents([.weekOfYear], from: startDate, to: endDate)
         return max(1, components.weekOfYear ?? 1)
     }
-
+    
     private var frequencyDescription: String {
         switch weeklyFrequency {
         case 1:
@@ -356,7 +361,7 @@ struct EditPeriodizationPlanView: View {
             return "\(weeklyFrequency) allenamenti"
         }
     }
-
+    
     private func loadPlanData() {
         name = plan.name
         startDate = plan.startDate
@@ -369,9 +374,9 @@ struct EditPeriodizationPlanView: View {
         selectedFolders = plan.folders
         selectedTrainingDays = plan.trainingDays
     }
-
+    
     // MARK: - Actions
-
+    
     private func savePlan() {
         plan.name = name
         plan.startDate = startDate
@@ -382,7 +387,7 @@ struct EditPeriodizationPlanView: View {
         plan.notes = notes.isEmpty ? nil : notes
         plan.folders = selectedFolders
         plan.trainingDays = selectedTrainingDays
-
+        
         try? modelContext.save()
         dismiss()
     }
@@ -393,7 +398,7 @@ struct EditPeriodizationPlanView: View {
     guard let container = try? ModelContainer(for: PeriodizationPlan.self, configurations: config) else {
         return Text("Failed to create preview container")
     }
-
+    
     let plan = PeriodizationPlan(
         name: "Piano Forza 2025",
         startDate: Date(),
@@ -403,9 +408,9 @@ struct EditPeriodizationPlanView: View {
         secondaryStrengthProfile: .hypertrophy,
         weeklyFrequency: 4
     )
-
+    
     container.mainContext.insert(plan)
-
+    
     return EditPeriodizationPlanView(plan: plan)
         .modelContainer(container)
 }

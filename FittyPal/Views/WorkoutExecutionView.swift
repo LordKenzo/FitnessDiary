@@ -91,7 +91,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
     @Published private(set) var isCountdownActive: Bool = false
     @Published private(set) var countdownRemainingSeconds: Int = 0
     @Published private(set) var isSessionActive: Bool = false
-    @Published private(set) var sessionTitle: String = "Allenamento"
+    @Published private(set) var sessionTitle: String = L("workout.title")
     @Published private(set) var activeCard: WorkoutCard?
     @Published private(set) var encouragementMessage: String
     @Published private(set) var selectedSound: TimerSound
@@ -154,7 +154,7 @@ final class WorkoutExecutionViewModel: ObservableObject {
         encouragementMessage = motivationEngine.defaultMessage
         if !steps.isEmpty {
             isSessionActive = true
-            sessionTitle = "Allenamento Demo"
+            sessionTitle = L("workout.demo.title")
         }
         startTimer()
         updateMotivation(for: currentStep)
@@ -530,15 +530,15 @@ extension WorkoutExecutionViewModel {
     static func demo() -> WorkoutExecutionViewModel {
         let steps: [Step] = [
             Step(
-                title: "Riscaldamento Bike",
-                subtitle: "Cadenza agile 5'",
+                title: L("workout.demo.bike"),
+                subtitle: L("workout.demo.bike.steps"),
                 zone: .zone2,
                 estimatedDuration: 300,
                 type: .timed(duration: 300, isRest: false),
                 highlight: "Cuore pronto"
             ),
             Step(
-                title: "Panca Piana",
+                title: L("workout.demo.benchpress"),
                 subtitle: "3x10 @ 50kg",
                 zone: .zone3,
                 estimatedDuration: 420,
@@ -546,7 +546,7 @@ extension WorkoutExecutionViewModel {
                 highlight: "Stabilità massima"
             ),
             Step(
-                title: "Recupero",
+                title: L("workout.demo.recovery"),
                 subtitle: "90s di pausa",
                 zone: .zone1,
                 estimatedDuration: 90,
@@ -557,7 +557,7 @@ extension WorkoutExecutionViewModel {
 
         let viewModel = WorkoutExecutionViewModel(steps: steps)
         viewModel.isSessionActive = true
-        viewModel.sessionTitle = "Scheda Demo"
+        viewModel.sessionTitle = L("workout.demo.sheet")
         return viewModel
     }
 }
@@ -680,16 +680,16 @@ struct WorkoutExecutionView: View {
     private var workoutPicker: some View {
         ScrollView {
             VStack(spacing: 20) {
-                Text("Seleziona una scheda per iniziare")
+                Text(L("workout.start"))
                     .font(.title3)
                     .fontWeight(.semibold)
                     .padding(.top, 16)
 
                 if workoutCards.isEmpty {
                     ContentUnavailableView {
-                        Label("Nessuna scheda disponibile", systemImage: "doc.text")
+                        Label(L("workout.notavailable"), systemImage: "doc.text")
                     } description: {
-                        Text("Crea una scheda nella tab Schede per farla comparire qui")
+                        Text(L("workout.createsuggest"))
                     }
                     .padding()
                 } else {
@@ -718,7 +718,7 @@ struct WorkoutExecutionView: View {
                 }
                 Spacer()
                 VStack(alignment: .trailing) {
-                    Text("Durata stimata")
+                    Text(L("workout.estimation"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Text("\(card.estimatedDurationMinutes) min")
@@ -745,8 +745,11 @@ struct WorkoutExecutionView: View {
             Button {
                 viewModel.start(card: card, countdownSeconds: defaultCountdownSeconds, modelContext: modelContext)
             } label: {
-                Label("Avvia con countdown di \(defaultCountdownSeconds)s", systemImage: "play.circle.fill")
-                    .frame(maxWidth: .infinity)
+                Label(
+                    String(format: L("workout.startWithCountdown"), defaultCountdownSeconds),
+                    systemImage: "play.circle.fill"
+                )
+                .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
         }
@@ -825,7 +828,7 @@ struct WorkoutExecutionView: View {
     @ViewBuilder
     private var currentStepSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Fase corrente")
+            Text(L("workout.currentstep"))
                 .font(.headline)
 
             if let step = viewModel.currentStep, !viewModel.isCountdownActive {
@@ -838,14 +841,14 @@ struct WorkoutExecutionView: View {
                     customMethodRepsStepView(step: step, groups: groups, seriesNumber: seriesNumber, baseLoad: baseLoad)
                 }
             } else if viewModel.isCountdownActive {
-                Text("Il countdown è attivo")
+                Text(L("workout.activecountdown"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else if viewModel.isWorkoutCompleted {
-                Label("Allenamento completato", systemImage: "checkmark.seal.fill")
+                Label(L("workout.done"), systemImage: "checkmark.seal.fill")
                     .font(.title3)
             } else {
-                Text("Nessuna fase disponibile")
+                Text(L("workout.nostep"))
             }
         }
         .dashboardCardStyle()
@@ -854,7 +857,7 @@ struct WorkoutExecutionView: View {
     private func timedStepView(step: WorkoutExecutionViewModel.Step, isRest: Bool) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label(isRest ? "Pausa" : "Timer esercizio", systemImage: isRest ? "moon.zzz.fill" : "flame.fill")
+                Label(isRest ? L("workout.pause") : L("workout.timer"), systemImage: isRest ? "moon.zzz.fill" : "flame.fill")
                     .font(.subheadline)
                     .foregroundStyle(isRest ? .blue : .orange)
                 Spacer()
@@ -872,13 +875,13 @@ struct WorkoutExecutionView: View {
 
             HStack {
                 Button(action: viewModel.togglePause) {
-                    Label(viewModel.isPaused ? "Riprendi" : "Pausa", systemImage: viewModel.isPaused ? "play" : "pause")
+                    Label(viewModel.isPaused ? L("workout.continue") : L("workout.pause"), systemImage: viewModel.isPaused ? "play" : "pause")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
 
                 Button(role: .destructive, action: viewModel.skipToNextStep) {
-                    Label("Salta", systemImage: "forward.end.fill")
+                    Label(L("workout.skip"), systemImage: "forward.end.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -889,10 +892,11 @@ struct WorkoutExecutionView: View {
     private func repsStepView(step: WorkoutExecutionViewModel.Step, totalSets: Int, repsPerSet: Int) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Serie \(min(viewModel.completedSets + 1, totalSets)) di \(totalSets)")
+                let current = min(viewModel.completedSets + 1, totalSets)
+                Text(String(format: L("workout.seriesProgress"), current, totalSets))                
                     .font(.title3)
                     .bold()
-                Text("Ripetizioni suggerite: \(repsPerSet)")
+                Text(String(format: L("workout.suggestreps"), repsPerSet))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Text(step.highlight)
@@ -904,7 +908,7 @@ struct WorkoutExecutionView: View {
                 .tint(.green)
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Carico effettivo")
+                Text(L("workout.loadEffective"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 TextField("Kg", text: $viewModel.loadText)
@@ -913,10 +917,10 @@ struct WorkoutExecutionView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Ripetizioni completate")
+                Text(L("workout.repsCompleted"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                TextField("Ripetizioni", text: $viewModel.actualRepsText)
+                TextField(L("workout.reps.placeholder"), text: $viewModel.actualRepsText)
                     .keyboardType(.numberPad)
                     .textFieldStyle(.roundedBorder)
             }
@@ -933,14 +937,14 @@ struct WorkoutExecutionView: View {
             }
 
             Button(action: viewModel.confirmSet) {
-                Label("Conferma serie", systemImage: "checkmark.circle.fill")
+                Label(L("workout.confirmSerie"), systemImage: "checkmark.circle.fill")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .disabled(viewModel.completedSets >= totalSets)
 
             Button(role: .cancel, action: viewModel.skipCurrentSet) {
-                Label("Salta serie", systemImage: "forward.end.fill")
+                Label(L("workout.skipSet"), systemImage: "forward.end.fill")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
@@ -954,7 +958,7 @@ struct WorkoutExecutionView: View {
                 // Show rest timer
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Label("Recupero tra gruppi", systemImage: "timer")
+                        Label(L("workout.recoveryGroup"), systemImage: "timer")
                             .font(.subheadline)
                             .foregroundStyle(.purple)
                         Spacer()
@@ -963,7 +967,7 @@ struct WorkoutExecutionView: View {
                             .monospacedDigit()
                     }
 
-                    Text("Preparati per il prossimo gruppo")
+                    Text(L("workout.nextGroup"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
@@ -977,7 +981,7 @@ struct WorkoutExecutionView: View {
                         .tint(.purple)
 
                     Button(action: viewModel.skipGroupRest) {
-                        Label("Salta pausa", systemImage: "forward.end.fill")
+                        Label(L("workout.skipPause"), systemImage: "forward.end.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
@@ -989,11 +993,17 @@ struct WorkoutExecutionView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text("Gruppo \(viewModel.currentGroupIndex + 1) di \(groups.count)")
+                            Text(
+                                String(
+                                    format: L("workout.groupProgress"),
+                                    viewModel.currentGroupIndex + 1,
+                                    groups.count
+                                )
+                            )
                                 .font(.title3)
                                 .bold()
                             Spacer()
-                            Text("Serie \(seriesNumber)")
+                            Text(String(format: L("workout.serie"), seriesNumber))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
@@ -1018,7 +1028,7 @@ struct WorkoutExecutionView: View {
                                     Image(systemName: "scalemass")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
-                                    Text("Carico")
+                                    Text(L("workout.load"))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -1038,7 +1048,7 @@ struct WorkoutExecutionView: View {
 
                             VStack(alignment: .trailing, spacing: 4) {
                                 HStack(spacing: 4) {
-                                    Text("Pausa dopo")
+                                    Text(L("workout.pauseAfter"))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                     Image(systemName: "timer")
@@ -1058,13 +1068,17 @@ struct WorkoutExecutionView: View {
                     // Input fields for actual execution
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            Text("Carico effettivo")
+                            Text(L("workour.loadEffective"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Spacer()
-                            Text("Suggerito: \(currentGroup.formattedLoad) kg")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
+                            
+                            Text(
+                                String(
+                                    format: L("workout.suggestedLoad"),
+                                    currentGroup.formattedLoad
+                                )
+                            )
                         }
                         TextField("Kg", text: $viewModel.loadText)
                             .keyboardType(.decimalPad)
@@ -1084,19 +1098,19 @@ struct WorkoutExecutionView: View {
                     }
 
                     Button(action: viewModel.confirmGroup) {
-                        Label("Conferma gruppo", systemImage: "checkmark.circle.fill")
+                        Label(L("workout.confirmGroup"), systemImage: "checkmark.circle.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.purple)
 
                     Button(role: .cancel, action: viewModel.skipCurrentGroup) {
-                        Label("Salta gruppo", systemImage: "forward.end.fill")
+                        Label(L("workout.skipGroup"), systemImage: "forward.end.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                 } else {
-                    Text("Tutti i gruppi completati!")
+                    Text(L("workout.allGroupDone"))
                         .font(.title3)
                         .foregroundStyle(.green)
                 }
@@ -1124,7 +1138,7 @@ struct WorkoutExecutionView: View {
     private var upcomingSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Fasi successive")
+                Text(L("workout.nextSteps"))
                     .font(.headline)
                 Spacer()
                 Text("\(max(stepsRemaining, 0)) step")
@@ -1133,7 +1147,7 @@ struct WorkoutExecutionView: View {
             }
 
             if upcomingSteps.isEmpty {
-                Text("Hai quasi finito! 🎉")
+                Text(L("workout.closetofinish"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
@@ -1189,7 +1203,7 @@ struct WorkoutExecutionView: View {
             return "Target: \(targetZone.name)"
         }
 
-        return "Zone cardio"
+        return L("workout.zonecardio")
     }
 
     private var heartRateText: String {
@@ -1197,7 +1211,7 @@ struct WorkoutExecutionView: View {
             let bpm = bluetoothManager.currentHeartRate
             return bpm > 0 ? "\(bpm) bpm" : "Segnale in arrivo"
         } else {
-            return "Collega sensore"
+            return L("workout.connectsensor")
         }
     }
 
@@ -1289,7 +1303,7 @@ struct WorkoutExecutionView: View {
                     Button {
                         saveWorkoutLog()
                     } label: {
-                        Label("Salva allenamento", systemImage: "square.and.arrow.down")
+                        Label(L("workout.saveWorkout"), systemImage: "square.and.arrow.down")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                     }
@@ -1298,7 +1312,7 @@ struct WorkoutExecutionView: View {
                     Button(role: .destructive) {
                         discardWorkoutLog()
                     } label: {
-                        Label("Scarta", systemImage: "trash")
+                        Label(L("workout.trash"), systemImage: "trash")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
@@ -1306,7 +1320,7 @@ struct WorkoutExecutionView: View {
                 .padding(.horizontal)
                 .padding(.bottom)
             }
-            .navigationTitle("Fine allenamento")
+            .navigationTitle(L("workout.end"))
         }
         .interactiveDismissDisabled()
         .presentationDetents([.medium, .large])
@@ -1318,61 +1332,64 @@ struct WorkoutExecutionView: View {
                 Text(viewModel.activeCard?.name ?? viewModel.sessionTitle)
                     .font(.title3)
                     .fontWeight(.semibold)
-                Text("Riepilogo allenamento")
+                Text(L("workout.review"))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
-
+            
             VStack(spacing: 12) {
                 WorkoutSummaryMetricRow(
                     icon: "clock",
-                    title: "Durata totale",
+                    title: L("workout.totalDuration"),
                     value: format(seconds: viewModel.generalElapsedTime)
                 )
-
+                
                 if summaryMetrics.hasTonnage {
                     WorkoutSummaryMetricRow(
                         icon: "dumbbell.fill",
-                        title: "Tonnellaggio stimato",
-                        value: "\(formatTonnage(summaryMetrics.tonnage)) kg"
+                        title: L("workout.tonnage.estimated"),
+                        value: String(
+                            format: L("workout.tonnage.value"),
+                            formatTonnage(summaryMetrics.tonnage)
+                        )
                     )
                 }
-
+                
                 if summaryMetrics.hasCardioDuration {
                     WorkoutSummaryMetricRow(
                         icon: "figure.run",
-                        title: "Durata cardio",
+                        title: L("workout.cardio.duration"),
                         value: format(seconds: summaryMetrics.cardioDuration)
                     )
                 }
-
+                
                 if summaryMetrics.exerciseCount > 0 {
                     WorkoutSummaryMetricRow(
                         icon: "list.number",
-                        title: "Esercizi completati",
+                        title: L("workout.exercises.completed"),
                         value: "\(summaryMetrics.exerciseCount)"
                     )
                 }
-
+                
                 if summaryMetrics.upperBodyCount > 0 {
                     WorkoutSummaryMetricRow(
                         icon: "figure.strengthtraining.traditional",
-                        title: "Parte alta",
+                        title: L("workout.upperBody"),
                         value: "\(summaryMetrics.upperBodyCount)"
                     )
                 }
-
+                
                 if summaryMetrics.lowerBodyCount > 0 {
                     WorkoutSummaryMetricRow(
                         icon: "figure.step.training",
-                        title: "Parte bassa",
+                        title: L("workout.lowerBody"),
                         value: "\(summaryMetrics.lowerBodyCount)"
                     )
                 }
             }
-
+            
             if !summaryMetrics.hasTonnage {
-                Text("Inserisci i carichi nelle serie per stimare il tonnellaggio totale.")
+                Text(L("workout.tonnage.hint"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -1381,10 +1398,12 @@ struct WorkoutExecutionView: View {
         .dashboardCardStyle()
     }
 
+
     private var moodSelectionSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Come ti senti?")
+            Text(L("workout.mood.question"))
                 .font(.headline)
+            
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 90), spacing: 12)], spacing: 12) {
                 ForEach(WorkoutMood.allCases) { mood in
                     Button {
@@ -1393,7 +1412,7 @@ struct WorkoutExecutionView: View {
                         VStack(spacing: 6) {
                             Text(mood.emoji)
                                 .font(.system(size: 32))
-                            Text(mood.title)
+                            Text(mood.title) // qui immagino sia già localizzato, o lo gestisci nell'enum
                                 .font(.caption)
                         }
                         .frame(maxWidth: .infinity)
@@ -1411,18 +1430,21 @@ struct WorkoutExecutionView: View {
         }
     }
 
+
     private var notesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Note")
+            Text(L("common.notes"))
                 .font(.headline)
+            
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $completionNotes)
                     .frame(minHeight: 120)
                     .padding(8)
                     .background(Color(.secondarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                
                 if completionNotes.isEmpty {
-                    Text("Annota sensazioni, focus o modifiche")
+                    Text(L("workout.notes.placeholder"))
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
@@ -1432,20 +1454,25 @@ struct WorkoutExecutionView: View {
         }
     }
 
+
     private var rpeSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Toggle("Aggiungi RPE", isOn: $includeRPE.animation())
+            Toggle(L("workout.rpe.add"), isOn: $includeRPE.animation())
+            
             if includeRPE {
                 VStack(alignment: .leading, spacing: 8) {
                     Slider(value: $completionRPE, in: 1...10, step: 1)
-                    Text("RPE: \(Int(completionRPE))")
-                        .font(.subheadline)
-                        .monospacedDigit()
+                    Text(
+                        String(format: L("workout.rpe.value"), Int(completionRPE))
+                    )
+                    .font(.subheadline)
+                    .monospacedDigit()
                 }
                 .transition(.opacity)
             }
         }
     }
+
 
     @ViewBuilder
     private var countdownOverlay: some View {
@@ -1453,21 +1480,23 @@ struct WorkoutExecutionView: View {
             ZStack {
                 Color.black.opacity(0.55)
                     .ignoresSafeArea()
-
+                
                 VStack(spacing: 16) {
-                    Text("Countdown")
+                    Text(L("workout.countdown.title"))
                         .font(.headline)
                         .foregroundStyle(.white)
+                    
                     Text("\(viewModel.countdownRemainingSeconds)")
                         .font(.system(size: 72, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(.white)
-                    Text("Preparati a iniziare l'allenamento")
+                    
+                    Text(L("workout.countdown.subtitle"))
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.8))
-
+                    
                     Button(action: viewModel.skipCountdown) {
-                        Text("Salta countdown")
+                        Text(L("workout.countdown.skip"))
                             .fontWeight(.semibold)
                     }
                     .buttonStyle(.borderedProminent)
@@ -1481,6 +1510,7 @@ struct WorkoutExecutionView: View {
             .transition(.opacity)
         }
     }
+
 
     private func format(seconds: TimeInterval) -> String {
         let formatter = DateComponentsFormatter()
@@ -1617,49 +1647,74 @@ private struct HeartRateHistogram: View {
 }
 
 // MARK: - Step Factory
-
+@MainActor
 private enum WorkoutExecutionStepFactory {
     static func steps(for card: WorkoutCard, modelContext: ModelContext) -> [WorkoutExecutionViewModel.Step] {
         var result: [WorkoutExecutionViewModel.Step] = []
         let orderedBlocks = card.blocks.sorted { $0.order < $1.order }
-
+        
         for block in orderedBlocks {
             switch block.blockType {
             case .rest:
                 let restDuration = block.globalRestTime ?? 0
-                let subtitle = block.notes ?? (restDuration > 0 ? "Recupero \(formatDuration(restDuration))" : "Recupero libero")
+                
+                let subtitle: String
+                if let notes = block.notes, !notes.isEmpty {
+                    subtitle = notes
+                } else if restDuration > 0 {
+                    subtitle = String(
+                        format: L("workout.step.rest.subtitleTimed"),
+                        formatDuration(restDuration)
+                    )
+                } else {
+                    subtitle = L("workout.step.rest.subtitleFree")
+                }
+                
                 result.append(
                     WorkoutExecutionViewModel.Step(
-                        title: "Pausa",
+                        title: L("workout.step.rest.title"),
                         subtitle: subtitle,
                         zone: .zone1,
                         estimatedDuration: restDuration,
                         type: .timed(duration: restDuration, isRest: true),
-                        highlight: "Respira profondamente"
+                        highlight: L("workout.step.rest.highlight")
                     )
                 )
+                
             case .simple, .method:
                 result.append(contentsOf: stepsForExercises(in: block, cardTarget: card.targetExpression))
             case .customMethod:
                 result.append(contentsOf: stepsForCustomMethod(in: block, cardTarget: card.targetExpression, modelContext: modelContext))
             }
         }
-
+        
         return result
     }
+
 
     private static func stepsForExercises(in block: WorkoutBlock, cardTarget: StrengthExpressionType?) -> [WorkoutExecutionViewModel.Step] {
         var steps: [WorkoutExecutionViewModel.Step] = []
         let exercises = block.exerciseItems.sorted { $0.order < $1.order }
-
+        
         for exercise in exercises {
             let sets = exercise.sets.sorted { $0.order < $1.order }
             guard let firstSet = sets.first else { continue }
-
-            let title = exercise.exercise?.name ?? "Esercizio"
-            let subtitle = exercise.notes ?? setDescription(for: firstSet, totalSets: sets.count, restTime: exercise.restTime ?? block.globalRestTime)
-            let highlight = cardTarget?.rawValue ?? "Focus sulla tecnica"
-
+            
+            let title = exercise.exercise?.name ?? L("workout.exercise.defaultName")
+                                                     
+            let subtitle: String
+            if let notes = exercise.notes, !notes.isEmpty {
+                subtitle = notes
+            } else {
+                subtitle = setDescription(
+                    for: firstSet,
+                    totalSets: sets.count,
+                    restTime: exercise.restTime ?? block.globalRestTime
+                )
+            }
+                                                     
+            let highlight = cardTarget?.rawValue ?? L("workout.step.highlight.default")
+                                                     
             switch firstSet.setType {
             case .duration:
                 let duration = max(firstSet.duration ?? 30, 10)
@@ -1686,52 +1741,55 @@ private enum WorkoutExecutionStepFactory {
                     )
                 )
             }
-        }
-
-        return steps
+         }
+         return steps
     }
 
-    private static func stepsForCustomMethod(in block: WorkoutBlock, cardTarget: StrengthExpressionType?, modelContext: ModelContext) -> [WorkoutExecutionViewModel.Step] {
-        var steps: [WorkoutExecutionViewModel.Step] = []
-
-        // Get the custom method ID from the block
-        guard let customMethodID = block.customMethodID else { return steps }
-
-        // Fetch the custom method from database
-        let descriptor = FetchDescriptor<CustomTrainingMethod>(
+    private static func stepsForCustomMethod(
+        in block: WorkoutBlock,
+        cardTarget: StrengthExpressionType?,
+        modelContext: ModelContext
+     ) -> [WorkoutExecutionViewModel.Step] {
+         var steps: [WorkoutExecutionViewModel.Step] = []
+         
+         guard let customMethodID = block.customMethodID else { return steps }
+         
+         let descriptor = FetchDescriptor<CustomTrainingMethod>(
             predicate: #Predicate { $0.id == customMethodID }
-        )
-
-        guard let customMethod = try? modelContext.fetch(descriptor).first else {
-            return steps
-        }
-
-        let exercises = block.exerciseItems.sorted { $0.order < $1.order }
-
-        for exercise in exercises {
-            let sets = exercise.sets.sorted { $0.order < $1.order }
-
-            let title = exercise.exercise?.name ?? "Esercizio"
-            let highlight = cardTarget?.rawValue ?? "Focus sulla tecnica"
-
-            // Create one step per series
-            for (seriesIndex, set) in sets.enumerated() {
-                let seriesNumber = seriesIndex + 1
-                let baseLoad = set.weight ?? 0
-
-                // Create rep groups for this series
-                let groups = customMethod.createRepGroups(baseLoad: baseLoad)
-
-                guard !groups.isEmpty else { continue }
-
-                let subtitle = "\(customMethod.name) - Serie \(seriesNumber)/\(sets.count) - \(groups.count) gruppi"
-
-                // Calculate estimated duration (sum of all group rest times + ~3 seconds per rep)
-                let totalReps = groups.reduce(0) { $0 + $1.repCount }
-                let totalRestTime = groups.reduce(0.0) { $0 + $1.restAfterGroup }
-                let estimatedDuration = TimeInterval(totalReps * 3) + totalRestTime
-
-                steps.append(
+         )
+         
+         guard let customMethod = try? modelContext.fetch(descriptor).first else {
+             return steps
+         }
+         
+         let exercises = block.exerciseItems.sorted { $0.order < $1.order }
+         
+         for exercise in exercises {
+             let sets = exercise.sets.sorted { $0.order < $1.order }
+             
+             let title = exercise.exercise?.name ?? L("workout.exercise.defaultName")
+             let highlight = cardTarget?.rawValue ?? L("workout.step.highlight.default")
+             
+             for (seriesIndex, set) in sets.enumerated() {
+                 let seriesNumber = seriesIndex + 1
+                 let baseLoad = set.weight ?? 0
+                 
+                 let groups = customMethod.createRepGroups(baseLoad: baseLoad)
+                 guard !groups.isEmpty else { continue }
+                 
+                 let subtitle = String(
+                    format: L("workout.customMethod.subtitle"),
+                    customMethod.name,
+                    seriesNumber,
+                    sets.count,
+                    groups.count
+                 )
+                 
+                 let totalReps = groups.reduce(0) { $0 + $1.repCount }
+                 let totalRestTime = groups.reduce(0.0) { $0 + $1.restAfterGroup }
+                 let estimatedDuration = TimeInterval(totalReps * 3) + totalRestTime
+                 
+                 steps.append(
                     WorkoutExecutionViewModel.Step(
                         title: title,
                         subtitle: subtitle,
@@ -1740,43 +1798,50 @@ private enum WorkoutExecutionStepFactory {
                         type: .customMethodReps(groups: groups, seriesNumber: seriesNumber, baseLoad: baseLoad),
                         highlight: highlight
                     )
-                )
-            }
-        }
+                 )
+             }
+         }
+         
+         return steps
+     }
 
-        return steps
-    }
 
     private static func setDescription(for set: WorkoutSet, totalSets: Int, restTime: TimeInterval?) -> String {
         var parts: [String] = []
-
+        
         if totalSets > 0 {
-            parts.append("\(totalSets)x")
+            parts.append(String(format: L("workout.setDescription.sets"), totalSets))
         }
-
+        
         switch set.setType {
         case .reps:
             if let reps = set.reps {
-                parts.append("\(reps) reps")
+                parts.append(String(format: L("workout.setDescription.reps"), reps))
             }
         case .duration:
             if let duration = set.duration {
+                // qui potresti in futuro localizzare anche il formato "Xm Ys"
                 parts.append(formatDuration(duration))
             }
         }
-
+        
         if let weight = set.weight {
-            parts.append(String(format: "@ %.0f kg", weight))
+            parts.append(String(format: L("workout.setDescription.weightKg"), weight))
         } else if let percentage = set.percentageOfMax {
-            parts.append(String(format: "@ %.0f%% 1RM", percentage))
+            parts.append(String(format: L("workout.setDescription.percentageRM"), percentage))
         }
-
+        
         if let restTime {
-            parts.append("Rec. \(formatDuration(restTime))")
+            let restString = String(
+                format: L("workout.setDescription.rest"),
+                formatDuration(restTime)
+            )
+            parts.append(restString)
         }
-
+        
         return parts.joined(separator: " • ")
     }
+
 
     private static func formatDuration(_ duration: TimeInterval) -> String {
         let minutes = Int(duration) / 60

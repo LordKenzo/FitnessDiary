@@ -52,53 +52,60 @@ struct CreatePeriodizationPlanView: View {
             Form {
                 // Sezione Template
                 templateSection
-
+                
                 // Sezione Info Base
                 basicInfoSection
-
+                
                 // Sezione Organizzazione
                 if !folders.isEmpty {
                     organizationSection
                 }
-
+                
                 // Sezione Durata
                 durationSection
-
+                
                 // Sezione Modello
                 modelSection
-
+                
                 // Sezione Profili Forza
                 strengthProfilesSection
-
+                
                 // Sezione Frequenza
                 frequencySection
-
+                
                 // Sezione Giorni Allenamento
                 trainingDaysSection
-
+                
                 // Sezione Generazione
                 generationSection
-
+                
                 // Sezione Note
                 notesSection
             }
-            .navigationTitle("Nuovo Piano")
+            .navigationTitle(L("plan.create.title"))
             .navigationBarTitleDisplayMode(.inline)
             .appScreenBackground()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button(L("common.cancel")) {
                         dismiss()
                     }
                 }
-
+                
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Crea") {
+                    Button(L("plan.create.action")) {
                         createPlan()
                     }
                     .disabled(!isFormValid)
                 }
             }
+        }
+        // ⬇️ SPOSTATO QUI
+        .sheet(isPresented: $showingWeekdaySelection) {
+            WeekdaySelectionView(
+                selectedDays: $selectedTrainingDays,
+                requiredCount: weeklyFrequency
+            )
         }
     }
 
@@ -275,9 +282,6 @@ struct CreatePeriodizationPlanView: View {
             Text("Pianificazione")
         } footer: {
             Text("Scegli in quali giorni della settimana ti allenerai. Questi giorni saranno validi per tutto il piano.")
-        }
-        .sheet(isPresented: $showingWeekdaySelection) {
-            WeekdaySelectionView(selectedDays: $selectedTrainingDays, requiredCount: weeklyFrequency)
         }
     }
 
