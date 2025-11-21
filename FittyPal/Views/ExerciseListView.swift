@@ -21,6 +21,9 @@ struct ExerciseListView: View {
     @State private var filterReferencePlane: ReferencePlane?
     @State private var filterMotorSchemas: Set<MotorSchema> = []
     @State private var filterTags: Set<ExerciseTag> = []
+    @State private var filterDifficultyLevel: DifficultyLevel?
+    @State private var filterBodyRegion: BodyRegion?
+    @State private var filterEquipment: Set<Equipment> = []
     @State private var filterFavoritesOnly = false
     @State private var showingFiltersSheet = false
     
@@ -37,9 +40,12 @@ struct ExerciseListView: View {
             let matchesReferencePlane = filterReferencePlane == nil || exercise.referencePlane == filterReferencePlane
             let matchesMotorSchemas = filterMotorSchemas.isEmpty || !Set(exercise.motorSchemas).isDisjoint(with: filterMotorSchemas)
             let matchesTags = filterTags.isEmpty || !Set(exercise.tags).isDisjoint(with: filterTags)
+            let matchesDifficultyLevel = filterDifficultyLevel == nil || exercise.difficultyLevel == filterDifficultyLevel
+            let matchesBodyRegion = filterBodyRegion == nil || exercise.bodyRegion == filterBodyRegion
+            let matchesEquipment = filterEquipment.isEmpty || !Set(exercise.equipment).isDisjoint(with: filterEquipment)
             let matchesFavorite = !filterFavoritesOnly || exercise.isFavorite
 
-            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory && matchesPrimaryMuscle && matchesReferencePlane && matchesMotorSchemas && matchesTags && matchesFavorite
+            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory && matchesPrimaryMuscle && matchesReferencePlane && matchesMotorSchemas && matchesTags && matchesDifficultyLevel && matchesBodyRegion && matchesEquipment && matchesFavorite
         }
     }
     
@@ -87,6 +93,9 @@ struct ExerciseListView: View {
                     filterReferencePlane: $filterReferencePlane,
                     filterMotorSchemas: $filterMotorSchemas,
                     filterTags: $filterTags,
+                    filterDifficultyLevel: $filterDifficultyLevel,
+                    filterBodyRegion: $filterBodyRegion,
+                    filterEquipment: $filterEquipment,
                     filterFavoritesOnly: $filterFavoritesOnly,
                     onClearAll: removeAllFilters
                 )
@@ -139,8 +148,12 @@ struct ExerciseListView: View {
                 filterReferencePlane: $filterReferencePlane,
                 filterMotorSchemas: $filterMotorSchemas,
                 filterTags: $filterTags,
+                filterDifficultyLevel: $filterDifficultyLevel,
+                filterBodyRegion: $filterBodyRegion,
+                filterEquipment: $filterEquipment,
                 filterFavoritesOnly: $filterFavoritesOnly,
                 muscles: muscles,
+                equipment: equipment,
                 onClearAll: removeAllFilters
             )
         }
@@ -182,6 +195,9 @@ struct ExerciseListView: View {
         filterReferencePlane = nil
         filterMotorSchemas.removeAll()
         filterTags.removeAll()
+        filterDifficultyLevel = nil
+        filterBodyRegion = nil
+        filterEquipment.removeAll()
         filterFavoritesOnly = false
     }
 
@@ -194,6 +210,9 @@ struct ExerciseListView: View {
         filterReferencePlane != nil ||
         !filterMotorSchemas.isEmpty ||
         !filterTags.isEmpty ||
+        filterDifficultyLevel != nil ||
+        filterBodyRegion != nil ||
+        !filterEquipment.isEmpty ||
         filterFavoritesOnly
     }
 }
@@ -335,13 +354,13 @@ struct ExerciseRow: View {
                     }
                 }
                 
-                // Attrezzo
-                if let equipment = exercise.equipment {
+                // Attrezzi
+                if !exercise.equipment.isEmpty {
                     HStack(spacing: 4) {
-                        Image(systemName: equipment.category.icon)
+                        Image(systemName: "dumbbell")
                             .font(.caption2)
                             .foregroundStyle(.blue)
-                        Text(equipment.name)
+                        Text(exercise.equipment.map { $0.name }.sorted().joined(separator: ", "))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)

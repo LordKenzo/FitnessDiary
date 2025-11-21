@@ -87,6 +87,27 @@ struct ExerciseQuickLookView: View {
                 MetadataChip(title: plane.rawValue, systemImage: plane.icon, tint: plane.color)
             }
 
+            if exercise.difficultyLevel != .notSet {
+                MetadataChip(title: exercise.difficultyLevel.rawValue, systemImage: exercise.difficultyLevel.icon, tint: exercise.difficultyLevel.color)
+            }
+
+            if exercise.bodyRegion != .notSet {
+                MetadataChip(title: exercise.bodyRegion.rawValue, systemImage: exercise.bodyRegion.icon, tint: exercise.bodyRegion.color)
+            }
+
+            if !exercise.equipment.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Attrezzi")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    HStack(spacing: 8) {
+                        ForEach(exercise.equipment.sorted(by: { $0.name < $1.name }), id: \.id) { item in
+                            MetadataChip(title: item.name, systemImage: item.category.icon, tint: .blue)
+                        }
+                    }
+                }
+            }
+
             if !exercise.motorSchemas.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Schemi motori")

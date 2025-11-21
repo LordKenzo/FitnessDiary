@@ -15,6 +15,7 @@ struct EditExerciseView: View {
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
     @State private var selectedMotorSchemas: Set<MotorSchema> = []
     @State private var selectedTags: Set<ExerciseTag> = []
+    @State private var selectedEquipment: Set<Equipment> = []
     @State private var photoItem1: PhotosPickerItem?
     @State private var photoItem2: PhotosPickerItem?
     @State private var photoItem3: PhotosPickerItem?
@@ -29,6 +30,9 @@ struct EditExerciseView: View {
 
                     // Tassonomia
                     taxonomySection
+
+                    // Difficoltà e Regione Corporea
+                    difficultyAndBodyRegionSection
 
                     // Piano e Focus
                     planeAndFocusSection
@@ -76,6 +80,7 @@ struct EditExerciseView: View {
                 selectedSecondaryMuscles = Set(exercise.secondaryMuscles)
                 selectedMotorSchemas = Set(exercise.motorSchemas)
                 selectedTags = Set(exercise.tags)
+                selectedEquipment = Set(exercise.equipment)
             }
             .sheet(isPresented: $showingAddVariant) {
                 AddVariantView(exercise: exercise, allExercises: allExercises)
@@ -113,6 +118,26 @@ struct EditExerciseView: View {
             primaryMetabolism: $exercise.primaryMetabolism,
             category: $exercise.category
         )
+    }
+
+    private var difficultyAndBodyRegionSection: some View {
+        SectionCard(title: "Difficoltà e Regione") {
+            VStack(spacing: 12) {
+                LabeledPicker(label: "Livello di Difficoltà", selection: $exercise.difficultyLevel) {
+                    ForEach(DifficultyLevel.allCases, id: \.self) { level in
+                        Label(level.rawValue, systemImage: level.icon)
+                            .tag(level)
+                    }
+                }
+
+                LabeledPicker(label: "Regione Corporea", selection: $exercise.bodyRegion) {
+                    ForEach(BodyRegion.allCases, id: \.self) { region in
+                        Label(region.rawValue, systemImage: region.icon)
+                            .tag(region)
+                    }
+                }
+            }
+        }
     }
 
     private var planeAndFocusSection: some View {
@@ -217,7 +242,39 @@ struct EditExerciseView: View {
     }
 
     private var equipmentSection: some View {
-        EquipmentPickerSection(selectedEquipment: $exercise.equipment, equipment: equipment)
+        SectionCard(title: "Attrezzi") {
+            VStack(spacing: 12) {
+                NavigationLink {
+                    EquipmentSelectionView(
+                        equipment: equipment,
+                        selectedEquipment: $selectedEquipment
+                    )
+                } label: {
+                    HStack {
+                        Label("Attrezzi", systemImage: "dumbbell")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Text(selectedEquipment.isEmpty ? "Nessuno" : "\(selectedEquipment.count)")
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(12)
+                }
+                .buttonStyle(.plain)
+
+                if !selectedEquipment.isEmpty {
+                    Text(selectedEquipment.map { $0.name }.sorted().joined(separator: ", "))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+        .onChange(of: selectedEquipment) { _, newValue in
+            exercise.equipment = Array(newValue)
+        }
     }
 
     private var musclesSection: some View {
@@ -337,8 +394,8 @@ struct EditExerciseView: View {
                                 Text(variant.name)
                                     .font(.body)
                                     .fontWeight(.medium)
-                                if let equipment = variant.equipment {
-                                    Text(equipment.name)
+                                if !variant.equipment.isEmpty {
+                                    Text(variant.equipment.map { $0.name }.sorted().joined(separator: ", "))
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
@@ -494,13 +551,14 @@ struct AddVariantView: View {
                                             .foregroundStyle(candidate.category.color)
                                     }
 
-                                    if let equipment = candidate.equipment {
+                                    if !candidate.equipment.isEmpty {
                                         HStack(spacing: 4) {
-                                            Image(systemName: equipment.category.icon)
+                                            Image(systemName: "dumbbell")
                                                 .font(.caption2)
-                                            Text(equipment.name)
+                                            Text(candidate.equipment.map { $0.name }.sorted().joined(separator: ", "))
                                                 .font(.caption2)
                                                 .foregroundStyle(.secondary)
+                                                .lineLimit(1)
                                         }
                                     }
                                 }
