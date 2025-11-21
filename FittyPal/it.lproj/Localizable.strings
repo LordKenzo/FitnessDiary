@@ -463,6 +463,7 @@
 "microcycle.duplicateWorkout.footer" = "L’allenamento verrà copiato in %d giorni. Gli allenamenti esistenti verranno sostituiti.";
 
 // MARK: - Allenamento
+"workout.startWithCountdown" = "Avvia con countdown di %ds";
 "workout.title" = "Allenamento";
 "workout.history.title" = "Allenamenti passati";
 "workout.start" = "Seleziona una scheda per iniziare";
@@ -546,14 +547,3 @@
 "workout.setDescription.weightKg" = "@ %.0f kg";
 "workout.setDescription.percentageRM" = "@ %.0f%% 1RM";
 "workout.setDescription.rest" = "Rec. %@";
-
-/*
-L("workout.pause")
-
-"Fase corrente"
-"Il countdown è attivo"
-"Nessuna fase disponibile"
-Text(String(format: L("workout.suggestreps"), repsPerSet))
- Text(String(format: L("workout.seriesProgress"), current, totalSets))
-
-*/
