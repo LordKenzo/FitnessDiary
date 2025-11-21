@@ -17,6 +17,7 @@ struct WorkoutCardListView: View {
     @State private var showingDeletionAlert = false
     @State private var deletionAlertMessage = ""
     @State private var cardToDelete: WorkoutCard?
+    @State private var folderToDelete: WorkoutFolder?
     @ObservedObject private var localizationManager = LocalizationManager.shared
     private static let noFolderID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
 
@@ -88,7 +89,8 @@ struct WorkoutCardListView: View {
                                         count: folderCards.count,
                                         color: folder.color,
                                         isExpanded: binding(for: folder.id),
-                                        onEditFolder: { selectedFolder = folder }
+                                        onEditFolder: { selectedFolder = folder },
+                                        onDeleteFolder: { deleteFolder(folder) }
                                     ) {
                                         ForEach(folderCards) { card in
                                             WorkoutCardRow(
@@ -220,6 +222,25 @@ struct WorkoutCardListView: View {
         modelContext.delete(card)
     }
 
+    private func deleteFolder(_ folder: WorkoutFolder) {
+        // Verifica se la folder contiene schede
+        let folderCards = cards(for: folder)
+        if !folderCards.isEmpty {
+            deletionAlertMessage = "Impossibile eliminare la folder \"\(folder.name)\" perché contiene \(folderCards.count) schede. Rimuovi prima le schede dalla folder."
+            showingDeletionAlert = true
+            return
+        }
+
+        // Se la folder è vuota, elimina
+        modelContext.delete(folder)
+        do {
+            try modelContext.save()
+        } catch {
+            deletionAlertMessage = "Errore durante l'eliminazione della folder: \(error.localizedDescription)"
+            showingDeletionAlert = true
+        }
+    }
+
     private func binding(for folderID: UUID) -> Binding<Bool> {
         Binding(
             get: { expandedFolders.contains(folderID) },
@@ -281,8 +302,17 @@ struct WorkoutCardListView: View {
             if !folders.isEmpty {
                 Divider()
                 ForEach(folders) { folder in
-                    Button {
-                        selectedFolder = folder
+                    Menu {
+                        Button {
+                            selectedFolder = folder
+                        } label: {
+                            Label("Modifica", systemImage: "pencil")
+                        }
+                        Button(role: .destructive) {
+                            deleteFolder(folder)
+                        } label: {
+                            Label("Elimina", systemImage: "trash")
+                        }
                     } label: {
                         HStack {
                             Circle()
@@ -420,6 +450,7 @@ private struct FolderDisclosureCard<Content: View>: View {
     let color: Color
     @Binding var isExpanded: Bool
     var onEditFolder: (() -> Void)? = nil
+    var onDeleteFolder: (() -> Void)? = nil
     @ViewBuilder var content: () -> Content
     @Environment(\.colorScheme) private var colorScheme
 
@@ -445,12 +476,24 @@ private struct FolderDisclosureCard<Content: View>: View {
 
                 Spacer()
 
-                if let onEditFolder {
-                    Button(action: onEditFolder) {
-                        Image(systemName: "pencil.circle.fill")
-                            .font(.title3)
+                HStack(spacing: 12) {
+                    if let onEditFolder {
+                        Button(action: onEditFolder) {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.blue)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+
+                    if let onDeleteFolder {
+                        Button(action: onDeleteFolder) {
+                            Image(systemName: "trash.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.red)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }

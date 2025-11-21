@@ -17,6 +17,9 @@ struct PeriodizationPlanListView: View {
     @State private var showingAddFolder = false
     @State private var selectedFolder: PeriodizationFolder?
     @State private var expandedFolders: Set<UUID> = []
+    @State private var showingDeletionAlert = false
+    @State private var deletionAlertMessage = ""
+    @State private var folderToDelete: PeriodizationFolder?
     private static let noFolderID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
 
     private var plansWithoutFolder: [PeriodizationPlan] {
@@ -52,7 +55,8 @@ struct PeriodizationPlanListView: View {
                                         count: folderPlans.count,
                                         color: folder.color,
                                         isExpanded: binding(for: folder.id),
-                                        onEditFolder: { selectedFolder = folder }
+                                        onEditFolder: { selectedFolder = folder },
+                                        onDeleteFolder: { deleteFolder(folder) }
                                     ) {
                                         ForEach(folderPlans) { plan in
                                             NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
@@ -129,6 +133,11 @@ struct PeriodizationPlanListView: View {
                 .sheet(item: $selectedFolder) { folder in
                     EditPeriodizationFolderView(folder: folder)
                 }
+                .alert("Attenzione", isPresented: $showingDeletionAlert) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(deletionAlertMessage)
+                }
             }
         }
     }
@@ -137,6 +146,25 @@ struct PeriodizationPlanListView: View {
     private func deletePlan(_ plan: PeriodizationPlan) {
         modelContext.delete(plan)
         try? modelContext.save()
+    }
+
+    private func deleteFolder(_ folder: PeriodizationFolder) {
+        // Verifica se la folder contiene piani
+        let folderPlans = plans(for: folder)
+        if !folderPlans.isEmpty {
+            deletionAlertMessage = "Impossibile eliminare la folder \"\(folder.name)\" perché contiene \(folderPlans.count) piani. Rimuovi prima i piani dalla folder."
+            showingDeletionAlert = true
+            return
+        }
+
+        // Se la folder è vuota, elimina
+        modelContext.delete(folder)
+        do {
+            try modelContext.save()
+        } catch {
+            deletionAlertMessage = "Errore durante l'eliminazione della folder: \(error.localizedDescription)"
+            showingDeletionAlert = true
+        }
     }
 
     private func binding(for folderID: UUID) -> Binding<Bool> {
@@ -164,8 +192,17 @@ struct PeriodizationPlanListView: View {
             if !folders.isEmpty {
                 Divider()
                 ForEach(folders) { folder in
-                    Button {
-                        selectedFolder = folder
+                    Menu {
+                        Button {
+                            selectedFolder = folder
+                        } label: {
+                            Label("Modifica", systemImage: "pencil")
+                        }
+                        Button(role: .destructive) {
+                            deleteFolder(folder)
+                        } label: {
+                            Label("Elimina", systemImage: "trash")
+                        }
                     } label: {
                         HStack {
                             Circle()
@@ -367,6 +404,7 @@ private struct FolderDisclosureCard<Content: View>: View {
     let color: Color
     @Binding var isExpanded: Bool
     var onEditFolder: (() -> Void)? = nil
+    var onDeleteFolder: (() -> Void)? = nil
     @ViewBuilder var content: () -> Content
     @Environment(\.colorScheme) private var colorScheme
 
@@ -392,12 +430,24 @@ private struct FolderDisclosureCard<Content: View>: View {
 
                 Spacer()
 
-                if let onEditFolder {
-                    Button(action: onEditFolder) {
-                        Image(systemName: "pencil.circle.fill")
-                            .font(.title3)
+                HStack(spacing: 12) {
+                    if let onEditFolder {
+                        Button(action: onEditFolder) {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.blue)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+
+                    if let onDeleteFolder {
+                        Button(action: onDeleteFolder) {
+                            Image(systemName: "trash.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.red)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }
