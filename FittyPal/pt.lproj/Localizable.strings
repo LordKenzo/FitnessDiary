@@ -467,3 +467,21 @@
 "workout.setDescription.weightKg" = "@ %.0f kg";
 "workout.setDescription.percentageRM" = "@ %.0f%% 1RM";
 "workout.setDescription.rest" = "Descanso %@";
+
+// Workout Tab
+"workout.today" = "Treino de hoje";
+"workout.week" = "Semana";
+"workout.periodized" = "Treinos periodizados";
+"workout.single" = "Treinos individuais";
+"workout.rest.day" = "Dia de descanso";
+"workout.rest.day.subtitle" = "Recupera para voltares mais forte!";
+"workout.no.assigned" = "Nenhum treino atribuído";
+"workout.no.assigned.subtitle" = "Vai ao separador Periodização para atribuir um treino a este dia.";
+
+// Dashboard
+"dashboard.periodization.active" = "Periodização ativa";
+"dashboard.periodization.progress" = "Progresso";
+"dashboard.periodization.week" = "Semana";
+"dashboard.periodization.intensity" = "Intensidade";
+"dashboard.periodization.completion" = "Conclusão";
+"dashboard.periodization.plan.progress" = "Progresso do plano";

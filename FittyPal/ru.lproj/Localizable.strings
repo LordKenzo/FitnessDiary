@@ -466,3 +466,21 @@
 "workout.setDescription.weightKg" = "@ %.0f кг";
 "workout.setDescription.percentageRM" = "@ %.0f%% от 1ПМ";
 "workout.setDescription.rest" = "Отдых %@";
+
+// Workout Tab
+"workout.today" = "Тренировка на сегодня";
+"workout.week" = "Неделя";
+"workout.periodized" = "Периодизированные тренировки";
+"workout.single" = "Отдельные тренировки";
+"workout.rest.day" = "День отдыха";
+"workout.rest.day.subtitle" = "Восстанавливайся, чтобы вернуться сильнее!";
+"workout.no.assigned" = "Нет назначенных тренировок";
+"workout.no.assigned.subtitle" = "Перейдите во вкладку «Периодизация», чтобы назначить тренировку на этот день.";
+
+// Dashboard
+"dashboard.periodization.active" = "Активная периодизация";
+"dashboard.periodization.progress" = "Прогресс";
+"dashboard.periodization.week" = "Неделя";
+"dashboard.periodization.intensity" = "Интенсивность";
+"dashboard.periodization.completion" = "Завершение";
+"dashboard.periodization.plan.progress" = "Прогресс плана";

@@ -530,3 +530,21 @@
 "workout.setDescription.weightKg" = "@ %.0f kg";
 "workout.setDescription.percentageRM" = "@ %.0f%% 1RM";
 "workout.setDescription.rest" = "Rest %@";
+
+// Workout Tab
+"workout.today" = "Today’s Workout";
+"workout.week" = "Week";
+"workout.periodized" = "Periodized Workouts";
+"workout.single" = "Single Workouts";
+"workout.rest.day" = "Rest Day";
+"workout.rest.day.subtitle" = "Recover to come back stronger!";
+"workout.no.assigned" = "No Workout Assigned";
+"workout.no.assigned.subtitle" = "Go to the Periodization tab to assign a workout to this day.";
+
+// Dashboard
+"dashboard.periodization.active" = "Active Periodization";
+"dashboard.periodization.progress" = "Progress";
+"dashboard.periodization.week" = "Week";
+"dashboard.periodization.intensity" = "Intensity";
+"dashboard.periodization.completion" = "Completion";
+"dashboard.periodization.plan.progress" = "Plan Progress";
