@@ -185,12 +185,13 @@ struct WorkoutCardListView: View {
         }
 
         // Verifica se la scheda è usata in periodizzazioni attive
-        let descriptor = FetchDescriptor<TrainingDay>(
-            predicate: #Predicate<TrainingDay> { day in
-                day.workoutCard?.id == card.id
-            }
-        )
-        if let daysUsingCard = try? modelContext.fetch(descriptor) {
+        // Note: SwiftData Predicate doesn't support optional chaining with relationships,
+        // so we fetch all TrainingDays and filter in memory
+        let descriptor = FetchDescriptor<TrainingDay>()
+        if let trainingDays = try? modelContext.fetch(descriptor) {
+            // Trova i giorni che usano questa scheda
+            let daysUsingCard = trainingDays.filter { $0.workoutCard?.id == card.id }
+
             if !daysUsingCard.isEmpty {
                 // Trova le periodizzazioni attive che contengono questi giorni
                 var activePlanNames: [String] = []
