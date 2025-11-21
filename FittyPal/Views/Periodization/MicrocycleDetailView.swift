@@ -397,6 +397,8 @@ struct TrainingDayCardView: View {
     let day: TrainingDay
     let onSelectWorkout: () -> Void
     let onDuplicate: () -> Void
+    @State private var showErrorAlert = false
+    @State private var errorMessage: String?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -546,8 +548,13 @@ struct TrainingDayCardView: View {
                 }
             }
         }
+        .alert("Errore", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage ?? "Si è verificato un errore inatteso.")
+        }
     }
-    
+
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "it_IT")
@@ -746,6 +753,16 @@ struct CalendarDayCard: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd"
         return formatter.string(from: date)
+    }
+
+    private func removeWorkoutFromDay(_ day: TrainingDay) {
+        day.workoutCard = nil
+        do {
+            try modelContext.save()
+        } catch {
+            errorMessage = "Impossibile rimuovere la scheda: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
     }
 }
 
