@@ -4,6 +4,7 @@ import SwiftData
 struct DashboardView: View {
     private let calendar = Calendar.current
     @Query private var storedSessionLogs: [WorkoutSessionLog]
+    @Query private var periodizationPlans: [PeriodizationPlan]
     @Query private var muscles: [Muscle]
     @Query private var equipment: [Equipment]
     @AppStorage("dashboardWorkoutsCount") private var dashboardWorkoutsCount = 14
@@ -69,12 +70,38 @@ struct DashboardView: View {
         return formatter
     }
 
+    // MARK: - Active Periodization Helpers
+
+    private var activePeriodizationPlan: PeriodizationPlan? {
+        periodizationPlans.first { $0.isCurrentlyActive() }
+    }
+
+    private var currentMicrocycle: Microcycle? {
+        guard let activePlan = activePeriodizationPlan else { return nil }
+        let today = Date()
+
+        for mesocycle in activePlan.mesocycles {
+            for microcycle in mesocycle.microcycles {
+                if microcycle.isCurrentlyActive(at: today) {
+                    return microcycle
+                }
+            }
+        }
+        return nil
+    }
+
     var body: some View {
         NavigationStack {
             AppBackgroundView {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 32) {
                         heroHeader
+
+                        // Active Periodization Section (se esiste)
+                        if let activePlan = activePeriodizationPlan {
+                            activePeriodizationSection(plan: activePlan)
+                        }
+
                         metricGrid
                         trendSection
                         focusSection
@@ -95,6 +122,140 @@ struct DashboardView: View {
 
 
 
+
+    // MARK: - Active Periodization Section
+
+    private func activePeriodizationSection(plan: PeriodizationPlan) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(L("dashboard.periodization.active"), systemImage: "calendar.badge.checkmark")
+                        .font(.headline)
+                        .foregroundStyle(.white.opacity(0.95))
+
+                    Text(plan.name)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                }
+
+                Spacer()
+
+                // Progress badge
+                VStack(spacing: 4) {
+                    Text(L("dashboard.periodization.progress"))
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.7))
+                    Text(String(format: "%.0f%%", plan.progressPercentage()))
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.white.opacity(0.2))
+                .cornerRadius(10)
+            }
+
+            Divider()
+                .overlay(Color.white.opacity(0.3))
+
+            // Current week info
+            if let microcycle = currentMicrocycle {
+                HStack(spacing: 20) {
+                    // Week number
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L("dashboard.periodization.week"))
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.7))
+                        HStack(spacing: 6) {
+                            Image(systemName: "calendar")
+                                .font(.title3)
+                            Text("\(microcycle.weekNumber)")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                        }
+                        .foregroundStyle(.white)
+                    }
+
+                    Divider()
+                        .frame(height: 40)
+                        .overlay(Color.white.opacity(0.3))
+
+                    // Load level
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L("dashboard.periodization.intensity"))
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.7))
+                        HStack(spacing: 6) {
+                            Image(systemName: microcycle.loadLevel.icon)
+                                .font(.title3)
+                            Text(microcycle.loadLevel.rawValue)
+                                .font(.headline)
+                        }
+                        .foregroundStyle(.white)
+                    }
+
+                    Spacer()
+
+                    // Training completion
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text(L("dashboard.periodization.completion"))
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.7))
+                        Text("\(microcycle.completedDays)/\(microcycle.totalPlannedDays)")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                    }
+                }
+            }
+
+            // Progress bar
+            VStack(spacing: 8) {
+                HStack {
+                    Text(L("dashboard.periodization.plan.progress"))
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+
+                    Spacer()
+
+                    Text(formattedDateRange(from: plan.startDate, to: plan.endDate))
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+
+                ProgressView(value: plan.progressPercentage() / 100.0)
+                    .tint(.white)
+                    .scaleEffect(x: 1, y: 1.2, anchor: .center)
+            }
+        }
+        .padding(20)
+        .background(
+            LinearGradient(
+                colors: [Color.purple, Color.indigo],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .opacity(colorScheme == .dark ? 0.9 : 0.85)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: Color.purple.opacity(0.4), radius: 20, y: 12)
+    }
+
+    private func formattedDateRange(from startDate: Date, to endDate: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: localizationManager.currentLanguage.rawValue)
+        formatter.dateFormat = "dd MMM"
+
+        let start = formatter.string(from: startDate)
+        let end = formatter.string(from: endDate)
+
+        return "\(start) - \(end)"
+    }
 
     private var heroHeader: some View {
         VStack(alignment: .leading, spacing: 18) {

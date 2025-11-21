@@ -569,6 +569,7 @@ struct WorkoutExecutionView: View {
     @StateObject private var viewModel: WorkoutExecutionViewModel
     @Bindable private var bluetoothManager: BluetoothHeartRateManager
     @Query(sort: \WorkoutCard.name) private var workoutCards: [WorkoutCard]
+    @Query private var periodizationPlans: [PeriodizationPlan]
     @Query private var profiles: [UserProfile]
     @AppStorage("workoutCountdownSeconds") private var defaultCountdownSeconds = 10
     @State private var isCompletionSheetPresented = false
@@ -579,6 +580,8 @@ struct WorkoutExecutionView: View {
     @State private var completionRPE: Double = 7
     @State private var isSaveErrorAlertPresented = false
     @State private var saveErrorMessage: String?
+    @State private var showPeriodizedWorkouts = true
+    @State private var showSingleWorkouts = true
 
     init(
         viewModel: WorkoutExecutionViewModel = WorkoutExecutionViewModel(),
@@ -677,6 +680,45 @@ struct WorkoutExecutionView: View {
         }
     }
 
+    // MARK: - Active Periodization Helpers
+
+    private var activePeriodizationPlan: PeriodizationPlan? {
+        periodizationPlans.first { $0.isCurrentlyActive() }
+    }
+
+    private var todaysTrainingDay: TrainingDay? {
+        guard let activePlan = activePeriodizationPlan else { return nil }
+        let today = Calendar.current.startOfDay(for: Date())
+
+        // Cerca tra tutti i mesocicli e microcicli
+        for mesocycle in activePlan.mesocycles {
+            for microcycle in mesocycle.microcycles {
+                for day in microcycle.trainingDays {
+                    if Calendar.current.isDate(day.date, inSameDayAs: today) {
+                        return day
+                    }
+                }
+            }
+        }
+        return nil
+    }
+
+    private var periodizedWorkoutCards: [WorkoutCard] {
+        guard let todayDay = todaysTrainingDay,
+              let workout = todayDay.workoutCard else {
+            return []
+        }
+        return [workout]
+    }
+
+    private var singleWorkoutCards: [WorkoutCard] {
+        // Tutte le schede che non sono l'allenamento di oggi
+        if let todayWorkout = todaysTrainingDay?.workoutCard {
+            return workoutCards.filter { $0.id != todayWorkout.id }
+        }
+        return workoutCards
+    }
+
     private var workoutPicker: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -693,14 +735,257 @@ struct WorkoutExecutionView: View {
                     }
                     .padding()
                 } else {
-                    ForEach(workoutCards) { card in
-                        workoutCardButton(for: card)
+                    // Sezione Allenamento del Giorno
+                    if let todayDay = todaysTrainingDay, let activePlan = activePeriodizationPlan {
+                        todayWorkoutSection(trainingDay: todayDay, plan: activePlan)
+                    }
+
+                    // Sezione Allenamenti Periodizzati (future se necessario)
+                    if !periodizedWorkoutCards.isEmpty && todaysTrainingDay != nil {
+                        periodizedWorkoutsSection
+                    }
+
+                    // Sezione Allenamenti Singoli
+                    if !singleWorkoutCards.isEmpty {
+                        singleWorkoutsSection
                     }
                 }
             }
             .padding(24)
         }
         .background(Color.clear)
+    }
+
+    // MARK: - Workout Sections
+
+    private func todayWorkoutSection(trainingDay: TrainingDay, plan: PeriodizationPlan) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header con info periodizzazione
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(L("workout.today"), systemImage: "star.fill")
+                        .font(.headline)
+                        .foregroundStyle(.orange)
+
+                    Text(plan.name)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                // Badge settimana
+                if let microcycle = trainingDay.microcycle {
+                    VStack(spacing: 2) {
+                        Text(L("workout.week"))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text("\(microcycle.weekNumber)")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.orange.opacity(0.15))
+                    .cornerRadius(8)
+                }
+            }
+
+            // Workout card o rest day
+            if trainingDay.isRestDay {
+                restDayCard
+            } else if let workout = trainingDay.workoutCard {
+                todayWorkoutCard(for: workout, trainingDay: trainingDay)
+            } else {
+                noWorkoutAssignedCard(for: trainingDay)
+            }
+
+            Divider()
+        }
+    }
+
+    private var restDayCard: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "moon.zzz.fill")
+                .font(.largeTitle)
+                .foregroundStyle(.blue)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(L("workout.rest.day"))
+                    .font(.headline)
+                Text(L("workout.rest.day.subtitle"))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(Color.blue.opacity(0.1))
+        .cornerRadius(12)
+    }
+
+    private func noWorkoutAssignedCard(for day: TrainingDay) -> some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 16) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.title2)
+                    .foregroundStyle(.orange)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L("workout.no.assigned"))
+                        .font(.headline)
+                    Text(L("workout.no.assigned.subtitle"))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+        }
+        .padding()
+        .background(Color.orange.opacity(0.1))
+        .cornerRadius(12)
+    }
+
+    private func todayWorkoutCard(for card: WorkoutCard, trainingDay: TrainingDay) -> some View {
+        let scriptLines = WorkoutDebugLogBuilder.buildLog(for: card.blocks)
+        return VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(card.name)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+
+                    if let description = card.cardDescription {
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    // Microcycle info
+                    if let microcycle = trainingDay.microcycle {
+                        HStack(spacing: 8) {
+                            Image(systemName: microcycle.loadLevel.icon)
+                                .font(.caption)
+                                .foregroundStyle(microcycle.loadLevel.color)
+                            Text(microcycle.loadLevel.rawValue)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundStyle(microcycle.loadLevel.color)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(microcycle.loadLevel.color.opacity(0.15))
+                        .cornerRadius(6)
+                    }
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing) {
+                    Text(L("workout.estimation"))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("\(card.estimatedDurationMinutes) min")
+                        .font(.body)
+                        .bold()
+                }
+            }
+
+            if !scriptLines.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(scriptLines.prefix(3), id: \.self) { line in
+                        Text(line)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if scriptLines.count > 3 {
+                        Text("…")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            }
+
+            Button {
+                viewModel.start(card: card, countdownSeconds: defaultCountdownSeconds, modelContext: modelContext)
+            } label: {
+                Label(
+                    String(format: L("workout.startWithCountdown"), defaultCountdownSeconds),
+                    systemImage: "play.circle.fill"
+                )
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+        .background(Color.orange.opacity(0.05))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.orange, lineWidth: 2)
+        )
+    }
+
+    private var periodizedWorkoutsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button {
+                withAnimation {
+                    showPeriodizedWorkouts.toggle()
+                }
+            } label: {
+                HStack {
+                    Label(L("workout.periodized"), systemImage: "calendar.badge.checkmark")
+                        .font(.headline)
+
+                    Spacer()
+
+                    Image(systemName: showPeriodizedWorkouts ? "chevron.down" : "chevron.right")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.primary)
+
+            if showPeriodizedWorkouts {
+                ForEach(periodizedWorkoutCards) { card in
+                    workoutCardButton(for: card)
+                }
+            }
+
+            Divider()
+        }
+    }
+
+    private var singleWorkoutsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button {
+                withAnimation {
+                    showSingleWorkouts.toggle()
+                }
+            } label: {
+                HStack {
+                    Label(L("workout.single"), systemImage: "doc.text")
+                        .font(.headline)
+
+                    Spacer()
+
+                    Image(systemName: showSingleWorkouts ? "chevron.down" : "chevron.right")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.primary)
+
+            if showSingleWorkouts {
+                ForEach(singleWorkoutCards) { card in
+                    workoutCardButton(for: card)
+                }
+            }
+        }
     }
 
     private func workoutCardButton(for card: WorkoutCard) -> some View {

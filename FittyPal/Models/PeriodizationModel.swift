@@ -112,6 +112,17 @@ enum LoadLevel: String, Codable, CaseIterable {
         }
     }
 
+    var color: Color {
+        switch self {
+        case .high:
+            return .red
+        case .medium:
+            return .orange
+        case .low:
+            return .green
+        }
+    }
+
     /// Fattore di intensità predefinito (modulabile)
     var defaultIntensityFactor: Double {
         switch self {
