@@ -739,7 +739,7 @@ struct WorkoutExecutionView: View {
                     .padding()
                 } else {
                     // Sezione Allenamento del Giorno
-                    if let todayDay = todaysTrainingDay, let activePlan = activePeriodizationPlan {
+                    if let todayDay = todaysTrainingDay, !todayDay.completed, let activePlan = activePeriodizationPlan {
                         todayWorkoutSection(trainingDay: todayDay, plan: activePlan)
                     }
 
