@@ -1,0 +1,333 @@
+//
+//  PeriodizationPlanListView.swift
+//  FittyPal
+//
+//  Created by Claude on 20/11/2025.
+//
+import SwiftUI
+import SwiftData
+
+/// Vista principale lista piani di periodizzazione
+struct PeriodizationPlanListView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \PeriodizationPlan.startDate, order: .reverse) private var allPlans: [PeriodizationPlan]
+    @State private var showingCreatePlan = false
+    @State private var selectedPlan: PeriodizationPlan?
+    @State private var showingPlanDetail = false
+    @State private var showingEditPlan = false
+    @State private var showingAddFolder = false
+    
+    var body: some View {
+        NavigationStack {
+            Group {
+                if allPlans.isEmpty {
+                    emptyStateView
+                } else {
+                    plansList
+                }
+            }
+            .navigationTitle("Periodizzazione")
+            .appScreenBackground()
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        Button {
+                            showingCreatePlan = true
+                        } label: {
+                            Label("Nuovo Piano", systemImage: "calendar.badge.plus")
+                        }
+
+                        Button {
+                            showingAddFolder = true
+                        } label: {
+                            Label("Nuovo Folder", systemImage: "folder.badge.plus")
+                        }
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingCreatePlan) {
+                CreatePeriodizationPlanView()
+            }
+            .sheet(item: $selectedPlan) { plan in
+                EditPeriodizationPlanView(plan: plan)
+            }
+            .sheet(isPresented: $showingAddFolder) {
+                AddPeriodizationFolderView()
+            }
+        }
+    }
+    
+    // MARK: - Views
+    private var emptyStateView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "calendar.badge.checkmark")
+                .font(.system(size: 64))
+                .foregroundStyle(.secondary)
+            Text("Nessun Piano di Periodizzazione")
+                .font(.title2)
+                .fontWeight(.bold)
+            Text("Crea il tuo primo piano per organizzare l'allenamento nel tempo")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            Button {
+                showingCreatePlan = true
+            } label: {
+                Label("Crea Piano", systemImage: "plus.circle.fill")
+                    .font(.headline)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundStyle(.white)
+                    .cornerRadius(12)
+            }
+            .padding(.top, 20)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private var plansList: some View {
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                // Piani attivi
+                if !activePlans.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Piani Attivi")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .padding(.horizontal)
+                        ForEach(activePlans) { plan in
+                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
+                                PlanCardView(plan: plan, isActive: true, onEdit: {
+                                    selectedPlan = plan
+                                }, onDelete: {
+                                    deletePlan(plan)
+                                })
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+                // Piani passati/futuri
+                if !inactivePlans.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Altri Piani")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .padding(.horizontal)
+                            .padding(.top, activePlans.isEmpty ? 0 : 12)
+                        ForEach(inactivePlans) { plan in
+                            NavigationLink(destination: PeriodizationTimelineView(plan: plan)) {
+                                PlanCardView(plan: plan, isActive: false, onEdit: {
+                                    selectedPlan = plan
+                                }, onDelete: {
+                                    deletePlan(plan)
+                                })
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+            .padding(.vertical)
+        }
+    }
+    
+    // MARK: - Helpers
+    private var activePlans: [PeriodizationPlan] {
+        allPlans.filter { $0.isCurrentlyActive() }
+    }
+    
+    private var inactivePlans: [PeriodizationPlan] {
+        allPlans.filter { !$0.isCurrentlyActive() }
+    }
+    
+    // MARK: - Actions
+    private func deletePlan(_ plan: PeriodizationPlan) {
+        modelContext.delete(plan)
+        try? modelContext.save()
+    }
+}
+
+// MARK: - Plan Card View
+/// Card per visualizzare un piano nella lista
+struct PlanCardView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let plan: PeriodizationPlan
+    let isActive: Bool
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(plan.name)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                    HStack(spacing: 8) {
+                        Label(plan.periodizationModel.rawValue, systemImage: plan.periodizationModel.icon)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if isActive {
+                            Label("Attivo", systemImage: "circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.green)
+                        }
+                    }
+                }
+
+            }
+            
+            // Info Profilo
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Focus")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(plan.primaryStrengthProfile.rawValue)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+                if let secondary = plan.secondaryStrengthProfile {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Secondario")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Text(secondary.rawValue)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                    }
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("Frequenza")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text("\(plan.weeklyFrequency)x/sett")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+            }
+            
+            Divider()
+            
+            // Progress e Date
+            VStack(spacing: 8) {
+                HStack {
+                    Text(formatDate(plan.startDate))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "arrow.right")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(formatDate(plan.endDate))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("\(plan.durationInWeeks) settimane")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if isActive {
+                    HStack {
+                        ProgressView(value: plan.progressPercentage() / 100.0)
+                            .tint(.blue)
+                        Text("\(Int(plan.progressPercentage()))%")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 40, alignment: .trailing)
+                    }
+                }
+            }
+            
+            // Stats mesocicli
+            if !plan.mesocycles.isEmpty {
+                HStack(spacing: 12) {
+                    Label("\(plan.mesocycles.count) mesocicli", systemImage: "square.stack.3d.up")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    let totalMicrocycles = plan.mesocycles.reduce(0) { $0 + $1.microcycles.count }
+                    if totalMicrocycles > 0 {
+                        Label("\(totalMicrocycles) settimane", systemImage: "calendar")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(isActive ? Color.accentColor.opacity(0.05) : Color(.systemGray6))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isActive ? Color.accentColor.opacity(0.3) : Color.clear, lineWidth: 1)
+        )
+        .overlay(alignment: .topTrailing) {
+            Menu {
+                Button {
+                    onEdit()
+                } label: {
+                    Label("Modifica", systemImage: "pencil")
+                }
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label("Elimina", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.title3)
+                    .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                    .padding(6)
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        // formatter.locale = Locale(identifier: "it_IT")
+        formatter.locale = Locale.current
+        formatter.dateFormat = "dd MMM yyyy"
+        return formatter.string(from: date)
+    }
+}
+
+#Preview {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    guard let container = try? ModelContainer(for: PeriodizationPlan.self, configurations: config) else {
+        return Text("Failed to create preview container")
+    }
+    // Piano esempio 1 (attivo)
+    let plan1 = PeriodizationPlan(
+        name: "Forza Massimale 2025",
+        startDate: Calendar.current.date(byAdding: .month, value: -1, to: Date())!,
+        endDate: Calendar.current.date(byAdding: .month, value: 2, to: Date())!,
+        periodizationModel: .linear,
+        primaryStrengthProfile: .maxStrength,
+        secondaryStrengthProfile: .speedStrength,
+        weeklyFrequency: 4,
+        isActive: true
+    )
+    // Piano esempio 2 (passato)
+    let plan2 = PeriodizationPlan(
+        name: "Ipertrofia Estate",
+        startDate: Calendar.current.date(byAdding: .month, value: -6, to: Date())!,
+        endDate: Calendar.current.date(byAdding: .month, value: -3, to: Date())!,
+        periodizationModel: .block,
+        primaryStrengthProfile: .hypertrophy,
+        weeklyFrequency: 5,
+        isActive: false
+    )
+    container.mainContext.insert(plan1)
+    container.mainContext.insert(plan2)
+    return NavigationStack {
+        PeriodizationPlanListView()
+    }
+    .modelContainer(container)
+}

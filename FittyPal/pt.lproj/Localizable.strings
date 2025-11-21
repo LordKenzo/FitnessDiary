@@ -7,6 +7,7 @@
 "tab.dashboard" = "Painel";
 "tab.workout" = "Treino";
 "tab.cards" = "Fichas";
+"tab.periodization" = "Periodização";
 "tab.settings" = "Configurações";
 
 // MARK: - Dashboard
@@ -296,3 +297,192 @@
 "confirm.cancel" = "Cancelar";
 "confirm.save" = "Salvar";
 "confirm.discard" = "Descartar";
+
+// MARK: - Plano de Periodização
+"plan.create.title" = "Novo Plano";
+"plan.edit.title" = "Editar Plano";
+"plan.create.action" = "Criar Plano";
+"plan.name.placeholder" = "Nome do plano";
+"plan.section.basicInfo" = "Informações Básicas";
+"plan.section.dates" = "Datas";
+"plan.section.model" = "Modelo de Periodização";
+"plan.section.strengthProfiles" = "Perfis de Força";
+"plan.section.frequency" = "Frequência Semanal";
+"plan.section.scheduling" = "Agendamento";
+"plan.section.generation" = "Geração";
+"plan.section.notes" = "Notas";
+"plan.startDate" = "Data de início";
+"plan.estimatedEndDate" = "Data estimada de término";
+"plan.duration.weeks" = "Duração: %d semanas";
+"plan.duration.value" = "%d semanas";
+"plan.trainingDays.title" = "Dias de Treino";
+"plan.trainingDays.selectCount" = "Selecionar %d dias";
+"plan.trainingDays.selectedCount" = "%d de %d dias selecionados";
+"plan.trainingDays.footer" = "Escolha em quais dias da semana irá treinar. Estes dias serão aplicados a todo o plano.";
+"plan.frequency.title" = "Frequência: %d vezes/semana";
+"plan.frequency.title.short" = "Frequência";
+"plan.frequency.desc.1" = "1 treino por semana (manutenção)";
+"plan.frequency.desc.2" = "2 treinos (ex. Superior/Inferior)";
+"plan.frequency.desc.3" = "3 treinos (ex. Full Body 3x)";
+"plan.frequency.desc.4" = "4 treinos (ex. Superior/Inferior 2x)";
+"plan.frequency.desc.5" = "5 treinos (alta frequência)";
+"plan.frequency.desc.6" = "6 treinos (Empurrar/Puxar/Pernas 2x)";
+"plan.frequency.desc.7" = "7 treinos (todos os dias)";
+"plan.frequency.desc.generic" = "%d treinos";
+"plan.profile.primary" = "Perfil primário";
+"plan.profile.secondary.toggle" = "Perfil secundário";
+"plan.profile.secondary" = "Secundário";
+"plan.generation.title" = "Gerar Estrutura";
+"plan.generation.description" = "A estrutura completa com mesociclos, microciclos e dias será gerada.";
+"plan.generation.button" = "Gerar agora";
+"plan.progress.title" = "Progresso do Plano";
+
+// MARK: - Linha do Tempo
+"plan.timeline.title" = "Linha do Tempo de Mesociclos";
+"plan.timeline.reorderHint" = "Arraste para reordenar";
+"plan.timeline.empty" = "Nenhum mesociclo gerado";
+"plan.timeline.generate" = "Gerar Mesociclos";
+"plan.timeline.generate.description" = "Gere mesociclos para iniciar a periodização.";
+"plan.timeline.edit.start" = "Reordenar";
+"plan.timeline.edit.done" = "Concluído";
+"plan.focus.primary" = "Foco principal";
+
+// MARK: - Seleção de Dias da Semana
+"weekday.select.count" = "Selecionar %d dias";
+"weekday.select.progress" = "%d de %d";
+"weekday.section.days" = "Dias da Semana";
+"weekday.section.days.footer" = "Estes serão os seus dias fixos de treino para todo o plano. Escolha %d dias com base na sua frequência semanal.";
+"weekday.presets.title" = "Predefinições Sugeridas";
+"weekday.preset.monThu.upperLower" = "Seg-Qui (Superior/Inferior)";
+"weekday.preset.tueFri" = "Ter-Sex";
+"weekday.preset.wedSat" = "Qua-Sáb";
+"weekday.preset.monWedFri" = "Seg-Qua-Sex (Clássico)";
+"weekday.preset.tueThuSat" = "Ter-Qui-Sáb";
+"weekday.preset.monThuSat" = "Seg-Qui-Sáb";
+"weekday.preset.monTueThuFri" = "Seg-Ter-Qui-Sex";
+"weekday.preset.monWedFriSat" = "Seg-Qua-Sex-Sáb";
+"weekday.preset.weekdays" = "Seg-Ter-Qua-Qui-Sex";
+"weekday.preset.monTueThuFriSat" = "Seg-Ter-Qui-Sex-Sáb";
+"weekday.preset.ppl2x" = "Seg-Ter-Qua-Qui-Sex-Sáb (PPL 2x)";
+
+// MARK: - Microciclo
+"microcycle.weekHeader.loadLevel" = "Nível de carga";
+"microcycle.completion.title" = "Conclusão";
+"microcycle.volume.title" = "Volume Semanal";
+"microcycle.volume.distribution" = "Distribuição de Volume";
+"microcycle.days.title" = "Dias da Semana";
+"microcycle.days.empty" = "Nenhum dia gerado";
+"microcycle.days.empty.subtitle" = "Gere dias para começar a planear a sua semana.";
+"microcycle.day.rest" = "Descanso";
+"microcycle.day.completed" = "Concluído";
+"microcycle.day.skipped" = "Pulado";
+"microcycle.day.complete" = "Concluir";
+"microcycle.duplicateWorkout.title" = "Duplicar Treino";
+"microcycle.duplicateWorkout.info" = "Selecione os dias para onde deseja copiar este treino.";
+"microcycle.duplicateWorkout.daysHeader" = "Dias disponíveis (%d)";
+"microcycle.duplicateWorkout.footer" = "O treino será copiado para %d dias. Os treinos existentes serão substituídos.";
+
+// MARK: - Treino
+"workout.startWithCountdown" = "Iniciar com contagem decrescente de %ds";
+"workout.title" = "Treino";
+"workout.history.title" = "Treinos passados";
+"workout.start" = "Selecionar uma ficha para começar";
+"workout.notavailable" = "Nenhuma ficha disponível";
+"workout.createsuggest" = "Crie uma ficha na aba Fichas para que apareça aqui";
+"workout.estimation" = "Duração estimada";
+"workout.currentstep" = "Fase atual";
+"workout.nostep" = "Nenhuma fase disponível";
+"workout.load" = "Carga";
+"workout.groupProgress" = "Grupo %d de %d";
+"workout.confirmGroup" = "Confirmar grupo";
+"workout.skipGroup" = "Saltar grupo";
+"workout.allGroupDone" = "Todos os grupos completados!";
+"workout.nextSteps" = "Fases seguintes";
+"workout.closetofinish" = "Está quase a terminar! 🎉";
+"workout.zone" = "Zonas Cardio";
+"workout.connectsensor" = "Ligar sensor";
+"workout.end" = "Terminar treino";
+"workout.trash" = "Descartar";
+"workout.review" = "Resumo do treino";
+"workout.saveWorkout" = "Guardar treino";
+"workout.serie" = "Série %d";
+"workout.suggestedLoad" = "Sugerido: %@ kg";
+"workout.pause" = "Pausa";
+"workout.skipPause" = "Saltar pausa";
+"workout.pauseAfter" = "Pausa após";
+"workout.continue" = "Retomar";
+"workout.timer" = "Temporizador de exercício";
+"workout.skip" = "Saltar";
+"workout.suggestreps" = "Repetições sugeridas: %d";
+"workout.seriesProgress" = "Série %d de %d";
+"workout.loadEffective" = "Carga efetiva";
+"workout.repsCompleted" = "Repetições completadas";
+"workout.confirmSerie" = "Confirmar série";
+"workout.skipSet" = "Saltar série";
+"workout.recoveryGroup" = "Recuperação entre grupos";
+"workout.nextGroup" = "Prepare-se para o próximo grupo";
+"workout.reps.placeholder" = "Repetições";
+"workout.activecountdown" = "A contagem decrescente está ativa";
+"workout.done" = "Treino concluído";
+"workout.demo.title" = "Treino Demo";
+"workout.demo.sheet" = "Ficha Demo";
+"workout.demo.bike" = "Aquecimento de Bicicleta";
+"workout.demo.bike.steps" = "Cadência leve 5’";
+"workout.demo.benchpress" = "Supino Reto";
+"workout.demo.recovery" = "Recuperação";
+"workout.signal.incoming" = "Sinal recebido";
+// Resumo do treino
+"workout.totalDuration" = "Duração total";
+"workout.tonnage.estimated" = "Tonelagem estimada";
+"workout.tonnage.value" = "%@ kg";
+"workout.cardio.duration" = "Duração cardio";
+"workout.exercises.completed" = "Exercícios concluídos";
+"workout.upperBody" = "Parte superior";
+"workout.lowerBody" = "Parte inferior";
+"workout.tonnage.hint" = "Insira as cargas nas séries para estimar a tonelagem total.";
+// Humor
+"workout.mood.question" = "Como se sente?";
+// Notas
+"common.notes" = "Notas";
+"workout.notes.placeholder" = "Anote sensações, foco ou alterações";
+// RPE (Esforço Percebido)
+"workout.rpe.add" = "Adicionar RPE";
+"workout.rpe.value" = "RPE: %d";
+// Contagem decrescente
+"workout.countdown.title" = "Contagem decrescente";
+"workout.countdown.subtitle" = "Prepare-se para começar o treino";
+"workout.countdown.skip" = "Saltar contagem decrescente";
+// Passo: Descanso
+"workout.step.rest.title" = "Pausa";
+"workout.step.rest.subtitleTimed" = "Recuperação %@";
+"workout.step.rest.subtitleFree" = "Recuperação livre";
+"workout.step.rest.highlight" = "Respire fundamente";
+// Passo padrão
+"workout.exercise.defaultName" = "Exercício";
+"workout.step.highlight.default" = "Foque-se na técnica";
+// Método personalizado
+"workout.customMethod.subtitle" = "%@ — Série %d/%d — %d grupos";
+// Descrição da série
+"workout.setDescription.sets" = "%dx";
+"workout.setDescription.reps" = "%d repetições";
+"workout.setDescription.weightKg" = "@ %.0f kg";
+"workout.setDescription.percentageRM" = "@ %.0f%% 1RM";
+"workout.setDescription.rest" = "Descanso %@";
+
+// Workout Tab
+"workout.today" = "Treino de hoje";
+"workout.week" = "Semana";
+"workout.periodized" = "Treinos periodizados";
+"workout.single" = "Treinos individuais";
+"workout.rest.day" = "Dia de descanso";
+"workout.rest.day.subtitle" = "Recupera para voltares mais forte!";
+"workout.no.assigned" = "Nenhum treino atribuído";
+"workout.no.assigned.subtitle" = "Vai ao separador Periodização para atribuir um treino a este dia.";
+
+// Dashboard
+"dashboard.periodization.active" = "Periodização ativa";
+"dashboard.periodization.progress" = "Progresso";
+"dashboard.periodization.week" = "Semana";
+"dashboard.periodization.intensity" = "Intensidade";
+"dashboard.periodization.completion" = "Conclusão";
+"dashboard.periodization.plan.progress" = "Progresso do plano";

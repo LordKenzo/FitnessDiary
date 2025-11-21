@@ -296,3 +296,192 @@
 "confirm.cancel" = "Отмена";
 "confirm.save" = "Сохранить";
 "confirm.discard" = "Отменить";
+
+// MARK: - План периодизации
+"plan.create.title" = "Новый план";
+"plan.edit.title" = "Редактировать план";
+"plan.create.action" = "Создать план";
+"plan.name.placeholder" = "Название плана";
+"plan.section.basicInfo" = "Основная информация";
+"plan.section.dates" = "Даты";
+"plan.section.model" = "Модель периодизации";
+"plan.section.strengthProfiles" = "Силовые профили";
+"plan.section.frequency" = "Еженедельная частота";
+"plan.section.scheduling" = "Планирование";
+"plan.section.generation" = "Генерация";
+"plan.section.notes" = "Заметки";
+"plan.startDate" = "Дата начала";
+"plan.estimatedEndDate" = "Ориентировочная дата окончания";
+"plan.duration.weeks" = "Продолжительность: %d недель";
+"plan.duration.value" = "%d недель";
+"plan.trainingDays.title" = "Дни тренировок";
+"plan.trainingDays.selectCount" = "Выберите %d дней";
+"plan.trainingDays.selectedCount" = "%d из %d дней выбрано";
+"plan.trainingDays.footer" = "Выберите дни недели, в которые будете тренироваться. Эти дни будут применяться ко всему плану.";
+"plan.frequency.title" = "Частота: %d раз/неделю";
+"plan.frequency.title.short" = "Частота";
+"plan.frequency.desc.1" = "1 тренировка в неделю (поддержание)";
+"plan.frequency.desc.2" = "2 тренировки (например, Верх/Низ)";
+"plan.frequency.desc.3" = "3 тренировки (например, Полное тело 3 раза)";
+"plan.frequency.desc.4" = "4 тренировки (например, Верх/Низ 2 раза)";
+"plan.frequency.desc.5" = "5 тренировок (высокая частота)";
+"plan.frequency.desc.6" = "6 тренировок (Толчок/Тяга/Ноги 2 раза)";
+"plan.frequency.desc.7" = "7 тренировок (ежедневно)";
+"plan.frequency.desc.generic" = "%d тренировок";
+"plan.profile.primary" = "Основной профиль";
+"plan.profile.secondary.toggle" = "Вторичный профиль";
+"plan.profile.secondary" = "Вторичный";
+"plan.generation.title" = "Сгенерировать структуру";
+"plan.generation.description" = "Будет сгенерирована полная структура с мезоциклами, микроциклами и днями.";
+"plan.generation.button" = "Сгенерировать сейчас";
+"plan.progress.title" = "Прогресс плана";
+
+// MARK: - Временная шкала
+"plan.timeline.title" = "Временная шкала мезоциклов";
+"plan.timeline.reorderHint" = "Перетащите для изменения порядка";
+"plan.timeline.empty" = "Нет сгенерированных мезоциклов";
+"plan.timeline.generate" = "Сгенерировать мезоциклы";
+"plan.timeline.generate.description" = "Сгенерируйте мезоциклы, чтобы начать периодизацию.";
+"plan.timeline.edit.start" = "Изменить порядок";
+"plan.timeline.edit.done" = "Готово";
+"plan.focus.primary" = "Основной фокус";
+
+// MARK: - Выбор дней недели
+"weekday.select.count" = "Выберите %d дней";
+"weekday.select.progress" = "%d из %d";
+"weekday.section.days" = "Дни недели";
+"weekday.section.days.footer" = "Это будут ваши фиксированные дни тренировок на весь план. Выберите %d дней в зависимости от вашей еженедельной частоты.";
+"weekday.presets.title" = "Предложенные шаблоны";
+"weekday.preset.monThu.upperLower" = "Пн-Чт (Верх/Низ)";
+"weekday.preset.tueFri" = "Вт-Пт";
+"weekday.preset.wedSat" = "Ср-Сб";
+"weekday.preset.monWedFri" = "Пн-Ср-Пт (Классика)";
+"weekday.preset.tueThuSat" = "Вт-Чт-Сб";
+"weekday.preset.monThuSat" = "Пн-Чт-Сб";
+"weekday.preset.monTueThuFri" = "Пн-Вт-Чт-Пт";
+"weekday.preset.monWedFriSat" = "Пн-Ср-Пт-Сб";
+"weekday.preset.weekdays" = "Пн-Вт-Ср-Чт-Пт";
+"weekday.preset.monTueThuFriSat" = "Пн-Вт-Чт-Пт-Сб";
+"weekday.preset.ppl2x" = "Пн-Вт-Ср-Чт-Пт-Сб (ТТН 2x)";
+
+// MARK: - Микроцикл
+"microcycle.weekHeader.loadLevel" = "Уровень нагрузки";
+"microcycle.completion.title" = "Завершение";
+"microcycle.volume.title" = "Недельный объём";
+"microcycle.volume.distribution" = "Распределение объёма";
+"microcycle.days.title" = "Дни недели";
+"microcycle.days.empty" = "Нет сгенерированных дней";
+"microcycle.days.empty.subtitle" = "Сгенерируйте дни, чтобы начать планирование недели.";
+"microcycle.day.rest" = "Отдых";
+"microcycle.day.completed" = "Завершено";
+"microcycle.day.skipped" = "Пропущено";
+"microcycle.day.complete" = "Завершить";
+"microcycle.duplicateWorkout.title" = "Дублировать тренировку";
+"microcycle.duplicateWorkout.info" = "Выберите дни, в которые хотите скопировать эту тренировку.";
+"microcycle.duplicateWorkout.daysHeader" = "Доступные дни (%d)";
+"microcycle.duplicateWorkout.footer" = "Тренировка будет скопирована в %d дней. Существующие тренировки будут заменены.";
+
+// MARK: - Тренировка
+"workout.startWithCountdown" = "Начать с обратного отсчёта %dс";
+"workout.title" = "Тренировка";
+"workout.history.title" = "Прошлые тренировки";
+"workout.start" = "Выберите карточку, чтобы начать";
+"workout.notavailable" = "Нет доступных карточек";
+"workout.createsuggest" = "Создайте карточку во вкладке Карточки, чтобы она отобразилась здесь";
+"workout.estimation" = "Примерная продолжительность";
+"workout.currentstep" = "Текущая фаза";
+"workout.nostep" = "Нет доступных фаз";
+"workout.load" = "Нагрузка";
+"workout.groupProgress" = "Группа %d из %d";
+"workout.confirmGroup" = "Подтвердить группу";
+"workout.skipGroup" = "Пропустить группу";
+"workout.allGroupDone" = "Все группы завершены!";
+"workout.nextSteps" = "Следующие фазы";
+"workout.closetofinish" = "Вы почти закончили! 🎉";
+"workout.zone" = "Кардио-зоны";
+"workout.connectsensor" = "Подключить датчик";
+"workout.end" = "Завершить тренировку";
+"workout.trash" = "Отменить";
+"workout.review" = "Итоги тренировки";
+"workout.saveWorkout" = "Сохранить тренировку";
+"workout.serie" = "Подход %d";
+"workout.suggestedLoad" = "Рекомендовано: %@ кг";
+"workout.pause" = "Пауза";
+"workout.skipPause" = "Пропустить паузу";
+"workout.pauseAfter" = "Пауза после";
+"workout.continue" = "Продолжить";
+"workout.timer" = "Таймер упражнения";
+"workout.skip" = "Пропустить";
+"workout.suggestreps" = "Рекомендуемое количество повторений: %d";
+"workout.seriesProgress" = "Подход %d из %d";
+"workout.loadEffective" = "Фактическая нагрузка";
+"workout.repsCompleted" = "Выполненные повторения";
+"workout.confirmSerie" = "Подтвердить подход";
+"workout.skipSet" = "Пропустить подход";
+"workout.recoveryGroup" = "Отдых между группами";
+"workout.nextGroup" = "Готовьтесь к следующей группе";
+"workout.reps.placeholder" = "Повторения";
+"workout.activecountdown" = "Обратный отсчёт активен";
+"workout.done" = "Тренировка завершена";
+"workout.demo.title" = "Демо-тренировка";
+"workout.demo.sheet" = "Демо-карточка";
+"workout.demo.bike" = "Разминка на велотренажёре";
+"workout.demo.bike.steps" = "Лёгкий темп 5’";
+"workout.demo.benchpress" = "Жим лёжа";
+"workout.demo.recovery" = "Отдых";
+"workout.signal.incoming" = "Входящий сигнал";
+// Итоги тренировки
+"workout.totalDuration" = "Общая продолжительность";
+"workout.tonnage.estimated" = "Примерный весовой объём";
+"workout.tonnage.value" = "%@ кг";
+"workout.cardio.duration" = "Продолжительность кардио";
+"workout.exercises.completed" = "Выполненные упражнения";
+"workout.upperBody" = "Верх тела";
+"workout.lowerBody" = "Низ тела";
+"workout.tonnage.hint" = "Введите веса в подходах, чтобы оценить общий весовой объём.";
+// Настроение
+"workout.mood.question" = "Как вы себя чувствуете?";
+// Заметки
+"common.notes" = "Заметки";
+"workout.notes.placeholder" = "Запишите ощущения, фокус или изменения";
+// RPE (Субъективная оценка переносимости нагрузки)
+"workout.rpe.add" = "Добавить RPE";
+"workout.rpe.value" = "RPE: %d";
+// Обратный отсчёт
+"workout.countdown.title" = "Обратный отсчёт";
+"workout.countdown.subtitle" = "Готовьтесь начать тренировку";
+"workout.countdown.skip" = "Пропустить обратный отсчёт";
+// Шаг: Отдых
+"workout.step.rest.title" = "Пауза";
+"workout.step.rest.subtitleTimed" = "Отдых %@";
+"workout.step.rest.subtitleFree" = "Свободный отдых";
+"workout.step.rest.highlight" = "Глубоко дышите";
+// Шаг по умолчанию
+"workout.exercise.defaultName" = "Упражнение";
+"workout.step.highlight.default" = "Сконцентрируйтесь на технике";
+// Пользовательский метод
+"workout.customMethod.subtitle" = "%@ — Подход %d/%d — %d групп";
+// Описание подхода
+"workout.setDescription.sets" = "%dx";
+"workout.setDescription.reps" = "%d повторений";
+"workout.setDescription.weightKg" = "@ %.0f кг";
+"workout.setDescription.percentageRM" = "@ %.0f%% от 1ПМ";
+"workout.setDescription.rest" = "Отдых %@";
+
+// Workout Tab
+"workout.today" = "Тренировка на сегодня";
+"workout.week" = "Неделя";
+"workout.periodized" = "Периодизированные тренировки";
+"workout.single" = "Отдельные тренировки";
+"workout.rest.day" = "День отдыха";
+"workout.rest.day.subtitle" = "Восстанавливайся, чтобы вернуться сильнее!";
+"workout.no.assigned" = "Нет назначенных тренировок";
+"workout.no.assigned.subtitle" = "Перейдите во вкладку «Периодизация», чтобы назначить тренировку на этот день.";
+
+// Dashboard
+"dashboard.periodization.active" = "Активная периодизация";
+"dashboard.periodization.progress" = "Прогресс";
+"dashboard.periodization.week" = "Неделя";
+"dashboard.periodization.intensity" = "Интенсивность";
+"dashboard.periodization.completion" = "Завершение";
+"dashboard.periodization.plan.progress" = "Прогресс плана";

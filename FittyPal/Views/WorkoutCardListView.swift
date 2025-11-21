@@ -14,6 +14,10 @@ struct WorkoutCardListView: View {
     @State private var filterOwner: FilterOwner = .all
     @State private var selectedClient: Client?
     @State private var expandedFolders: Set<UUID> = []
+    @State private var showingDeletionAlert = false
+    @State private var deletionAlertMessage = ""
+    @State private var cardToDelete: WorkoutCard?
+    @State private var folderToDelete: WorkoutFolder?
     @ObservedObject private var localizationManager = LocalizationManager.shared
     private static let noFolderID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
 
@@ -85,7 +89,8 @@ struct WorkoutCardListView: View {
                                         count: folderCards.count,
                                         color: folder.color,
                                         isExpanded: binding(for: folder.id),
-                                        onEditFolder: { selectedFolder = folder }
+                                        onEditFolder: { selectedFolder = folder },
+                                        onDeleteFolder: { deleteFolder(folder) }
                                     ) {
                                         ForEach(folderCards) { card in
                                             WorkoutCardRow(
@@ -160,6 +165,11 @@ struct WorkoutCardListView: View {
                 .sheet(item: $selectedFolder) { folder in
                     EditFolderView(folder: folder)
                 }
+                .alert("Impossibile Eliminare", isPresented: $showingDeletionAlert) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(deletionAlertMessage)
+                }
             }
         }
     }
@@ -168,7 +178,67 @@ struct WorkoutCardListView: View {
 
 
     private func deleteCard(_ card: WorkoutCard) {
+        // Verifica se la scheda è assegnata a clienti
+        if !card.assignedTo.isEmpty {
+            let clientNames = card.assignedTo.map { $0.fullName }.joined(separator: ", ")
+            deletionAlertMessage = "Impossibile eliminare la scheda \"\(card.name)\" perché è assegnata ai seguenti clienti: \(clientNames)"
+            showingDeletionAlert = true
+            return
+        }
+
+        // Verifica se la scheda è usata in periodizzazioni attive
+        // Note: SwiftData Predicate doesn't support optional chaining with relationships,
+        // so we fetch all TrainingDays and filter in memory
+        let descriptor = FetchDescriptor<TrainingDay>()
+        if let trainingDays = try? modelContext.fetch(descriptor) {
+            // Trova i giorni che usano questa scheda
+            let daysUsingCard = trainingDays.filter { $0.workoutCard?.id == card.id }
+
+            if !daysUsingCard.isEmpty {
+                // Trova le periodizzazioni attive che contengono questi giorni
+                var activePlanNames: [String] = []
+
+                for day in daysUsingCard {
+                    if let microcycle = day.microcycle,
+                       let mesocycle = microcycle.mesocycle,
+                       let plan = mesocycle.plan,
+                       plan.isCurrentlyActive() {
+                        if !activePlanNames.contains(plan.name) {
+                            activePlanNames.append(plan.name)
+                        }
+                    }
+                }
+
+                if !activePlanNames.isEmpty {
+                    let planList = activePlanNames.joined(separator: ", ")
+                    deletionAlertMessage = "Impossibile eliminare la scheda \"\(card.name)\" perché è utilizzata nelle seguenti periodizzazioni attive: \(planList)"
+                    showingDeletionAlert = true
+                    return
+                }
+            }
+        }
+
+        // Se tutti i controlli passano, elimina la scheda
         modelContext.delete(card)
+    }
+
+    private func deleteFolder(_ folder: WorkoutFolder) {
+        // Verifica se la folder contiene schede
+        let folderCards = cards(for: folder)
+        if !folderCards.isEmpty {
+            deletionAlertMessage = "Impossibile eliminare la folder \"\(folder.name)\" perché contiene \(folderCards.count) schede. Rimuovi prima le schede dalla folder."
+            showingDeletionAlert = true
+            return
+        }
+
+        // Se la folder è vuota, elimina
+        modelContext.delete(folder)
+        do {
+            try modelContext.save()
+        } catch {
+            deletionAlertMessage = "Errore durante l'eliminazione della folder: \(error.localizedDescription)"
+            showingDeletionAlert = true
+        }
     }
 
     private func binding(for folderID: UUID) -> Binding<Bool> {
@@ -232,8 +302,17 @@ struct WorkoutCardListView: View {
             if !folders.isEmpty {
                 Divider()
                 ForEach(folders) { folder in
-                    Button {
-                        selectedFolder = folder
+                    Menu {
+                        Button {
+                            selectedFolder = folder
+                        } label: {
+                            Label("Modifica", systemImage: "pencil")
+                        }
+                        Button(role: .destructive) {
+                            deleteFolder(folder)
+                        } label: {
+                            Label("Elimina", systemImage: "trash")
+                        }
                     } label: {
                         HStack {
                             Circle()
@@ -371,6 +450,7 @@ private struct FolderDisclosureCard<Content: View>: View {
     let color: Color
     @Binding var isExpanded: Bool
     var onEditFolder: (() -> Void)? = nil
+    var onDeleteFolder: (() -> Void)? = nil
     @ViewBuilder var content: () -> Content
     @Environment(\.colorScheme) private var colorScheme
 
@@ -396,12 +476,24 @@ private struct FolderDisclosureCard<Content: View>: View {
 
                 Spacer()
 
-                if let onEditFolder {
-                    Button(action: onEditFolder) {
-                        Image(systemName: "pencil.circle.fill")
-                            .font(.title3)
+                HStack(spacing: 12) {
+                    if let onEditFolder {
+                        Button(action: onEditFolder) {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.blue)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+
+                    if let onDeleteFolder {
+                        Button(action: onDeleteFolder) {
+                            Image(systemName: "trash.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.red)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }

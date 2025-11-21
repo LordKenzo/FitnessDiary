@@ -23,6 +23,11 @@ struct ContentView: View {
                     Label(L("tab.cards"), systemImage: "list.bullet.clipboard")
                 }
 
+            PeriodizationPlanListView()
+                .tabItem {
+                    Label(L("tab.periodization"), systemImage: "calendar.badge.checkmark")
+                }
+
             SettingsView(bluetoothManager: bluetoothManager)
                 .tabItem {
                     Label(L("tab.settings"), systemImage: "gearshape")
