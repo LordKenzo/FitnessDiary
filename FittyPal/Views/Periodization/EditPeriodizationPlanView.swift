@@ -28,6 +28,8 @@ struct EditPeriodizationPlanView: View {
     @State private var selectedFolders: [PeriodizationFolder] = []
     @State private var selectedTrainingDays: [Weekday] = []
     @State private var showingWeekdaySelection = false
+    @State private var showErrorAlert = false
+    @State private var errorMessage: String?
     
     var body: some View {
         NavigationStack {
@@ -87,6 +89,11 @@ struct EditPeriodizationPlanView: View {
                 selectedDays: $selectedTrainingDays,
                 requiredCount: weeklyFrequency
             )
+        }
+        .alert("Errore", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage ?? "Si è verificato un errore durante il salvataggio.")
         }
     }
     
@@ -387,9 +394,14 @@ struct EditPeriodizationPlanView: View {
         plan.notes = notes.isEmpty ? nil : notes
         plan.folders = selectedFolders
         plan.trainingDays = selectedTrainingDays
-        
-        try? modelContext.save()
-        dismiss()
+
+        do {
+            try modelContext.save()
+            dismiss()
+        } catch {
+            errorMessage = "Impossibile salvare il piano: \(error.localizedDescription)"
+            showErrorAlert = true
+        }
     }
 }
 
