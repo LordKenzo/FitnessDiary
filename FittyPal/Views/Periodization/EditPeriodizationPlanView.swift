@@ -252,7 +252,7 @@ struct EditPeriodizationPlanView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(mesocycle.phaseType.swiftUIColor)
+                        .background(mesocycle.phaseType.color)
                         .cornerRadius(6)
                 }
             }

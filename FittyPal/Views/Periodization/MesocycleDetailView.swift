@@ -194,7 +194,7 @@ struct MesocycleDetailView: View {
     // MARK: - Helpers
 
     private var phaseColor: Color {
-        mesocycle.phaseType.swiftUIColor
+        mesocycle.phaseType.color
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -306,7 +306,7 @@ struct MicrocycleBarView: View {
     }
 
     private var loadLevelColor: Color {
-        microcycle.loadLevel.swiftUIColor
+        microcycle.loadLevel.color
     }
 
     private func formatDateRange(start: Date, end: Date) -> String {

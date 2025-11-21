@@ -70,16 +70,16 @@ enum PhaseType: String, Codable, CaseIterable {
         }
     }
 
-    var color: String {
+    var color: Color {
         switch self {
         case .accumulation:
-            return "blue"
+            return .blue
         case .intensification:
-            return "orange"
+            return .orange
         case .transformation:
-            return "purple"
+            return .purple
         case .deload:
-            return "green"
+            return .green
         }
     }
 }
@@ -187,34 +187,3 @@ enum SplitType: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - SwiftUI Color Extensions
-
-extension PhaseType {
-    /// Colore SwiftUI per la fase
-    var swiftUIColor: Color {
-        switch self {
-        case .accumulation:
-            return .blue
-        case .intensification:
-            return .orange
-        case .transformation:
-            return .purple
-        case .deload:
-            return .green
-        }
-    }
-}
-
-extension LoadLevel {
-    /// Colore SwiftUI per il livello di carico
-    var swiftUIColor: Color {
-        switch self {
-        case .high:
-            return .red
-        case .medium:
-            return .orange
-        case .low:
-            return .green
-        }
-    }
-}

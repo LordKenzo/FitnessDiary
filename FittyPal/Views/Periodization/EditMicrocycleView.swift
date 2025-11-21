@@ -116,7 +116,7 @@ struct EditMicrocycleView: View {
                 if let mesocycle = microcycle.mesocycle {
                     HStack {
                         Circle()
-                            .fill(mesocycle.phaseType.swiftUIColor)
+                            .fill(mesocycle.phaseType.color)
                             .frame(width: 8, height: 8)
                         Text(mesocycle.name)
                             .font(.caption)

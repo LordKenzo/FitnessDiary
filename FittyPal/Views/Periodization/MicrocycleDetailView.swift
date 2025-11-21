@@ -364,9 +364,9 @@ struct MicrocycleDetailView: View {
     }
     
     // MARK: - Helpers
-    
+
     private var loadLevelColor: Color {
-        microcycle.loadLevel.swiftUIColor
+        microcycle.loadLevel.color
     }
     
     private func formatDate(_ date: Date) -> String {

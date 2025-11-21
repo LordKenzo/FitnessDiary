@@ -372,7 +372,7 @@ struct MesocycleBarView: View {
     }
     
     private var phaseColor: Color {
-        mesocycle.phaseType.swiftUIColor
+        mesocycle.phaseType.color
     }
 }
 
