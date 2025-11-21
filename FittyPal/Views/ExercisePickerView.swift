@@ -4,6 +4,7 @@ import SwiftData
 struct ExercisePickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Muscle.name) private var muscles: [Muscle]
+    @Query(sort: \Equipment.name) private var equipment: [Equipment]
 
     let exercises: [Exercise]
     let onSelect: (Exercise) -> Void
@@ -20,6 +21,9 @@ struct ExercisePickerView: View {
     @State private var filterReferencePlane: ReferencePlane?
     @State private var filterMotorSchemas: Set<MotorSchema> = []
     @State private var filterTags: Set<ExerciseTag> = []
+    @State private var filterDifficultyLevel: DifficultyLevel?
+    @State private var filterBodyRegion: BodyRegion?
+    @State private var filterEquipment: Set<Equipment> = []
     @State private var filterFavoritesOnly = false
 
     private var filteredExercises: [Exercise] {
@@ -35,9 +39,12 @@ struct ExercisePickerView: View {
             let matchesReferencePlane = filterReferencePlane == nil || exercise.referencePlane == filterReferencePlane
             let matchesMotorSchemas = filterMotorSchemas.isEmpty || !Set(exercise.motorSchemas).isDisjoint(with: filterMotorSchemas)
             let matchesTags = filterTags.isEmpty || !Set(exercise.tags).isDisjoint(with: filterTags)
+            let matchesDifficultyLevel = filterDifficultyLevel == nil || exercise.difficultyLevel == filterDifficultyLevel
+            let matchesBodyRegion = filterBodyRegion == nil || exercise.bodyRegion == filterBodyRegion
+            let matchesEquipment = filterEquipment.isEmpty || !Set(exercise.equipment).isDisjoint(with: filterEquipment)
             let matchesFavorite = !filterFavoritesOnly || exercise.isFavorite
 
-            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory && matchesPrimaryMuscle && matchesReferencePlane && matchesMotorSchemas && matchesTags && matchesFavorite
+            return matchesSearch && matchesMetabolism && matchesBiomechanical && matchesRole && matchesCategory && matchesPrimaryMuscle && matchesReferencePlane && matchesMotorSchemas && matchesTags && matchesDifficultyLevel && matchesBodyRegion && matchesEquipment && matchesFavorite
         }
         .sorted { $0.name < $1.name }
     }
@@ -120,6 +127,9 @@ struct ExercisePickerView: View {
                             filterReferencePlane: $filterReferencePlane,
                             filterMotorSchemas: $filterMotorSchemas,
                             filterTags: $filterTags,
+                            filterDifficultyLevel: $filterDifficultyLevel,
+                            filterBodyRegion: $filterBodyRegion,
+                            filterEquipment: $filterEquipment,
                             filterFavoritesOnly: $filterFavoritesOnly,
                             onClearAll: removeAllFilters
                         )
@@ -156,8 +166,12 @@ struct ExercisePickerView: View {
                     filterReferencePlane: $filterReferencePlane,
                     filterMotorSchemas: $filterMotorSchemas,
                     filterTags: $filterTags,
+                    filterDifficultyLevel: $filterDifficultyLevel,
+                    filterBodyRegion: $filterBodyRegion,
+                    filterEquipment: $filterEquipment,
                     filterFavoritesOnly: $filterFavoritesOnly,
                     muscles: muscles,
+                    equipment: equipment,
                     onClearAll: removeAllFilters
                 )
             }
@@ -179,6 +193,9 @@ struct ExercisePickerView: View {
         filterReferencePlane = nil
         filterMotorSchemas.removeAll()
         filterTags.removeAll()
+        filterDifficultyLevel = nil
+        filterBodyRegion = nil
+        filterEquipment.removeAll()
         filterFavoritesOnly = false
     }
 
@@ -191,6 +208,9 @@ struct ExercisePickerView: View {
         filterReferencePlane != nil ||
         !filterMotorSchemas.isEmpty ||
         !filterTags.isEmpty ||
+        filterDifficultyLevel != nil ||
+        filterBodyRegion != nil ||
+        !filterEquipment.isEmpty ||
         filterFavoritesOnly
     }
 }
@@ -310,6 +330,9 @@ struct ExerciseFiltersSummaryBar: View {
     @Binding var filterReferencePlane: ReferencePlane?
     @Binding var filterMotorSchemas: Set<MotorSchema>
     @Binding var filterTags: Set<ExerciseTag>
+    @Binding var filterDifficultyLevel: DifficultyLevel?
+    @Binding var filterBodyRegion: BodyRegion?
+    @Binding var filterEquipment: Set<Equipment>
     @Binding var filterFavoritesOnly: Bool
     let onClearAll: () -> Void
 
@@ -361,6 +384,24 @@ struct ExerciseFiltersSummaryBar: View {
                 ForEach(filterTags.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { tag in
                     ExerciseFilterChip(title: tag.rawValue, systemImage: tag.icon) {
                         filterTags.remove(tag)
+                    }
+                }
+
+                if let difficulty = filterDifficultyLevel {
+                    ExerciseFilterChip(title: difficulty.rawValue, systemImage: difficulty.icon) {
+                        filterDifficultyLevel = nil
+                    }
+                }
+
+                if let region = filterBodyRegion {
+                    ExerciseFilterChip(title: region.rawValue, systemImage: region.icon) {
+                        filterBodyRegion = nil
+                    }
+                }
+
+                ForEach(Array(filterEquipment).sorted(by: { $0.name < $1.name }), id: \.id) { item in
+                    ExerciseFilterChip(title: item.name, systemImage: item.category.icon) {
+                        filterEquipment.remove(item)
                     }
                 }
 

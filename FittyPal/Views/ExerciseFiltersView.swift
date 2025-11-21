@@ -10,9 +10,13 @@ struct ExerciseFiltersView: View {
     @Binding var filterReferencePlane: ReferencePlane?
     @Binding var filterMotorSchemas: Set<MotorSchema>
     @Binding var filterTags: Set<ExerciseTag>
+    @Binding var filterDifficultyLevel: DifficultyLevel?
+    @Binding var filterBodyRegion: BodyRegion?
+    @Binding var filterEquipment: Set<Equipment>
     @Binding var filterFavoritesOnly: Bool
 
     let muscles: [Muscle]
+    let equipment: [Equipment]
     let onClearAll: () -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -89,6 +93,49 @@ struct ExerciseFiltersView: View {
                             ForEach(ReferencePlane.allCases, id: \.self) { plane in
                                 FilterChip(title: plane.rawValue, systemImage: plane.icon, tint: plane.color, isSelected: filterReferencePlane == plane) {
                                     filterReferencePlane = plane
+                                }
+                            }
+                        }
+                    }
+
+                    FilterSection(title: "Livello di Difficoltà") {
+                        chipGrid {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterDifficultyLevel == nil) {
+                                filterDifficultyLevel = nil
+                            }
+                            ForEach(DifficultyLevel.allCases, id: \.self) { level in
+                                FilterChip(title: level.rawValue, systemImage: level.icon, tint: level.color, isSelected: filterDifficultyLevel == level) {
+                                    filterDifficultyLevel = level
+                                }
+                            }
+                        }
+                    }
+
+                    FilterSection(title: "Regione Corporea") {
+                        chipGrid {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterBodyRegion == nil) {
+                                filterBodyRegion = nil
+                            }
+                            ForEach(BodyRegion.allCases, id: \.self) { region in
+                                FilterChip(title: region.rawValue, systemImage: region.icon, tint: region.color, isSelected: filterBodyRegion == region) {
+                                    filterBodyRegion = region
+                                }
+                            }
+                        }
+                    }
+
+                    FilterSection(title: "Attrezzi") {
+                        chipGrid {
+                            FilterChip(title: L("filters.all"), systemImage: nil, isSelected: filterEquipment.isEmpty) {
+                                filterEquipment.removeAll()
+                            }
+                            ForEach(equipment, id: \.id) { item in
+                                FilterChip(title: item.name, systemImage: item.category.icon, tint: .accentColor, isSelected: filterEquipment.contains(item)) {
+                                    if filterEquipment.contains(item) {
+                                        filterEquipment.remove(item)
+                                    } else {
+                                        filterEquipment.insert(item)
+                                    }
                                 }
                             }
                         }

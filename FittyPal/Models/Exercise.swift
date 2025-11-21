@@ -33,8 +33,14 @@ final class Exercise: Identifiable {
     var primaryMuscles: [Muscle]
     var secondaryMuscles: [Muscle]
 
-    // Attrezzo primario (opzionale)
-    var equipment: Equipment?
+    // Attrezzi (multipli)
+    var equipment: [Equipment]
+
+    // Livello di difficoltà
+    var difficultyLevel: DifficultyLevel
+
+    // Regione corporea
+    var bodyRegion: BodyRegion
 
     // Varianti dell'esercizio (max 10, relazione bidirezionale)
     var variants: [Exercise]
@@ -58,7 +64,9 @@ final class Exercise: Identifiable {
         isFavorite: Bool = false,
         primaryMuscles: [Muscle] = [],
         secondaryMuscles: [Muscle] = [],
-        equipment: Equipment? = nil,
+        equipment: [Equipment] = [],
+        difficultyLevel: DifficultyLevel = .notSet,
+        bodyRegion: BodyRegion = .notSet,
         variants: [Exercise] = []
     ) {
         self.id = id
@@ -80,6 +88,8 @@ final class Exercise: Identifiable {
         self.primaryMuscles = primaryMuscles
         self.secondaryMuscles = secondaryMuscles
         self.equipment = equipment
+        self.difficultyLevel = difficultyLevel
+        self.bodyRegion = bodyRegion
         self.variants = variants
     }
 
@@ -357,6 +367,86 @@ enum ExerciseTag: String, Codable, CaseIterable, Identifiable {
         case .core: return .indigo
         case .balance: return .mint
         case .cardio: return .purple
+        }
+    }
+}
+
+// MARK: - Livello di Difficoltà
+enum DifficultyLevel: String, Codable, CaseIterable, Identifiable {
+    case notSet = "Non Impostato"
+    case novice = "Novizio"
+    case beginner = "Principiante"
+    case intermediate = "Intermedio"
+    case advanced = "Avanzato"
+    case expert = "Esperto"
+    case master = "Master"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .notSet: return "questionmark.circle"
+        case .novice: return "star"
+        case .beginner: return "star.fill"
+        case .intermediate: return "star.leadinghalf.filled"
+        case .advanced: return "star.circle"
+        case .expert: return "star.circle.fill"
+        case .master: return "crown.fill"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .notSet: return .gray
+        case .novice: return .green
+        case .beginner: return .mint
+        case .intermediate: return .blue
+        case .advanced: return .orange
+        case .expert: return .red
+        case .master: return .purple
+        }
+    }
+
+    var sortOrder: Int {
+        switch self {
+        case .notSet: return 0
+        case .novice: return 1
+        case .beginner: return 2
+        case .intermediate: return 3
+        case .advanced: return 4
+        case .expert: return 5
+        case .master: return 6
+        }
+    }
+}
+
+// MARK: - Regione Corporea
+enum BodyRegion: String, Codable, CaseIterable, Identifiable {
+    case notSet = "Non Impostato"
+    case upperBody = "Parte Superiore"
+    case lowerBody = "Parte Inferiore"
+    case midsection = "Zona Centrale"
+    case fullBody = "Corpo Intero"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .notSet: return "questionmark.circle"
+        case .upperBody: return "figure.arms.open"
+        case .lowerBody: return "figure.walk"
+        case .midsection: return "figure.core.training"
+        case .fullBody: return "figure.mixed.cardio"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .notSet: return .gray
+        case .upperBody: return .blue
+        case .lowerBody: return .green
+        case .midsection: return .orange
+        case .fullBody: return .purple
         }
     }
 }

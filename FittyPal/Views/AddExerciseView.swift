@@ -7,7 +7,18 @@ extension Muscle: Hashable {
     public static func == (lhs: Muscle, rhs: Muscle) -> Bool {
         return lhs.id == rhs.id
     }
-    
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
+// Estensione per rendere Equipment conforme a Hashable
+extension Equipment: Hashable {
+    public static func == (lhs: Equipment, rhs: Equipment) -> Bool {
+        return lhs.id == rhs.id
+    }
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
@@ -32,7 +43,9 @@ struct AddExerciseView: View {
     @State private var isFavorite = false
     @State private var selectedPrimaryMuscles: Set<Muscle> = []
     @State private var selectedSecondaryMuscles: Set<Muscle> = []
-    @State private var selectedEquipment: Equipment?
+    @State private var selectedEquipment: Set<Equipment> = []
+    @State private var difficultyLevel: DifficultyLevel = .notSet
+    @State private var bodyRegion: BodyRegion = .notSet
     @State private var photoItem1: PhotosPickerItem?
     @State private var photoItem2: PhotosPickerItem?
     @State private var photoItem3: PhotosPickerItem?
@@ -49,6 +62,9 @@ struct AddExerciseView: View {
 
                     // Tassonomia
                     taxonomySection
+
+                    // Difficoltà e Regione Corporea
+                    difficultyAndBodyRegionSection
 
                     // Piano e Focus
                     planeAndFocusSection
@@ -121,6 +137,26 @@ struct AddExerciseView: View {
             primaryMetabolism: $primaryMetabolism,
             category: $category
         )
+    }
+
+    private var difficultyAndBodyRegionSection: some View {
+        SectionCard(title: "Difficoltà e Regione") {
+            VStack(spacing: 12) {
+                LabeledPicker(label: "Livello di Difficoltà", selection: $difficultyLevel) {
+                    ForEach(DifficultyLevel.allCases, id: \.self) { level in
+                        Label(level.rawValue, systemImage: level.icon)
+                            .tag(level)
+                    }
+                }
+
+                LabeledPicker(label: "Regione Corporea", selection: $bodyRegion) {
+                    ForEach(BodyRegion.allCases, id: \.self) { region in
+                        Label(region.rawValue, systemImage: region.icon)
+                            .tag(region)
+                    }
+                }
+            }
+        }
     }
 
     private var planeAndFocusSection: some View {
@@ -213,7 +249,36 @@ struct AddExerciseView: View {
     }
 
     private var equipmentSection: some View {
-        EquipmentPickerSection(selectedEquipment: $selectedEquipment, equipment: equipment)
+        SectionCard(title: "Attrezzi") {
+            VStack(spacing: 12) {
+                NavigationLink {
+                    EquipmentSelectionView(
+                        equipment: equipment,
+                        selectedEquipment: $selectedEquipment
+                    )
+                } label: {
+                    HStack {
+                        Label("Attrezzi", systemImage: "dumbbell")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Text(selectedEquipment.isEmpty ? "Nessuno" : "\(selectedEquipment.count)")
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(12)
+                }
+                .buttonStyle(.plain)
+
+                if !selectedEquipment.isEmpty {
+                    Text(selectedEquipment.map { $0.name }.sorted().joined(separator: ", "))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
     }
 
     private var musclesSection: some View {
@@ -345,7 +410,9 @@ struct AddExerciseView: View {
             isFavorite: isFavorite,
             primaryMuscles: Array(selectedPrimaryMuscles),
             secondaryMuscles: Array(selectedSecondaryMuscles),
-            equipment: selectedEquipment
+            equipment: Array(selectedEquipment),
+            difficultyLevel: difficultyLevel,
+            bodyRegion: bodyRegion
         )
         modelContext.insert(exercise)
         dismiss()
