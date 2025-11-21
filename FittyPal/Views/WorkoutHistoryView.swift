@@ -40,7 +40,17 @@ struct WorkoutHistoryView: View {
 
     private func deleteLogs(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(logs[index])
+            let logToDelete = logs[index]
+
+            // Find any TrainingDay that has this sessionLog and mark it incomplete
+            let descriptor = FetchDescriptor<TrainingDay>()
+            if let trainingDays = try? modelContext.fetch(descriptor) {
+                for day in trainingDays where day.sessionLog?.id == logToDelete.id {
+                    day.markIncomplete()
+                }
+            }
+
+            modelContext.delete(logToDelete)
         }
     }
 }
