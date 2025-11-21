@@ -119,15 +119,31 @@ final class PeriodizationPlan {
         return isActive && date >= startDate && date <= endDate
     }
 
-    /// Progresso percentuale del piano
+    /// Numero totale di giorni di allenamento pianificati (esclusi i giorni di riposo)
+    var totalTrainingDays: Int {
+        mesocycles.reduce(0) { total, mesocycle in
+            total + mesocycle.microcycles.reduce(0) { mesoTotal, microcycle in
+                mesoTotal + microcycle.trainingDays.filter { !$0.isRestDay }.count
+            }
+        }
+    }
+
+    /// Numero di giorni di allenamento completati
+    var completedTrainingDays: Int {
+        mesocycles.reduce(0) { total, mesocycle in
+            total + mesocycle.microcycles.reduce(0) { mesoTotal, microcycle in
+                mesoTotal + microcycle.trainingDays.filter { !$0.isRestDay && $0.completed }.count
+            }
+        }
+    }
+
+    /// Progresso percentuale del piano (basato sui giorni di allenamento completati)
     func progressPercentage(at date: Date = Date()) -> Double {
-        guard date >= startDate else { return 0.0 }
-        guard date <= endDate else { return 100.0 }
+        let total = totalTrainingDays
+        guard total > 0 else { return 0.0 }
 
-        let totalDuration = endDate.timeIntervalSince(startDate)
-        let elapsed = date.timeIntervalSince(startDate)
-
-        return (elapsed / totalDuration) * 100.0
+        let completed = completedTrainingDays
+        return (Double(completed) / Double(total)) * 100.0
     }
 
     // MARK: - Folder Helpers

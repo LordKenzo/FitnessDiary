@@ -713,8 +713,10 @@ struct WorkoutExecutionView: View {
     }
 
     private var singleWorkoutCards: [WorkoutCard] {
-        // Tutte le schede che non sono l'allenamento di oggi
-        if let todayWorkout = todaysTrainingDay?.workoutCard {
+        // Tutte le schede che non sono l'allenamento di oggi (se non completato)
+        if let todayDay = todaysTrainingDay,
+           !todayDay.completed,
+           let todayWorkout = todayDay.workoutCard {
             return workoutCards.filter { $0.id != todayWorkout.id }
         }
         return workoutCards
