@@ -503,44 +503,39 @@ struct DashboardView: View {
                     value: averageRPEString,
                     tint: .orange
                 )
-
                 Divider()
                     .overlay(AppTheme.stroke(for: colorScheme))
-
                 insightRow(
                     icon: "scalemass.fill",
                     title: L("insight.tonnage"),
                     value: String(format: "%.0f kg", totalTonnage),
                     tint: .blue
                 )
-
                 Divider()
                     .overlay(AppTheme.stroke(for: colorScheme))
-
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 12) {
-                        LinearGradient(
-                            colors: [Color.purple.opacity(0.9), Color.pink.opacity(0.6)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        .mask {
-                            Image(systemName: "quote.bubble.fill")
-                                .font(.system(size: 22, weight: .bold))
-                        }
-                        .frame(width: 40, height: 40)
-
+                HStack(spacing: 12) {
+                    LinearGradient(
+                        colors: [Color.purple.opacity(0.9), Color.pink.opacity(0.6)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .mask {
+                        Image(systemName: "quote.bubble.fill")
+                            .font(.system(size: 22, weight: .bold))
+                    }
+                    .frame(width: 40, height: 40)
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(L("insight.motivation"))
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(AppTheme.subtleText(for: colorScheme))
+                        Text(motivationalQuote)
+                            .font(.callout.italic())
+                            .foregroundStyle(.primary)
                     }
-
-                    Text(motivationalQuote)
-                        .font(.callout.italic())
-                        .foregroundStyle(.primary)
-                        .padding(.leading, 52)
+                    Spacer() // Aggiungi Spacer() per allineare come negli altri insight
                 }
             }
+
         }
         .dashboardCardStyle()
     }
